@@ -8,7 +8,7 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - NonVisibleObjectForMainCamera
+  - Environment
   - Water
   - UI
   - 
