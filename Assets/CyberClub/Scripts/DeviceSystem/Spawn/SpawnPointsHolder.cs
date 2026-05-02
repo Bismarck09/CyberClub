@@ -8,6 +8,9 @@ public class SpawnPointsHolder : MonoBehaviour
       
     public Transform GetSpawnPoint()
     {
+        if (_spawnPoints.Count == 0)
+            return null;
+
         Transform spawnPoint = _spawnPoints[0];
         _spawnPoints.RemoveAt(0);
         return spawnPoint;

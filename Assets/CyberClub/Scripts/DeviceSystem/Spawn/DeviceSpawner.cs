@@ -3,17 +3,20 @@ using System.Collections.Generic;
 
 public class DeviceSpawner : MonoBehaviour
 {
-    [SerializeField] private DeviceRegistry deviceRegistry;
+    [SerializeField] private DeviceRegistry _deviceRegistry;
+    [SerializeField] private LocationInformation _locationInformation;
 
     private GameDeviceFactory _deviceFactory;
 
     private void Awake()
     {
-        _deviceFactory = new GameDeviceFactory(new List<IDeviceCreator>() { new ConsoleCreator(), new ComputerCreator() }, deviceRegistry);
+        _deviceFactory = new GameDeviceFactory(new List<IDeviceCreator>() { new ConsoleCreator(), new ComputerCreator() }, _deviceRegistry);
     }
 
-    public void SpawnDevice(ZoneDeviceConfig config, SpawnPointsHolder spawnPointsHolder)
+    public void SpawnDevice()
     {
-        _deviceFactory.SpawnDevice(config, spawnPointsHolder);
+        if (_locationInformation.IsDeviceRemained)
+            _deviceFactory.SpawnDevice(_locationInformation.ZoneConfig, _locationInformation.SpawnPoints);
     }
+
 }

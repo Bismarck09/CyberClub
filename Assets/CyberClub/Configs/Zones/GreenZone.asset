@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4ee810ddd6c56b44482319c27892f285, type: 3}
-  m_Name: RedZone
+  m_Name: GreenZone
   m_EditorClassIdentifier: Assembly-CSharp::ZoneDeviceConfig
   _deviceType: 1
   _devicePrefab: {fileID: 3298852077758282747, guid: 32f728676d9324af2bb020633e44994d, type: 3}
-  _zoneId: 1
+  _zoneId: 2
