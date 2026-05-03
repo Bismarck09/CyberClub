@@ -4,9 +4,9 @@ public class ComputerCreator : MonoBehaviour, IDeviceCreator
 {
     public DeviceType Type => DeviceType.Computer;
 
-    public IGameDevice Create(ZoneDeviceConfig config, SpawnPointsHolder spawnPointsHolder)
+    public IGameDevice Create(ZoneDeviceConfig config, Transform spawnPoint)
     {
-        var computerPrefab = Instantiate(config.DevicePrefab, spawnPointsHolder.GetSpawnPoint());
+        var computerPrefab = Instantiate(config.DevicePrefab, spawnPoint);
         return computerPrefab.GetComponent<IGameDevice>();
     }
 }

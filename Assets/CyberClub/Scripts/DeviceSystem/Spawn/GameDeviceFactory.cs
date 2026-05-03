@@ -1,10 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class GameDeviceFactory
 {
     private List<IDeviceCreator> _deviceCreators;
     private DeviceRegistry _deviceRegistry;
+
+    public event Action IsDeviceOver;
 
     public GameDeviceFactory(List<IDeviceCreator> deviceCreators, DeviceRegistry deviceRegistry)
     {
@@ -15,14 +18,16 @@ public class GameDeviceFactory
     public void SpawnDevice(ZoneDeviceConfig config, SpawnPointsHolder spawnPointsHolder)
     {
         IDeviceCreator creator = _deviceCreators.Find(c => c.Type == config.DeviceType);
-        if (creator != null)
+        Transform spawnPoint = spawnPointsHolder.GetSpawnPoint();
+
+        if (spawnPoint != null)
         {
-            IGameDevice device = creator.Create(config, spawnPointsHolder);
+            IGameDevice device = creator.Create(config, spawnPoint);
             _deviceRegistry.Add(device, config.ZoneId.ToString());
         }
         else
         {
-            Debug.LogError($"No device creator found for type {config.DeviceType}");
+            IsDeviceOver?.Invoke();
         }
     }
     
