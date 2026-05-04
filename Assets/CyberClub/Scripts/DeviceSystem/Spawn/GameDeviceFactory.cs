@@ -22,8 +22,8 @@ public class GameDeviceFactory
 
         if (spawnPoint != null)
         {
-            IGameDevice device = creator.Create(config, spawnPoint);
-            _deviceRegistry.Add(device, config.ZoneId.ToString());
+            GameDevice device = creator.Create(config, spawnPoint);
+            _deviceRegistry.Add(device, config.PriceOfHourCoins, config.PriceOfHourGems);
         }
         else
         {

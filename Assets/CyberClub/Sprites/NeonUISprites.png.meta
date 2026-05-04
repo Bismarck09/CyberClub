@@ -105,7 +105,7 @@ TextureImporter:
         width: 345
         height: 52
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -114,6 +114,50 @@ TextureImporter:
       bones: []
       spriteID: 2b1ed477168855b42a918e324cb32884
       internalID: -1645075027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NeonUISprites_1
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 347
+        width: 58
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8cfd20b55599147f1818d6d80fc561f8
+      internalID: -1390246776
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: NeonUISprites_2
+      rect:
+        serializedVersion: 2
+        x: 1036
+        y: 336
+        width: 84
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ba6bf2a9e50b44223ac3e8a5f2931a28
+      internalID: 1935866409
       vertices: []
       indices: 
       edges: []
@@ -133,6 +177,8 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       NeonUISprites_0: -1645075027
+      NeonUISprites_1: -1390246776
+      NeonUISprites_2: 1935866409
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
