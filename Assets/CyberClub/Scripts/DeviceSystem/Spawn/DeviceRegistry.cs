@@ -9,6 +9,19 @@ public class DeviceRegistry : MonoBehaviour
     {
         _devices.Add(new DeviceEntry(device, priceOfHourCoins, priceOfHourGems));
     }
+
+    public DeviceEntry GetRandomFreeDevice()
+    {
+        List<DeviceEntry> freeDevices = _devices.FindAll(d => !d.Device.IsOccupied);
+
+        if (freeDevices.Count > 0)
+        {
+            int randomIndex = Random.Range(0, freeDevices.Count);
+            return freeDevices[randomIndex];
+        }
+
+        return null;
+    }
 }
 
 public class DeviceEntry
