@@ -1,9 +1,11 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System;
 
 public class VisitorMovement : MonoBehaviour
 {
     private NavMeshAgent _agent;
+    private Action _onComplete;
     private Vector3 _targetPos;
     private bool _hasTarget;
 
@@ -19,18 +21,27 @@ public class VisitorMovement : MonoBehaviour
         if (!_hasTarget)
             return;
 
-        if (_agent.velocity == Vector3.zero)
+        OnCompleteMove();
+    }
+
+    private void OnCompleteMove()
+    {
+        if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance && (!_agent.hasPath || _agent.velocity.sqrMagnitude < 0.01f))
         {
             IsMoving = false;
             RotateToTarget();
+            _hasTarget = false;
+            _onComplete?.Invoke();
         }
         else
             IsMoving = true;
     }
 
-    public void Move(Vector3 target)
+    public void Move(Vector3 target, Action onComplete = null)
     {
         _targetPos = target;
+        _onComplete = onComplete;
+
         _agent.SetDestination(_targetPos);
         _hasTarget = true;
     }

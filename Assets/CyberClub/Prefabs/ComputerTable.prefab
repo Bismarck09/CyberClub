@@ -43,6 +43,8 @@ GameObject:
   - component: {fileID: 2810176372253261570}
   - component: {fileID: 7057148197196976853}
   - component: {fileID: -7999684150958332446}
+  - component: {fileID: 5377710452963965617}
+  - component: {fileID: 7008112749975199665}
   m_Layer: 0
   m_Name: ComputerTable
   m_TagString: Untagged
@@ -187,6 +189,48 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameDevice
   _targetPoint: {fileID: 1420318848321061687}
   _sitPoint: {fileID: 1754151211761438853}
+--- !u!65 &5377710452963965617
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3298852077758282747}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.6363811, y: 0.7785061, z: 0.9972856}
+  m_Center: {x: 0.0021481514, y: 0.38770953, z: 0.74364054}
+--- !u!65 &7008112749975199665
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3298852077758282747}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.602805, y: 0.54827225, z: 0.6909684}
+  m_Center: {x: -0.005604744, y: 0.2725926, z: -0.13738751}
 --- !u!1 &4735254671973859709
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 public class VisitorService : MonoBehaviour
 {
@@ -10,8 +11,10 @@ public class VisitorService : MonoBehaviour
 
     private DeviceEntry _freeDevice;
     private Visitor _visitor;
-
     private bool _isServicing;
+
+    public event Action<DeviceEntry> OnVisitorServiced; 
+
 
     private void Update()
     {
@@ -38,8 +41,10 @@ public class VisitorService : MonoBehaviour
 
         _visitorQueue.RemoveVisitor(_visitor);
         _visitor.GetComponent<VisitorMovement>().Move(_freeDevice.Device.TargetPoint.position);
-        _freeDevice.Device.Reserve(15f);
+        _freeDevice.Device.Reserve(15f, _visitor.GetComponent<VisitorExit>());
 
         _isServicing = false;
+
+        OnVisitorServiced?.Invoke(_freeDevice);
     }
 }

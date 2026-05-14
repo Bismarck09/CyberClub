@@ -1,8 +1,10 @@
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerRotation : MonoBehaviour
 {
+    [SerializeField] private CinemachineInputAxisController _cinemachineInputAxisController;
     [SerializeField] private Transform _playerHead;
     [SerializeField] private InteractionWithUI _interactionWithUI;
     [SerializeField] private float _sensitivity;
@@ -35,7 +37,6 @@ public class PlayerRotation : MonoBehaviour
     private void Rotate()
     {
         Vector2 rotateDirection = _inputAction.ReadValue<Vector2>();
-        Debug.Log($"Rotate direction: {rotateDirection}");
 
         _rotationX -= rotateDirection.y * _sensitivity * Time.deltaTime;
         _rotationY += rotateDirection.x * _sensitivity * Time.deltaTime;
@@ -49,6 +50,7 @@ public class PlayerRotation : MonoBehaviour
     private void SwitchRotateActive(bool isActive)
     {
         _isRotateActive = !isActive;
+        _cinemachineInputAxisController.enabled = _isRotateActive;
         Debug.Log($"Rotate active: {_isRotateActive}");
     }
 }

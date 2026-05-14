@@ -10,8 +10,6 @@ public class ZoneSwitcher : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent(out ZoneInformation zoneInformation))
             OnZoneChanged?.Invoke(zoneInformation);
-
-        Debug.Log("Zone switched to " + zoneInformation.name);
     }
 
     void OnTriggerExit(Collider other)

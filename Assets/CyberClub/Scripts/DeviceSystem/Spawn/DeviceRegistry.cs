@@ -5,7 +5,9 @@ public class DeviceRegistry : MonoBehaviour
 {
     private List<DeviceEntry> _devices = new();
 
-    public void Add(GameDevice device, float priceOfHourCoins, float priceOfHourGems)
+    public int CurrentDeviceCount => _devices.Count;
+
+    public void Add(GameDevice device, int priceOfHourCoins, int priceOfHourGems)
     {
         _devices.Add(new DeviceEntry(device, priceOfHourCoins, priceOfHourGems));
     }
@@ -27,14 +29,14 @@ public class DeviceRegistry : MonoBehaviour
 public class DeviceEntry
 {
     private GameDevice _device;
-    private  float _priceOfHourCoins;
-    private float _priceOfHourGems;
+    private  int _priceOfHourCoins;
+    private int _priceOfHourGems;
 
     public GameDevice Device => _device;
-    public float PriceOfHourCoins => _priceOfHourCoins;
-    public float PriceOfHourGems => _priceOfHourGems;
+    public int PriceOfHourCoins => _priceOfHourCoins;
+    public int PriceOfHourGems => _priceOfHourGems;
 
-    public DeviceEntry(GameDevice device, float priceOfHourCoins, float priceOfHourGems)
+    public DeviceEntry(GameDevice device, int priceOfHourCoins, int priceOfHourGems)
     {
         _device = device;
         _priceOfHourCoins = priceOfHourCoins;

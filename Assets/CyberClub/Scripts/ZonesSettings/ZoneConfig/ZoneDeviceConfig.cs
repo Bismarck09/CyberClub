@@ -6,12 +6,14 @@ public class ZoneDeviceConfig : ScriptableObject
 {
     [SerializeField] DeviceType _deviceType;
     [SerializeField] GameObject _devicePrefab;
-    [SerializeField] private float _priceOfHourCoins;
-    [SerializeField] private float _priceOfHourGems; 
+    [SerializeField] private int _priceOfHourCoins;
+    [SerializeField] private int _priceOfHourGems; 
+    [SerializeField] private int _devicePrice;
 
     public DeviceType DeviceType => _deviceType;
     public GameObject DevicePrefab => _devicePrefab;
-    public float PriceOfHourCoins => _priceOfHourCoins;
-    public float PriceOfHourGems => _priceOfHourGems;
+    public int PriceOfHourCoins => _priceOfHourCoins;
+    public int PriceOfHourGems => _priceOfHourGems;
+    public int DevicePrice => _devicePrice;
 
 }

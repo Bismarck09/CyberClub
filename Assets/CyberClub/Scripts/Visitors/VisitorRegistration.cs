@@ -6,13 +6,27 @@ public class VisitorRegistration : MonoBehaviour
     private Transform _registrationPoint;
     private VisitorMovement _visitorMovement;
 
-    public void Init(Transform registrationPoint, VisitorMovement visitorMovement, VisitorQueue visitorQueue)
+    public bool IsRegistered { get; private set; }
+
+    public void Init(VisitorMovement visitorMovement, VisitorQueue visitorQueue)
     {
-        _registrationPoint = registrationPoint;
         _visitorMovement = visitorMovement;
         _visitorQueue = visitorQueue;
+        IsRegistered = false;
 
-        _visitorMovement.Move(_registrationPoint.position);
-        _visitorQueue.AddToQueue(GetComponent<Visitor>());
+        MoveToQueue();
+    }
+
+    private void MoveToQueue()
+    {
+        _registrationPoint = _visitorQueue.GetNextQueuePoint(GetComponent<Visitor>());
+
+        if (_registrationPoint != null)
+            _visitorMovement.Move(_registrationPoint.position, RegisterVisitor);
+    }
+
+    private void RegisterVisitor()
+    {
+        IsRegistered = true;
     }
 }

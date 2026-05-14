@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,6 +29,7 @@ public class UpgradeUIActive : MonoBehaviour
     private void EnableUpgrades(ZoneInformation newZoneInformation)
     {
         _upgradeButton.interactable = true;
+        _upgradePanel.SetActive(true);
     }
 
 }

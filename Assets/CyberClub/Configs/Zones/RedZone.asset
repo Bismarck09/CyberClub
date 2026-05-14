@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZoneDeviceConfig
   _deviceType: 1
   _devicePrefab: {fileID: 3298852077758282747, guid: 32f728676d9324af2bb020633e44994d, type: 3}
-  _zoneId: 1
+  _priceOfHourCoins: 5
+  _priceOfHourGems: 0
+  _devicePrice: 100

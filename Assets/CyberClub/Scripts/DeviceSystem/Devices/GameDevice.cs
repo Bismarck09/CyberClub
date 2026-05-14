@@ -12,15 +12,17 @@ public class GameDevice : MonoBehaviour
     public Transform TargetPoint => _targetPoint;
     public Transform SitPoint => _sitPoint;
 
-    public void Reserve(float time)
+    public void Reserve(float time, VisitorExit visitorExit)
     {
         _isOccupied = true;
-        StartCoroutine(ReleaseAfterTime(time));
+        StartCoroutine(ReleaseAfterTime(time, visitorExit));
     }
 
-    private IEnumerator ReleaseAfterTime(float time)
+    private IEnumerator ReleaseAfterTime(float time, VisitorExit visitorExit)
     {
         yield return new WaitForSeconds(time);
+
+        visitorExit.MoveToExit();
         _isOccupied = false;
     }
 
