@@ -24,14 +24,14 @@ public class GemsData : MonoBehaviour, IResource
         return false;
     }
 
-    public void AddResource(int amount, int multiplier)
+    public void AddResource(int amount, float multiplier)
     {
         if (amount == 0)
             return;
 
-        _currentGems += amount * multiplier;
+        _currentGems += Mathf.RoundToInt(amount * multiplier);
 
-        OnGemsChanged?.Invoke(amount * multiplier);
+        OnGemsChanged?.Invoke(Mathf.RoundToInt(amount * multiplier));
     }
 
     private void RemoveGems(int amount)

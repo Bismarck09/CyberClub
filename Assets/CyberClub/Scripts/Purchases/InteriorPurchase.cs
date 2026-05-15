@@ -1,16 +1,44 @@
+using System;
 using UnityEngine;
 
-public class InteriorPurchase : MonoBehaviour
+public class InteriorPurchase : MonoBehaviour, IPurchasable
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private ZoneSwitcher _zoneSwitcher;
+    [SerializeField] private CoinsData _coinsData;
+    
+    private InteriorData _interiorData;
+    
+    public event Action<InteriorData> OnInteriorPurchase;
+
+    private void OnEnable()
     {
-        
+        _zoneSwitcher.OnZoneChanged += ChangeInteriorData;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        _zoneSwitcher.OnZoneChanged -= ChangeInteriorData;
+    }
+
+    public bool CanBuy()
+    {
+        if  (_interiorData == null)
+            return false;
+
+        return _coinsData.TryBuy(_interiorData.InteriorsPrice);
+    }
+
+    public void Buy()
+    {
+        if (CanBuy())
+        {
+            _interiorData.BuyInterior();
+            OnInteriorPurchase?.Invoke(_interiorData);
+        }
+    }
+
+    private void ChangeInteriorData(ZoneInformation zoneInformation)
+    {
+        _interiorData = zoneInformation.GetComponent<InteriorData>();
     }
 }

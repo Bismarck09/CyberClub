@@ -25,13 +25,13 @@ public class CoinsData : MonoBehaviour, IResource
         return false;
     }
 
-    public void AddResource(int amount, int multiplier)
+    public void AddResource(int amount, float multiplier)
     {
         if (amount == 0)
             return;
 
-        _currentCoins += amount * multiplier;
-        OnCoinsChanged?.Invoke(amount * multiplier);
+        _currentCoins += Mathf.RoundToInt(amount * multiplier);
+        OnCoinsChanged?.Invoke(Mathf.RoundToInt(amount * multiplier));
     }
 
     private void RemoveCoins(int amount)

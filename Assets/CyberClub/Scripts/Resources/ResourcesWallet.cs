@@ -8,6 +8,7 @@ public class ResourcesWallet : MonoBehaviour
     [SerializeField] private VisitorService _visitorService;
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private GemsData _gemsData;
+    [SerializeField] private LocationInformation _locationInformation;
 
     private List<IResource> _resources = new();
 
@@ -29,7 +30,9 @@ public class ResourcesWallet : MonoBehaviour
 
     private void AddResources(DeviceEntry device)
     {
-        _coinsData.AddResource(device.PriceOfHourCoins, _resourceMultiplier.GetMultiplier(_coinsData.Type));
+        float coinsMultiplier = _resourceMultiplier.GetMultiplier(_coinsData.Type) + _locationInformation.Multiplier;
+        
+        _coinsData.AddResource(device.PriceOfHourCoins, coinsMultiplier);
         _gemsData.AddResource(device.PriceOfHourGems, _resourceMultiplier.GetMultiplier(_gemsData.Type));
     }
 

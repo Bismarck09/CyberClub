@@ -15,5 +15,10 @@ public class ZoneDeviceConfig : ScriptableObject
     public int PriceOfHourCoins => _priceOfHourCoins;
     public int PriceOfHourGems => _priceOfHourGems;
     public int DevicePrice => _devicePrice;
+    
+    public void IncreaseDevicePrice()
+    {
+        _devicePrice += Mathf.RoundToInt(_devicePrice / 10);
+    }
 
 }

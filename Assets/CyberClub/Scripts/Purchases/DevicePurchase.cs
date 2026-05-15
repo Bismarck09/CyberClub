@@ -6,6 +6,7 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private ZoneSwitcher _zoneSwitcher;
 
+    private ZoneInformation _zoneInformation;
     private int _devicePrice;
 
     public event Action OnDevicePurchased;
@@ -28,12 +29,16 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     public void Buy()
     {
         if (CanBuy())
+        {
+            _zoneInformation.ZoneConfig.IncreaseDevicePrice();
             OnDevicePurchased?.Invoke();
+        }
     }
 
     private void UpdateDevicePrice(ZoneInformation zoneInformation)
     {
-        _devicePrice = zoneInformation.ZoneConfig.DevicePrice;
+        _zoneInformation = zoneInformation;
+        _devicePrice = _zoneInformation.ZoneConfig.DevicePrice;
     }
 
 }
