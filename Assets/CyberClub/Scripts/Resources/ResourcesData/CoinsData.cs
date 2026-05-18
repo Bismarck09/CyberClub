@@ -12,7 +12,7 @@ public class CoinsData : MonoBehaviour, IResource
     void Start()
     {
         Type = ResourceType.Coins;
-        AddResource(350, 1);
+        AddResource(100000, 1);
     }
 
     public bool TryBuy(int amount)
