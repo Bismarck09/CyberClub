@@ -2357,7 +2357,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9fbca4a77d57874393f8dbf8edbe3cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VisitorExit
-  _exitPoint: {x: 0, y: 0, z: 0}
+  _exitPoint: {x: -18.3, y: 0, z: -14}
 --- !u!114 &6771363331702257886
 MonoBehaviour:
   m_ObjectHideFlags: 0

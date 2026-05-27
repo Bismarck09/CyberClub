@@ -38,6 +38,9 @@ public class UpgradeUIData : MonoBehaviour
     
     private void ChangeInteriorData(InteriorData interiorData)
     {
+        if (interiorData.IsMaxPurchased)
+            return;
+        
         _interiorPrice.text = interiorData.InteriorsPrice.ToString();
         _interiorMultiplier.text = interiorData.Multiplier.ToString();
     }

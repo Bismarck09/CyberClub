@@ -10,6 +10,7 @@ public class CoinsUIEffect : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _coinsText;
     [SerializeField] private FloatingResourceText _floatingTextPrefab;
     [SerializeField] private Transform _effectsRoot;
+    [SerializeField] private Vector3 _defaultScale;
 
     private void OnEnable()
     {
@@ -50,6 +51,7 @@ public class CoinsUIEffect : MonoBehaviour
     private void PlayPanelPunch()
     {
         _coinsPanel.DOKill();
+        _coinsPanel.localScale = _defaultScale;
 
         _coinsPanel
             .DOPunchScale(Vector3.one * 0.15f, 0.3f, 8, 0.5f);

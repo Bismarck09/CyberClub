@@ -8,7 +8,9 @@ public class InteriorData : MonoBehaviour
     [SerializeField] private List<float> _multipliers;
 
     private int _currentBoughtInteriorObjects;
+    private bool _isMaxPurchased;
     
+    public bool IsMaxPurchased => _isMaxPurchased;
     public int InteriorsPrice => _interiorsPrice[_currentBoughtInteriorObjects];
     public float Multiplier => _multipliers[_currentBoughtInteriorObjects];
 
@@ -28,5 +30,9 @@ public class InteriorData : MonoBehaviour
     {
         _interiorObjects[_currentBoughtInteriorObjects].SetActive(true);
         _currentBoughtInteriorObjects++;
+
+        if (_currentBoughtInteriorObjects >= _interiorObjects.Count)
+            _isMaxPurchased = true;
+
     }
 }

@@ -25,7 +25,7 @@ public class InteriorPurchase : MonoBehaviour, IPurchasable
         if  (_interiorData == null)
             return false;
 
-        return _coinsData.TryBuy(_interiorData.InteriorsPrice);
+        return !_interiorData.IsMaxPurchased && _coinsData.TryBuy(_interiorData.InteriorsPrice);
     }
 
     public void Buy()
