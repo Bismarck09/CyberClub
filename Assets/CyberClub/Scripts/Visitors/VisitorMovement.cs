@@ -4,6 +4,8 @@ using System;
 
 public class VisitorMovement : MonoBehaviour
 {
+    private Animator _animator;
+     
     private NavMeshAgent _agent;
     private Action _onComplete;
     private Vector3 _targetPos;
@@ -13,6 +15,7 @@ public class VisitorMovement : MonoBehaviour
 
     private void Awake()
     {
+        _animator = GetComponent<Animator>();
         _agent = GetComponent<NavMeshAgent>();
     }
 
@@ -29,8 +32,10 @@ public class VisitorMovement : MonoBehaviour
         if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance && (!_agent.hasPath || _agent.velocity.sqrMagnitude < 0.01f))
         {
             IsMoving = false;
-            RotateToTarget();
             _hasTarget = false;
+            _animator.SetBool("IsMovement", false);
+            
+            RotateToTarget();
             _onComplete?.Invoke();
         }
         else
@@ -44,6 +49,7 @@ public class VisitorMovement : MonoBehaviour
 
         _agent.SetDestination(_targetPos);
         _hasTarget = true;
+        _animator.SetBool("IsMovement", true);
     }
 
     private void RotateToTarget()

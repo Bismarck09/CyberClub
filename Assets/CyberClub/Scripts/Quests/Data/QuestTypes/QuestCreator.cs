@@ -1,7 +1,5 @@
-using System;
-using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UIElements;
+using UnityEngine;
 
 public class QuestCreator : MonoBehaviour
 {
@@ -11,54 +9,83 @@ public class QuestCreator : MonoBehaviour
     [SerializeField] private GemsData _gemsData;
     [SerializeField] private GameObject _questPrefab;
     [SerializeField] private Transform _content;
-    
-    private List<Quest> _allQuestsTypes = new List<Quest>();
-    private List<GameObject> _allQuestsPrefabs = new List<GameObject>();
-    private VisitorServiceQuest _visitorServiceQuest;
+
+    private readonly List<Quest> _allQuestsTypes = new();
+    private List<GameObject> _allQuestsPrefabs = new();
 
     private int _currentQuestIndex;
 
-
     private void Start()
     {
-        _visitorServiceQuest = new VisitorServiceQuest(_visitorService, _coinsData);
-        
-        _allQuestsTypes.Add(_visitorServiceQuest);
-        
+        _allQuestsTypes.Add(new VisitorServiceQuest(_visitorService, _coinsData));
+
         CreateQuests();
         StartQuest();
     }
 
     private void CreateQuests()
     {
-        foreach (var quest in _quests)
+        foreach (QuestData quest in _quests)
         {
             GameObject go = Instantiate(_questPrefab, _content);
-            go.GetComponent<QuestUI>().Init(quest);
-            
+
+            if (go.TryGetComponent(out QuestUI questUI))
+            {
+                questUI.Init(quest);
+            }
+
+            go.SetActive(false);
             _allQuestsPrefabs.Add(go);
-            
         }
     }
 
     private void StartQuest()
     {
         if (_currentQuestIndex >= _quests.Count)
-            return;
-        
-        QuestData quest = _quests[_currentQuestIndex];
-        
-        for (int i = 0; i < _allQuestsTypes.Capacity; i++)
         {
-            if (_allQuestsTypes[i].Type == quest.Type)
-            {
-                _allQuestsTypes[i].Activate(quest);
-                _allQuestsPrefabs[_currentQuestIndex].GetComponent<QuestUI>().Activate(_allQuestsTypes[i]);
-                
-                _currentQuestIndex++;
-                _allQuestsTypes[i].OnCompleted += StartQuest;
-                break;
-            }
+            Debug.Log("Все квесты выполнены");
+            return;
         }
+
+        QuestData questData = _quests[_currentQuestIndex];
+        Quest quest = GetQuestByType(questData.Type);
+
+        if (quest == null)
+        {
+            Debug.LogError($"Не найден обработчик для квеста типа: {questData.Type}");
+            return;
+        }
+
+        if (_currentQuestIndex >= _allQuestsPrefabs.Count)
+        {
+            Debug.LogError("Для квеста не найден UI-префаб");
+            return;
+        }
+
+        quest.OnCompleted -= StartQuest;
+        quest.OnCompleted += StartQuest;
+
+        quest.Activate(questData);
+
+        GameObject questObject = _allQuestsPrefabs[_currentQuestIndex];
+        questObject.SetActive(true);
+
+        if (questObject.TryGetComponent(out QuestUI questUI))
+        {
+            questUI.Activate(quest);
+        }
+
+        _currentQuestIndex++;
+    }
+
+    private Quest GetQuestByType(QuestType type)
+    {
+        for (int i = 0; i < _allQuestsTypes.Count; i++)
+        {
+            if (_allQuestsTypes[i].Type == type)
+                return _allQuestsTypes[i];
+        }
+
+        return null;
     }
 }

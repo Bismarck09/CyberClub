@@ -42,7 +42,7 @@ public class UpgradeUIData : MonoBehaviour
             return;
         
         _interiorPrice.text = interiorData.InteriorsPrice.ToString();
-        _interiorMultiplier.text = interiorData.Multiplier.ToString();
+        _interiorMultiplier.text = interiorData.GetCoinsMultiplier().ToString();
     }
 
     private void ChangeDeviceData()

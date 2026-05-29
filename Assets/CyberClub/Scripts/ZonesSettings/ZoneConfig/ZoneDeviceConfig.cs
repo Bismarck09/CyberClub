@@ -18,7 +18,7 @@ public class ZoneDeviceConfig : ScriptableObject
     
     public void IncreaseDevicePrice()
     {
-        _devicePrice += Mathf.RoundToInt(_devicePrice / 10);
+        _devicePrice += Mathf.RoundToInt(_devicePrice * 0.1f);
     }
 
 }

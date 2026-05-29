@@ -11,6 +11,7 @@ public class ZoneInformation : MonoBehaviour
 
     public ZoneDeviceConfig ZoneConfig => _zoneDeviceConfig;
     public SpawnPointsHolder SpawnPoints => _spawnPointsHolder;
+    public InteriorData Interior => _interiorData;
     public Color ZoneColor => _color;
     public string ZoneName => _zoneName;
 

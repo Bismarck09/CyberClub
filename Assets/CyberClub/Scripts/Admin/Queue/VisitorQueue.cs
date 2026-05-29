@@ -1,65 +1,65 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class VisitorQueue : MonoBehaviour
 {
-    [SerializeField] private Transform[] _queuePoints;
-
-    private List<Visitor> _queue = new ();
+    [SerializeField] private List<AdminWorker> _admins;
 
     public bool HasFreeSlot()
     {
-        return _queue.Count < _queuePoints.Length;
-    }
+        foreach (AdminWorker admin in _admins)
+        {
+            if (admin.HasFreeQueueSlot())
+                return true;
+        }
 
-    public void AddToQueue(Visitor visitor)
-    {
-        _queue.Add(visitor);
+        return false;
     }
 
     public Transform GetNextQueuePoint(Visitor visitor)
     {
-        AddToQueue(visitor);
+        AdminWorker admin = GetBestAdminForQueue();
 
-        if (_queue.Count >= _queuePoints.Length)
+        if (admin == null)
             return null;
 
-
-        return _queuePoints[_queue.Count - 1];
+        return admin.AddVisitorToQueue(visitor);
     }
 
-    public Visitor GetNextVisitor()
+    public Visitor GetNextVisitor(AdminWorker admin)
     {
-        if (_queue.Count == 0)
+        if (admin == null)
             return null;
 
-        Visitor nextVisitor = _queue[0].GetComponent<VisitorRegistration>().IsRegistered ? _queue[0] : null;
-
-        return nextVisitor;
+        return admin.GetNextVisitor();
     }
 
-    public void RemoveVisitor(Visitor visitor)
+    public void RemoveVisitor(AdminWorker admin, Visitor visitor)
     {
-        if (_queue.Contains(visitor))
-        {
-            _queue.Remove(visitor);
-            MoveQueue();
-        }
+        if (admin == null)
+            return;
+
+        admin.RemoveVisitor(visitor);
     }
 
-    private void MoveQueue()
+    public List<AdminWorker> GetAdmins()
     {
-        for (int i = 0; i < _queue.Count; i++)
+        return _admins;
+    }
+
+    private AdminWorker GetBestAdminForQueue()
+    {
+        AdminWorker bestAdmin = null;
+
+        foreach (AdminWorker admin in _admins)
         {
-            if (_queue[i] == null || _queue[i].GetComponent<VisitorRegistration>().IsRegistered == false)
+            if (!admin.HasFreeQueueSlot())
                 continue;
 
-            VisitorMovement visitor = _queue[i].GetComponent<VisitorMovement>();
-
-            if (Vector3.Distance(visitor.transform.position, _queuePoints[i].position) < 0.1f)
-                continue;
-
-            visitor.Move(_queuePoints[i].position);
+            if (bestAdmin == null || admin.QueueCount < bestAdmin.QueueCount)
+                bestAdmin = admin;
         }
+
+        return bestAdmin;
     }
 }

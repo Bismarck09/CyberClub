@@ -39,6 +39,6 @@ public class InteriorPurchase : MonoBehaviour, IPurchasable
 
     private void ChangeInteriorData(ZoneInformation zoneInformation)
     {
-        _interiorData = zoneInformation.GetComponent<InteriorData>();
+        _interiorData = zoneInformation.Interior;
     }
 }

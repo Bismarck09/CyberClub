@@ -1,50 +1,54 @@
-using System.Collections;
-using Unity.VisualScripting;
-using UnityEngine;
 using System;
+using System.Collections;
+using UnityEngine;
 
 public class VisitorService : MonoBehaviour
 {
     [SerializeField] private DeviceRegistry _deviceRegistry;
     [SerializeField] private VisitorQueue _visitorQueue;
-    [SerializeField] private float _serviceInterval;
 
-    private DeviceEntry _freeDevice;
-    private Visitor _visitor;
-    private bool _isServicing;
-
-    public event Action<DeviceEntry> OnVisitorServiced; 
-
+    public event Action<DeviceEntry> OnVisitorServiced;
 
     private void Update()
     {
-        if (!_isServicing)
-            ServiceVisitor();
+        ServiceVisitors();
     }
-    
 
-    private void ServiceVisitor()
+    private void ServiceVisitors()
     {
-        _visitor =  _visitorQueue.GetNextVisitor();
-        _freeDevice = _deviceRegistry.GetRandomFreeDevice();
-
-        if (_visitor != null && _freeDevice != null)
+        foreach (AdminWorker admin in _visitorQueue.GetAdmins())
         {
-            _isServicing = true;
-            StartCoroutine(Service());
+            if (admin == null || admin.IsHired == false || admin.IsBusy)
+                continue;
+
+            Visitor visitor = _visitorQueue.GetNextVisitor(admin);
+            DeviceEntry freeDevice = _deviceRegistry.GetRandomFreeDevice();
+
+            if (visitor == null || freeDevice == null)
+                continue;
+
+            StartCoroutine(Service(admin, visitor, freeDevice));
         }
     }
 
-    private IEnumerator Service()
+    private IEnumerator Service(AdminWorker admin, Visitor visitor, DeviceEntry freeDevice)
     {
-        yield return new WaitForSeconds(_serviceInterval);
+        admin.SetBusy(true);
 
-        _visitorQueue.RemoveVisitor(_visitor);
-        _visitor.GetComponent<VisitorMovement>().Move(_freeDevice.Device.TargetPoint.position);
-        _freeDevice.Device.Reserve(15f, _visitor.GetComponent<VisitorExit>());
+        yield return new WaitForSeconds(admin.GetServiceInterval());
 
-        _isServicing = false;
+        _visitorQueue.RemoveVisitor(admin, visitor);
 
-        OnVisitorServiced?.Invoke(_freeDevice);
+        VisitorMovement movement = visitor.GetComponent<VisitorMovement>();
+
+        if (movement != null)
+        {
+            movement.Move(freeDevice.Device.TargetPoint.position);
+            freeDevice.Device.Reserve(15f, movement.GetComponent<VisitorExit>());
+        }
+
+        admin.SetBusy(false);
+
+        OnVisitorServiced?.Invoke(freeDevice);
     }
 }

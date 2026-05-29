@@ -7,38 +7,41 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     [SerializeField] private ZoneSwitcher _zoneSwitcher;
 
     private ZoneInformation _zoneInformation;
-    private int _devicePrice;
 
     public event Action OnDevicePurchased;
 
     private void OnEnable()
     {
-        _zoneSwitcher.OnZoneChanged += UpdateDevicePrice;
+        _zoneSwitcher.OnZoneChanged += UpdateZoneInformation;
     }
 
     private void OnDisable()
     {
-        _zoneSwitcher.OnZoneChanged -= UpdateDevicePrice;
+        _zoneSwitcher.OnZoneChanged -= UpdateZoneInformation;
     }
 
     public bool CanBuy()
     {
-        return _coinsData.TryBuy(_devicePrice);
+        if (_zoneInformation == null)
+        {
+            Debug.LogWarning("Нельзя купить девайс: игрок не находится в зоне.");
+            return false;
+        }
+
+        return _coinsData.TryBuy(_zoneInformation.ZoneConfig.DevicePrice);
     }
 
     public void Buy()
     {
-        if (CanBuy())
-        {
-            _zoneInformation.ZoneConfig.IncreaseDevicePrice();
-            OnDevicePurchased?.Invoke();
-        }
+        if (!CanBuy())
+            return;
+
+        _zoneInformation.ZoneConfig.IncreaseDevicePrice();
+        OnDevicePurchased?.Invoke();
     }
 
-    private void UpdateDevicePrice(ZoneInformation zoneInformation)
+    private void UpdateZoneInformation(ZoneInformation zoneInformation)
     {
         _zoneInformation = zoneInformation;
-        _devicePrice = _zoneInformation.ZoneConfig.DevicePrice;
     }
-
 }

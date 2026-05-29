@@ -8,31 +8,70 @@ public class InteriorData : MonoBehaviour
     [SerializeField] private List<float> _multipliers;
 
     private int _currentBoughtInteriorObjects;
-    private bool _isMaxPurchased;
-    
-    public bool IsMaxPurchased => _isMaxPurchased;
-    public int InteriorsPrice => _interiorsPrice[_currentBoughtInteriorObjects];
-    public float Multiplier => _multipliers[_currentBoughtInteriorObjects];
+
+    public bool IsMaxPurchased => _currentBoughtInteriorObjects >= _interiorObjects.Count;
+
+    public int InteriorsPrice
+    {
+        get
+        {
+            if (IsMaxPurchased)
+                return 0;
+
+            if (_currentBoughtInteriorObjects >= _interiorsPrice.Count)
+            {
+                Debug.LogError("Не хватает цены для следующего интерьера");
+                return 0;
+            }
+
+            return _interiorsPrice[_currentBoughtInteriorObjects];
+        }
+    }
 
     public float GetCoinsMultiplier()
     {
-        float multiplier = 0;
+        float multiplier = 0f;
 
-        for (int i = 0; i < _currentBoughtInteriorObjects; i++)
+        int count = Mathf.Min(_currentBoughtInteriorObjects, _multipliers.Count);
+
+        for (int i = 0; i < count; i++)
         {
             multiplier += _multipliers[i];
         }
-        
+
         return multiplier;
     }
 
     public void BuyInterior()
     {
-        _interiorObjects[_currentBoughtInteriorObjects].SetActive(true);
-        _currentBoughtInteriorObjects++;
+        if (IsMaxPurchased)
+            return;
 
         if (_currentBoughtInteriorObjects >= _interiorObjects.Count)
-            _isMaxPurchased = true;
+        {
+            Debug.LogError("Не хватает объекта интерьера");
+            return;
+        }
 
+        if (_currentBoughtInteriorObjects >= _interiorsPrice.Count)
+        {
+            Debug.LogError("Не хватает цены интерьера");
+            return;
+        }
+
+        if (_currentBoughtInteriorObjects >= _multipliers.Count)
+        {
+            Debug.LogError("Не хватает множителя интерьера");
+            return;
+        }
+
+        GameObject interiorObject = _interiorObjects[_currentBoughtInteriorObjects];
+
+        if (interiorObject != null)
+        {
+            interiorObject.SetActive(true);
+        }
+
+        _currentBoughtInteriorObjects++;
     }
 }

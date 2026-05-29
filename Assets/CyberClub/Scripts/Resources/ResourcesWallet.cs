@@ -35,9 +35,4 @@ public class ResourcesWallet : MonoBehaviour
         _coinsData.AddResource(device.PriceOfHourCoins, coinsMultiplier);
         _gemsData.AddResource(device.PriceOfHourGems, _resourceMultiplier.GetMultiplier(_gemsData.Type));
     }
-
-    private void RemoveResource()
-    {
-        
-    }
 }
