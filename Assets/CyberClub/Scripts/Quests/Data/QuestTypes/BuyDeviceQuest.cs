@@ -1,16 +1,26 @@
 using UnityEngine;
 
-public class BuyDeviceQuest : MonoBehaviour
+public class BuyDeviceQuest : Quest
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private DevicePurchase _devicePurchase;
+
+    public BuyDeviceQuest(DevicePurchase devicePurchase, IResource resource) : base(QuestType.BuyDevice, resource)
     {
-        
+        _devicePurchase = devicePurchase;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void Subscribe()
     {
-        
+        _devicePurchase.OnDevicePurchased += Service;
+    }
+
+    protected override void Unsubscribe()
+    {
+        _devicePurchase.OnDevicePurchased -= Service;
+    }
+
+    private void Service()
+    {
+        AddProgress(1);
     }
 }

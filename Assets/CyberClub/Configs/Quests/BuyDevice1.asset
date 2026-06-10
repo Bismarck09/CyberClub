@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 854d92b630c5c074d9d8fffa0c7c4d8e, type: 3}
-  m_Name: QuestData 3
+  m_Name: BuyDevice1
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
-  _questType: 0
-  _targetValue: 20
-  _rewardValue: 300
+  _questType: 1
+  _targetValue: 5
+  _rewardValue: 100

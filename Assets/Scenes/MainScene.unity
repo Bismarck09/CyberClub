@@ -36394,10 +36394,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::QuestCreator
   _quests:
   - {fileID: 11400000, guid: 6438ceaa66c336341b4b59f54ffe18c1, type: 2}
+  - {fileID: 11400000, guid: 26a5a135e1a8e458ba27c01e0aafeaf6, type: 2}
   - {fileID: 11400000, guid: dce429a28b0cb044d8c6021cfbf3b2ae, type: 2}
   - {fileID: 11400000, guid: 19e02e68e39125b4fb6cc850e56833fa, type: 2}
   - {fileID: 11400000, guid: e3a30c8314357914ab8534037fd57f15, type: 2}
   _visitorService: {fileID: 1819034610}
+  _devicePurchase: {fileID: 1076341993}
   _coinsData: {fileID: 89083772}
   _gemsData: {fileID: 89083771}
   _questPrefab: {fileID: 3616039612397903377, guid: 7fdabdc9a52fee649a1343e6d87ac234, type: 3}

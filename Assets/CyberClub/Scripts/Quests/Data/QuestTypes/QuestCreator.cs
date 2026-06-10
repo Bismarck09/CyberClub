@@ -5,6 +5,7 @@ public class QuestCreator : MonoBehaviour
 {
     [SerializeField] private List<QuestData> _quests;
     [SerializeField] private VisitorService _visitorService;
+    [SerializeField] private DevicePurchase _devicePurchase;
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private GemsData _gemsData;
     [SerializeField] private GameObject _questPrefab;
@@ -18,6 +19,7 @@ public class QuestCreator : MonoBehaviour
     private void Start()
     {
         _allQuestsTypes.Add(new VisitorServiceQuest(_visitorService, _coinsData));
+        _allQuestsTypes.Add(new BuyDeviceQuest(_devicePurchase, _coinsData));
 
         CreateQuests();
         StartQuest();
