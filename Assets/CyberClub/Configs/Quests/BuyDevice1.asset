@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: BuyDevice1
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
   _questType: 1
+  _descriptionTemplate: 
   _targetValue: 5
   _rewardValue: 100

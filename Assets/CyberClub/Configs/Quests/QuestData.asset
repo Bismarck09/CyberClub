@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: QuestData
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
   _questType: 0
+  _descriptionTemplate: 
   _targetValue: 5
   _rewardValue: 100
