@@ -621,6 +621,7 @@ GameObject:
   - component: {fileID: 5571340064178282452}
   - component: {fileID: 2030673092836605784}
   - component: {fileID: 535132836772500092}
+  - component: {fileID: 5909821634517631997}
   m_Layer: 0
   m_Name: VisitorChild2
   m_TagString: Untagged
@@ -746,6 +747,18 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 0
+--- !u!114 &5909821634517631997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1482887055446474051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 625b9404ba6741409726285fac891963, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VisitorSeat
 --- !u!1 &1488806494756805793
 GameObject:
   m_ObjectHideFlags: 0
