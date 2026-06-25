@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class QuestUI : MonoBehaviour
 {
+    [SerializeField] private UIQuestPulseFeedback _questPulseFeedback;
     [SerializeField] private TextMeshProUGUI _description;
     [SerializeField] private TextMeshProUGUI _reward;
     [SerializeField] private GameObject _startPanel;
@@ -31,6 +32,7 @@ public class QuestUI : MonoBehaviour
 
         _quest.OnProgressChanged += UpdateUI;
         _quest.OnCompleted += CompleteQuest;
+        _quest.OnCompleted += _questPulseFeedback.ActivatePulse;
 
         _completePanel.onClick.RemoveListener(ClaimReward);
         _completePanel.onClick.AddListener(ClaimReward);
@@ -41,6 +43,7 @@ public class QuestUI : MonoBehaviour
         _completePanel.gameObject.SetActive(true);
 
         _quest.OnCompleted -= CompleteQuest;
+        _quest.OnCompleted -= _questPulseFeedback.ActivatePulse;
         _quest.OnProgressChanged -= UpdateUI;
     }
 

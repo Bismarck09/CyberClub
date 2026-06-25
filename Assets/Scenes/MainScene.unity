@@ -1392,8 +1392,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 180.09839, y: -515.5658}
-  m_SizeDelta: {x: 362.1968, y: 1029.1318}
+  m_AnchoredPosition: {x: 189.944, y: -515.5658}
+  m_SizeDelta: {x: 381.888, y: 1029.132}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &82226380
 MonoBehaviour:
@@ -6175,7 +6175,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &236660407
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6192,10 +6192,10 @@ RectTransform:
   - {fileID: 724407833}
   m_Father: {fileID: 531550472}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 182.5984, y: -305}
-  m_SizeDelta: {x: 325.1968, y: 400}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 325.1962, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &236660408
 MonoBehaviour:
@@ -11117,7 +11117,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.076503575, y: 0.08346588}
   m_AnchorMax: {x: 0.92774826, y: 0.84053415}
-  m_AnchoredPosition: {x: 0.34320068, y: 0.04069519}
+  m_AnchoredPosition: {x: 0.34320068, y: 0.04067993}
   m_SizeDelta: {x: -2.1015015, y: -0.9287033}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &437305650
@@ -12796,7 +12796,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0.00064810377, y: -0.000117676864}
-  m_SizeDelta: {x: 0, y: 1256.4448}
+  m_SizeDelta: {x: -0.00061035, y: 1256.445}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &531550473
 MonoBehaviour:
@@ -12819,7 +12819,7 @@ MonoBehaviour:
   m_Spacing: 10
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
+  m_ChildControlWidth: 0
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
@@ -17027,6 +17027,7 @@ GameObject:
   - component: {fileID: 738347706}
   - component: {fileID: 738347705}
   - component: {fileID: 738347704}
+  - component: {fileID: 738347707}
   m_Layer: 5
   m_Name: ButtonUpgrades
   m_TagString: Untagged
@@ -17052,7 +17053,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 75}
+  m_SizeDelta: {x: 325.1962, y: 75}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &738347704
 MonoBehaviour:
@@ -17110,6 +17111,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 738347707}
+        m_TargetAssemblyTypeName: UIPopFeedback, Assembly-CSharp
+        m_MethodName: ActivatePop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &738347705
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17148,6 +17161,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 738347702}
   m_CullTransparentMesh: 1
+--- !u!114 &738347707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738347702}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f108b80c9cd8574380398feecd72388, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPopFeedback
 --- !u!1 &749559280
 GameObject:
   m_ObjectHideFlags: 0
@@ -30238,6 +30263,7 @@ GameObject:
   - component: {fileID: 1366884407}
   - component: {fileID: 1366884406}
   - component: {fileID: 1366884405}
+  - component: {fileID: 1366884408}
   m_Layer: 5
   m_Name: ButtonSettings
   m_TagString: Untagged
@@ -30320,6 +30346,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 1366884408}
+        m_TargetAssemblyTypeName: UIPopFeedback, Assembly-CSharp
+        m_MethodName: ActivatePop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &1366884406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30358,6 +30396,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1366884403}
   m_CullTransparentMesh: 1
+--- !u!114 &1366884408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1366884403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f108b80c9cd8574380398feecd72388, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPopFeedback
 --- !u!1 &1367688563
 GameObject:
   m_ObjectHideFlags: 0
@@ -34471,6 +34521,7 @@ GameObject:
   - component: {fileID: 1599026670}
   - component: {fileID: 1599026669}
   - component: {fileID: 1599026668}
+  - component: {fileID: 1599026671}
   m_Layer: 5
   m_Name: ButtonShop
   m_TagString: Untagged
@@ -34540,7 +34591,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1599026669}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1599026671}
+        m_TargetAssemblyTypeName: UIPopFeedback, Assembly-CSharp
+        m_MethodName: ActivatePop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1599026669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34579,6 +34642,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1599026666}
   m_CullTransparentMesh: 1
+--- !u!114 &1599026671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1599026666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f108b80c9cd8574380398feecd72388, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPopFeedback
 --- !u!1 &1606270563
 GameObject:
   m_ObjectHideFlags: 0
@@ -35103,6 +35178,7 @@ GameObject:
   - component: {fileID: 1670227626}
   - component: {fileID: 1670227625}
   - component: {fileID: 1670227624}
+  - component: {fileID: 1670227627}
   m_Layer: 5
   m_Name: ButtonQuest
   m_TagString: Untagged
@@ -35128,7 +35204,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 75}
+  m_SizeDelta: {x: 325.1962, y: 75}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1670227624
 MonoBehaviour:
@@ -35186,6 +35262,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 1670227627}
+        m_TargetAssemblyTypeName: UIPopFeedback, Assembly-CSharp
+        m_MethodName: ActivatePop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &1670227625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35224,6 +35312,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1670227622}
   m_CullTransparentMesh: 1
+--- !u!114 &1670227627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670227622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f108b80c9cd8574380398feecd72388, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPopFeedback
 --- !u!1 &1673378049
 GameObject:
   m_ObjectHideFlags: 0
@@ -38859,6 +38959,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::VisitorService
   _deviceRegistry: {fileID: 1114299402}
   _visitorQueue: {fileID: 1774507684}
+  _sessionTime: 15
 --- !u!223 &1820077459 stripped
 Canvas:
   m_CorrespondingSourceObject: {fileID: 4664635784909756602, guid: b0855061b337938439f6ab38583de348, type: 3}
@@ -42176,7 +42277,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -17, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1905121487
 MonoBehaviour:

@@ -5,6 +5,7 @@ using System;
 public class InteractionWithUI : MonoBehaviour
 {
     [SerializeField] private PlayerInput _playerInput;
+    
     private InputAction _interactAction;
     private bool _isInteracts;
 
@@ -12,7 +13,6 @@ public class InteractionWithUI : MonoBehaviour
 
     private void Awake()
     {
-        //_playerInput = GetComponent<PlayerInput>();
         _interactAction = _playerInput.actions["InteractionWithInterface"];
         
         _isInteracts = false;
