@@ -5,6 +5,8 @@ public class SpawnPointsHolder : MonoBehaviour
 {
     [SerializeField] private List<Transform> _spawnPoints;
 
+    public bool HasSpawnPoints => _spawnPoints.Count > 0;
+
     public Transform GetSpawnPoint()
     {
         if (_spawnPoints.Count == 0)

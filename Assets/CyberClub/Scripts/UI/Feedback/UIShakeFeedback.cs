@@ -1,16 +1,14 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class UIShakeFeedback : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] private RectTransform _uiRectTransform;
+    [SerializeField] private float _shakeDuration;
+    [SerializeField] private Vector3 _shakeStrength;
 
-    // Update is called once per frame
-    void Update()
+    public void Shake()
     {
-        
+        _uiRectTransform.DOShakePosition(_shakeDuration, _shakeStrength);
     }
 }

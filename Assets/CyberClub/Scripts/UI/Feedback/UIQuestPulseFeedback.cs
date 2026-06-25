@@ -13,6 +13,6 @@ public class UIQuestPulseFeedback : MonoBehaviour
 
     public void ActivatePulse()
     {
-        _uiRectTransform.DOPunchScale(Vector3.one * 0.05f, 1, 8, 0.7f).SetLoops(-1, LoopType.Restart);
+        _uiRectTransform.DOScale(Vector3.one * 1.04f, 0.5f).SetLoops(-1, LoopType.Yoyo);
     }
 }

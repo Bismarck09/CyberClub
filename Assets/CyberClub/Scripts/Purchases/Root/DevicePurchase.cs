@@ -24,11 +24,10 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     {
         if (_zoneInformation == null)
         {
-            Debug.LogWarning("Нельзя купить девайс: игрок не находится в зоне.");
             return false;
         }
 
-        return _coinsData.TryBuy(_zoneInformation.ZoneConfig.DevicePrice);
+        return _zoneInformation.SpawnPoints.HasSpawnPoints && _coinsData.TryBuy(_zoneInformation.ZoneConfig.DevicePrice) ;
     }
 
     public void Buy()

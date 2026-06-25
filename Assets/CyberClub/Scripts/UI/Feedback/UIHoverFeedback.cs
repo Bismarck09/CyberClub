@@ -1,16 +1,27 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using DG.Tweening;
 
-public class UIHoverFeedback : MonoBehaviour
+public class UIHoverFeedback : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private RectTransform _uiRectTransform;
+    [SerializeField] private float _hoverScale;
+    [SerializeField] private float _hoverDuration;
+
+    private Vector3 _startScale;
+
+    private void Awake()
     {
-        
+        _startScale = _uiRectTransform.localScale;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        
+        _uiRectTransform.DOScale(_startScale * _hoverScale, _hoverDuration).SetEase(Ease.OutQuad);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        _uiRectTransform.DOScale(_startScale, _hoverDuration).SetEase(Ease.OutQuad);
     }
 }
