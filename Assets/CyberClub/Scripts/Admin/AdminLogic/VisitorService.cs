@@ -7,6 +7,7 @@ public class VisitorService : MonoBehaviour
     [SerializeField] private DeviceRegistry _deviceRegistry;
     [SerializeField] private VisitorQueue _visitorQueue;
     [SerializeField] private float _sessionTime = 15f;
+    [SerializeField] private SpeedPotionEffectService _speedPotionEffectService;
 
     public event Action<DeviceEntry> OnVisitorServiced;
 
@@ -39,7 +40,10 @@ public class VisitorService : MonoBehaviour
     {
         admin.SetBusy(true);
 
-        yield return new WaitForSeconds(admin.GetServiceInterval());
+        float adminMultiplier = GetAdminServiceMultiplier();
+        float serviceDelay = admin.GetServiceInterval() / Mathf.Max(1f, adminMultiplier);
+
+        yield return new WaitForSeconds(serviceDelay);
 
         if (visitor == null || freeDevice == null || freeDevice.Device == null)
         {
@@ -55,7 +59,6 @@ public class VisitorService : MonoBehaviour
         VisitorMovement movement = visitor.GetComponent<VisitorMovement>();
         VisitorExit visitorExit = visitor.GetComponent<VisitorExit>();
         VisitorSeat seatController = visitor.GetComponent<VisitorSeat>();
-
         GameDevice device = freeDevice.Device;
 
         if (movement == null || visitorExit == null || device.TargetPoint == null)
@@ -65,21 +68,43 @@ public class VisitorService : MonoBehaviour
             yield break;
         }
 
+        float sessionMultiplier = GetDeviceSessionMultiplier();
+        float actualSessionTime = _sessionTime / Mathf.Max(1f, sessionMultiplier);
+
         movement.Move(device.TargetPoint.position, () =>
         {
             if (seatController != null && device.SitPoint != null)
             {
                 seatController.SitAt(device);
-                device.StartSession(_sessionTime, visitorExit, seatController);
+                device.StartSession(actualSessionTime, visitorExit, seatController);
             }
             else
             {
-                device.Reserve(_sessionTime, visitorExit);
+                device.Reserve(actualSessionTime, visitorExit);
             }
         });
 
         OnVisitorServiced?.Invoke(freeDevice);
-
         admin.SetBusy(false);
+    }
+
+    private float GetAdminServiceMultiplier()
+    {
+        if (_speedPotionEffectService != null)
+            return _speedPotionEffectService.AdminServiceMultiplier;
+
+        return SpeedPotionEffectService.Current != null
+            ? SpeedPotionEffectService.Current.AdminServiceMultiplier
+            : 1f;
+    }
+
+    private float GetDeviceSessionMultiplier()
+    {
+        if (_speedPotionEffectService != null)
+            return _speedPotionEffectService.DeviceSessionMultiplier;
+
+        return SpeedPotionEffectService.Current != null
+            ? SpeedPotionEffectService.Current.DeviceSessionMultiplier
+            : 1f;
     }
 }

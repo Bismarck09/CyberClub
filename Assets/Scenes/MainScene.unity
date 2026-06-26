@@ -1369,6 +1369,7 @@ GameObject:
   - component: {fileID: 77609681}
   - component: {fileID: 77609680}
   - component: {fileID: 77609679}
+  - component: {fileID: 77609683}
   m_Layer: 5
   m_Name: RatingButton
   m_TagString: Untagged
@@ -1503,6 +1504,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 77609677}
   m_CullTransparentMesh: 1
+--- !u!114 &77609683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 77609677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
+  _config: {fileID: 11400000, guid: b569314fecb2c5c4384c7be2fcc5394c, type: 2}
+  _icon: {fileID: 1334748727}
+  _titleText: {fileID: 1947852015}
+  _durationText: {fileID: 0}
+  _normalFrame: {fileID: 0}
+  _selectedFrame: {fileID: 0}
 --- !u!1 &82226378
 GameObject:
   m_ObjectHideFlags: 0
@@ -28171,6 +28190,7 @@ GameObject:
   - component: {fileID: 1081430563}
   - component: {fileID: 1081430562}
   - component: {fileID: 1081430561}
+  - component: {fileID: 1081430565}
   m_Layer: 5
   m_Name: CoinsButton
   m_TagString: Untagged
@@ -28305,6 +28325,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1081430559}
   m_CullTransparentMesh: 1
+--- !u!114 &1081430565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081430559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
+  _config: {fileID: 11400000, guid: a2e7313e4a2f47443a9e5550d0408b50, type: 2}
+  _icon: {fileID: 1520580859}
+  _titleText: {fileID: 1571606549}
+  _durationText: {fileID: 0}
+  _normalFrame: {fileID: 0}
+  _selectedFrame: {fileID: 0}
 --- !u!1 &1082883631
 GameObject:
   m_ObjectHideFlags: 0
@@ -33104,6 +33142,7 @@ Transform:
   - {fileID: 147176137}
   - {fileID: 235056044}
   - {fileID: 408639996}
+  - {fileID: 1502559003}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1378828571
@@ -40639,6 +40678,110 @@ Transform:
   m_Children: []
   m_Father: {fileID: 341522516}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1 &1502559002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1502559003}
+  - component: {fileID: 1502559008}
+  - component: {fileID: 1502559007}
+  - component: {fileID: 1502559006}
+  - component: {fileID: 1502559005}
+  - component: {fileID: 1502559004}
+  m_Layer: 0
+  m_Name: ShopPurchaseSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1502559003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502559002}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1374792488}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1502559004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502559002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5312df572d5d24db5d4b5042b0681e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AdGemReward
+  _gemsData: {fileID: 89083771}
+  _rewardGems: 20
+--- !u!114 &1502559005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502559002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c99355feb8d677f49a4e53b003898e8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RatingPotionEffectService
+--- !u!114 &1502559006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502559002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d08b420ea636bc44a8f1e3e0f271e64e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedPotionEffectService
+  _affectVisitorMovement: 1
+--- !u!114 &1502559007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502559002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ce67d8c59e94b48b9f5c33ee8bc3fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PotionEffectService
+  _resourcesMultiplier: {fileID: 89083773}
+  _speedPotionEffectService: {fileID: 1502559006}
+  _ratingPotionEffectService: {fileID: 1502559005}
+--- !u!114 &1502559008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1502559002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79cc54d7a8e5bb44af1b09e5a256175, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PotionPurchaseService
+  _gemsData: {fileID: 89083771}
+  _potionEffectService: {fileID: 1502559007}
 --- !u!1001 &1509195187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -42563,6 +42706,7 @@ GameObject:
   - component: {fileID: 1588416166}
   - component: {fileID: 1588416165}
   - component: {fileID: 1588416164}
+  - component: {fileID: 1588416168}
   m_Layer: 5
   m_Name: SpeedButton
   m_TagString: Untagged
@@ -42697,6 +42841,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1588416162}
   m_CullTransparentMesh: 1
+--- !u!114 &1588416168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1588416162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
+  _config: {fileID: 11400000, guid: 36bfada0cbc61bc4d815ab91362c622a, type: 2}
+  _icon: {fileID: 1882020896}
+  _titleText: {fileID: 1159221799}
+  _durationText: {fileID: 0}
+  _normalFrame: {fileID: 0}
+  _selectedFrame: {fileID: 0}
 --- !u!1 &1598643554
 GameObject:
   m_ObjectHideFlags: 0
@@ -47466,6 +47628,7 @@ MonoBehaviour:
   _deviceRegistry: {fileID: 1114299402}
   _visitorQueue: {fileID: 1774507684}
   _sessionTime: 15
+  _speedPotionEffectService: {fileID: 0}
 --- !u!223 &1820077459 stripped
 Canvas:
   m_CorrespondingSourceObject: {fileID: 4664635784909756602, guid: b0855061b337938439f6ab38583de348, type: 3}
@@ -50047,6 +50210,7 @@ GameObject:
   - component: {fileID: 1861126616}
   - component: {fileID: 1861126619}
   - component: {fileID: 1861126618}
+  - component: {fileID: 1861126620}
   m_Layer: 5
   m_Name: ShopPanel
   m_TagString: Untagged
@@ -50139,6 +50303,30 @@ MonoBehaviour:
   _uiRectTransform: {fileID: 1861126615}
   _canvasGroup: {fileID: 1861126618}
   _transitionDuration: 0.5
+--- !u!114 &1861126620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1861126614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d7ce5f99bef1c64781711f30e676a1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UniversalShopWindow
+  _purchaseService: {fileID: 0}
+  _products:
+  - {fileID: 11400000, guid: b569314fecb2c5c4384c7be2fcc5394c, type: 2}
+  - {fileID: 11400000, guid: a2e7313e4a2f47443a9e5550d0408b50, type: 2}
+  - {fileID: 11400000, guid: 36bfada0cbc61bc4d815ab91362c622a, type: 2}
+  _infoPanel: {fileID: 1878892519}
+  _productButtons:
+  - {fileID: 77609683}
+  - {fileID: 1081430565}
+  - {fileID: 1588416168}
+  _potionsTabButton: {fileID: 474361263}
+  _gemsTabButton: {fileID: 1175572720}
 --- !u!1 &1864682011
 GameObject:
   m_ObjectHideFlags: 0
@@ -50534,6 +50722,7 @@ GameObject:
   - component: {fileID: 1878892516}
   - component: {fileID: 1878892518}
   - component: {fileID: 1878892517}
+  - component: {fileID: 1878892519}
   m_Layer: 5
   m_Name: InfoPanel
   m_TagString: Untagged
@@ -50603,6 +50792,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1878892515}
   m_CullTransparentMesh: 1
+--- !u!114 &1878892519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1878892515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8feba1ba4388a34eb51f19dad0bbeec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShopProductInfoPanel
+  _icon: {fileID: 2105174669}
+  _titleText: {fileID: 0}
+  _descriptionText: {fileID: 313849504}
+  _durationText: {fileID: 1060286376}
+  _priceText: {fileID: 2003611434}
+  _buyButton: {fileID: 425644014}
 --- !u!1 &1879924669
 GameObject:
   m_ObjectHideFlags: 0
