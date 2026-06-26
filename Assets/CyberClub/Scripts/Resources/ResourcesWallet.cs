@@ -30,9 +30,17 @@ public class ResourcesWallet : MonoBehaviour
 
     private void AddResources(DeviceEntry device)
     {
-        float coinsMultiplier = _resourceMultiplier.GetMultiplier(_coinsData.Type) + _locationInformation.Multiplier;
-        
+        if (device == null)
+            return;
+
+        float globalCoinsMultiplier = _resourceMultiplier.GetMultiplier(_coinsData.Type);
+        float roomCoinsMultiplier = device.RoomCoinsMultiplier;
+
+        float coinsMultiplier = globalCoinsMultiplier + roomCoinsMultiplier;
+
         _coinsData.AddResource(device.PriceOfHourCoins, coinsMultiplier);
-        _gemsData.AddResource(device.PriceOfHourGems, _resourceMultiplier.GetMultiplier(_gemsData.Type));
+
+        float gemsMultiplier = _resourceMultiplier.GetMultiplier(_gemsData.Type);
+        _gemsData.AddResource(device.PriceOfHourGems, gemsMultiplier);
     }
 }

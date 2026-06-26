@@ -24,8 +24,16 @@ public class UIWindowTransition : MonoBehaviour
         Transition();
     }
     
+    private void OnDisable()
+    {
+        _transitionSequence?.Kill();
+        _transitionSequence = null;
+    }
+    
     public void Transition()
     {
+        _transitionSequence?.Kill();
+        
         _canvasGroup.alpha = 0;
         _uiRectTransform.localScale = Vector3.zero;
         _uiRectTransform.anchoredPosition = _startPosition + new Vector2(0, -Screen.height);

@@ -55,7 +55,7 @@ public class QuestUI : MonoBehaviour
         _quest.ResourceData.AddResource(_quest.GetData().RewardValue, 1);
 
         _completePanel.onClick.RemoveListener(ClaimReward);
-
+        _questPulseFeedback.StopPulse();
         Destroy(gameObject);
     }
 
@@ -74,6 +74,9 @@ public class QuestUI : MonoBehaviour
 
         _quest.OnCompleted -= CompleteQuest;
         _quest.OnProgressChanged -= UpdateUI;
+        _quest.OnCompleted -= _questPulseFeedback.ActivatePulse;
+        
         _completePanel.onClick.RemoveListener(ClaimReward);
+        _questPulseFeedback.StopPulse();
     }
 }

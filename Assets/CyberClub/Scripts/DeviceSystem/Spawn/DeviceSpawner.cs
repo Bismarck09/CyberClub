@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
 
 public class DeviceSpawner : MonoBehaviour
 {
@@ -12,7 +11,14 @@ public class DeviceSpawner : MonoBehaviour
 
     private void Awake()
     {
-        _deviceFactory = new GameDeviceFactory(new List<IDeviceCreator>() { new ConsoleCreator(), new ComputerCreator() }, _deviceRegistry);
+        _deviceFactory = new GameDeviceFactory(
+            new List<IDeviceCreator>
+            {
+                new ConsoleCreator(),
+                new ComputerCreator()
+            },
+            _deviceRegistry
+        );
     }
 
     private void OnEnable()
@@ -27,8 +33,15 @@ public class DeviceSpawner : MonoBehaviour
 
     private void SpawnDevice()
     {
-        if (_locationInformation.IsDeviceRemained)
-            _deviceFactory.SpawnDevice(_locationInformation.ZoneConfig, _locationInformation.SpawnPoints);
-    }
+        if (_locationInformation.CurrentZoneInformation == null)
+        {
+            Debug.LogError("DeviceSpawner: нет текущей зоны для спавна устройства.");
+            return;
+        }
 
+        if (!_locationInformation.IsDeviceRemained)
+            return;
+
+        _deviceFactory.SpawnDevice(_locationInformation.CurrentZoneInformation);
+    }
 }
