@@ -7,6 +7,8 @@ public class VisitorService : MonoBehaviour
     [SerializeField] private DeviceRegistry _deviceRegistry;
     [SerializeField] private VisitorQueue _visitorQueue;
     [SerializeField] private float _sessionTime = 15f;
+
+    [Header("Optional. If empty, service uses SpeedPotionEffectService.Current")]
     [SerializeField] private SpeedPotionEffectService _speedPotionEffectService;
 
     public event Action<DeviceEntry> OnVisitorServiced;
@@ -26,7 +28,7 @@ public class VisitorService : MonoBehaviour
             Visitor visitor = _visitorQueue.GetNextVisitor(admin);
             DeviceEntry freeDevice = _deviceRegistry.GetRandomFreeDevice();
 
-            if (visitor == null || freeDevice == null)
+            if (visitor == null || freeDevice == null || freeDevice.Device == null)
                 continue;
 
             if (!freeDevice.Device.TryReserve())
@@ -40,11 +42,10 @@ public class VisitorService : MonoBehaviour
     {
         admin.SetBusy(true);
 
-        float adminMultiplier = _speedPotionEffectService != null
-            ? _speedPotionEffectService.AdminServiceMultiplier
-            : 1f;
+        float adminMultiplier = GetAdminServiceMultiplier();
+        float serviceDelay = admin.GetServiceInterval() / Mathf.Max(1f, adminMultiplier);
 
-        yield return new WaitForSeconds(admin.GetServiceInterval() / Mathf.Max(1f, adminMultiplier));
+        yield return new WaitForSeconds(serviceDelay);
 
         if (visitor == null || freeDevice == null || freeDevice.Device == null)
         {
@@ -69,11 +70,15 @@ public class VisitorService : MonoBehaviour
             yield break;
         }
 
-        float sessionMultiplier = _speedPotionEffectService != null
-            ? _speedPotionEffectService.DeviceSessionMultiplier
-            : 1f;
-
+        float sessionMultiplier = GetDeviceSessionMultiplier();
         float actualSessionTime = _sessionTime / Mathf.Max(1f, sessionMultiplier);
+
+        Debug.Log(
+            $"VisitorService: serviceDelay={serviceDelay}, " +
+            $"sessionTime={actualSessionTime}, " +
+            $"adminMultiplier={adminMultiplier}, " +
+            $"sessionMultiplier={sessionMultiplier}"
+        );
 
         movement.Move(device.TargetPoint.position, () =>
         {
@@ -90,5 +95,25 @@ public class VisitorService : MonoBehaviour
 
         OnVisitorServiced?.Invoke(freeDevice);
         admin.SetBusy(false);
+    }
+
+    private SpeedPotionEffectService GetSpeedService()
+    {
+        if (_speedPotionEffectService != null)
+            return _speedPotionEffectService;
+
+        return SpeedPotionEffectService.Current;
+    }
+
+    private float GetAdminServiceMultiplier()
+    {
+        SpeedPotionEffectService speedService = GetSpeedService();
+        return speedService != null ? speedService.AdminServiceMultiplier : 1f;
+    }
+
+    private float GetDeviceSessionMultiplier()
+    {
+        SpeedPotionEffectService speedService = GetSpeedService();
+        return speedService != null ? speedService.DeviceSessionMultiplier : 1f;
     }
 }

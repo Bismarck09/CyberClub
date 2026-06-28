@@ -6,9 +6,12 @@ public class SpeedPotionEffectService : MonoBehaviour
 {
     public static SpeedPotionEffectService Current { get; private set; }
 
-    [SerializeField] private bool _affectVisitorMovement;
+    [Header("What speed potion affects")]
+    [SerializeField] private bool _affectAdminService = true;
+    [SerializeField] private bool _affectDeviceSession = true;
+    [SerializeField] private bool _affectVisitorMovement = true;
 
-    private Coroutine _timerCoroutine;
+    private Coroutine _legacyTimerCoroutine;
 
     public float AdminServiceMultiplier { get; private set; } = 1f;
     public float DeviceSessionMultiplier { get; private set; } = 1f;
@@ -23,42 +26,53 @@ public class SpeedPotionEffectService : MonoBehaviour
         Current = this;
     }
 
+    private void OnEnable()
+    {
+        Current = this;
+    }
+
     private void OnDestroy()
     {
         if (Current == this)
             Current = null;
     }
 
-    public void Activate(float duration, int multiplier)
+    public void Apply(int multiplier)
     {
         float safeMultiplier = Mathf.Max(1, multiplier);
 
-        AdminServiceMultiplier = safeMultiplier;
-        DeviceSessionMultiplier = safeMultiplier;
+        AdminServiceMultiplier = _affectAdminService ? safeMultiplier : 1f;
+        DeviceSessionMultiplier = _affectDeviceSession ? safeMultiplier : 1f;
         VisitorMovementMultiplier = _affectVisitorMovement ? safeMultiplier : 1f;
 
         OnChanged?.Invoke();
 
-        if (_timerCoroutine != null)
-            StopCoroutine(_timerCoroutine);
-
-        _timerCoroutine = StartCoroutine(ResetAfter(duration));
-
-        Debug.Log($"Зелье скорости активировано: x{safeMultiplier} на {duration} секунд.");
+        Debug.Log($"Зелье скорости применено: Admin x{AdminServiceMultiplier}, Session x{DeviceSessionMultiplier}, Movement x{VisitorMovementMultiplier}.");
     }
 
-    private IEnumerator ResetAfter(float duration)
+    public void Activate(float duration, int multiplier)
+    {
+        Apply(multiplier);
+
+        if (_legacyTimerCoroutine != null)
+            StopCoroutine(_legacyTimerCoroutine);
+
+        _legacyTimerCoroutine = StartCoroutine(LegacyResetAfter(duration));
+    }
+
+    private IEnumerator LegacyResetAfter(float duration)
     {
         yield return new WaitForSeconds(Mathf.Max(0.1f, duration));
         ResetEffect();
+        _legacyTimerCoroutine = null;
     }
 
     public void ResetEffect()
     {
-        if (_timerCoroutine != null)
+        if (_legacyTimerCoroutine != null)
         {
-            StopCoroutine(_timerCoroutine);
-            _timerCoroutine = null;
+            StopCoroutine(_legacyTimerCoroutine);
+            _legacyTimerCoroutine = null;
         }
 
         AdminServiceMultiplier = 1f;
@@ -67,6 +81,6 @@ public class SpeedPotionEffectService : MonoBehaviour
 
         OnChanged?.Invoke();
 
-        Debug.Log("Зелье скорости закончилось.");
+        Debug.Log("Зелье скорости выключено.");
     }
 }
