@@ -4,82 +4,108 @@ using UnityEngine.UI;
 
 public class ShopProductInfoPanel : MonoBehaviour
 {
-    [Header("Main")]
-    [SerializeField] private Image _icon;
-    [SerializeField] private TMP_Text _titleText;
+    [Header("Required UI")]
+    [SerializeField] private Image _productIcon;
     [SerializeField] private TMP_Text _descriptionText;
+    [SerializeField] private Button _actionButton;
 
-    [Header("Info rows")]
+    [Header("Optional UI for potions")]
     [SerializeField] private TMP_Text _durationText;
     [SerializeField] private TMP_Text _priceText;
 
-    [Header("Buttons")]
-    [SerializeField] private Button _buyButton;
+    [Header("Optional roots")]
+    [SerializeField] private GameObject _durationRoot;
+    [SerializeField] private GameObject _priceRoot;
 
-    private ShopProductConfig _currentConfig;
-    private PotionPurchaseService _purchaseService;
+    [Header("Optional button label")]
+    [SerializeField] private TMP_Text _actionButtonText;
 
-    public ShopProductConfig CurrentConfig => _currentConfig;
+    private ShopProductConfig _currentProduct;
+    private ShopActionService _actionService;
 
-    public void Construct(PotionPurchaseService purchaseService)
+    public void Initialize(ShopActionService actionService)
     {
-        _purchaseService = purchaseService;
+        _actionService = actionService;
     }
 
     private void OnEnable()
     {
-        if (_buyButton != null)
-            _buyButton.onClick.AddListener(BuyCurrentProduct);
+        if (_actionButton != null)
+            _actionButton.onClick.AddListener(ExecuteCurrentProduct);
     }
 
     private void OnDisable()
     {
-        if (_buyButton != null)
-            _buyButton.onClick.RemoveListener(BuyCurrentProduct);
+        if (_actionButton != null)
+            _actionButton.onClick.RemoveListener(ExecuteCurrentProduct);
     }
 
-    public void Show(ShopProductConfig config)
+    public void Show(ShopProductConfig product)
     {
-        _currentConfig = config;
+        _currentProduct = product;
 
-        if (config == null)
+        if (product == null)
         {
             Clear();
             return;
         }
 
-        if (_icon != null)
+        if (_productIcon != null)
         {
-            _icon.enabled = config.Icon != null;
-            _icon.sprite = config.Icon;
+            _productIcon.enabled = product.Icon != null;
+            _productIcon.sprite = product.Icon;
         }
 
-        //if (_titleText != null)
-            //_titleText.text = config.DisplayName;
-
         if (_descriptionText != null)
-            _descriptionText.text = config.Description;
+            _descriptionText.text = product.Description;
+
+        bool showDuration = product.HasDuration && _durationText != null;
+
+        if (_durationRoot != null)
+            _durationRoot.SetActive(showDuration);
 
         if (_durationText != null)
-            _durationText.text = config.DurationText;
+            _durationText.text = showDuration ? product.DurationText : string.Empty;
+
+        bool showPrice = product.HasPrice && _priceText != null;
+
+        if (_priceRoot != null)
+            _priceRoot.SetActive(showPrice);
 
         if (_priceText != null)
-            _priceText.text = config.PriceGems.ToString();
+            _priceText.text = showPrice ? product.PriceGems.ToString() : string.Empty;
 
-        if (_buyButton != null)
-            _buyButton.interactable = config.Category == ShopProductCategory.Potions;
+        if (_actionButtonText != null)
+            _actionButtonText.text = string.IsNullOrWhiteSpace(product.ButtonText) ? "Купить" : product.ButtonText;
+
+        if (_actionButton != null)
+            _actionButton.interactable = true;
+    }
+
+    private void ExecuteCurrentProduct()
+    {
+        if (_currentProduct == null)
+        {
+            Debug.LogWarning("ShopProductInfoPanel: нет выбранного товара.");
+            return;
+        }
+
+        if (_actionService == null)
+        {
+            Debug.LogWarning("ShopProductInfoPanel: не назначен ShopActionService.");
+            return;
+        }
+
+        _actionService.Execute(_currentProduct);
     }
 
     private void Clear()
     {
-        if (_icon != null)
+        if (_productIcon != null)
         {
-            _icon.sprite = null;
-            _icon.enabled = false;
+            _productIcon.sprite = null;
+            _productIcon.enabled = false;
         }
-
-        //if (_titleText != null)
-            //_titleText.text = string.Empty;
 
         if (_descriptionText != null)
             _descriptionText.text = string.Empty;
@@ -90,15 +116,13 @@ public class ShopProductInfoPanel : MonoBehaviour
         if (_priceText != null)
             _priceText.text = string.Empty;
 
-        if (_buyButton != null)
-            _buyButton.interactable = false;
-    }
+        if (_durationRoot != null)
+            _durationRoot.SetActive(false);
 
-    private void BuyCurrentProduct()
-    {
-        if (_currentConfig == null || _purchaseService == null)
-            return;
+        if (_priceRoot != null)
+            _priceRoot.SetActive(false);
 
-        _purchaseService.TryBuy(_currentConfig);
+        if (_actionButton != null)
+            _actionButton.interactable = false;
     }
 }

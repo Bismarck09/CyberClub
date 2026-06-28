@@ -10,7 +10,9 @@ public class VisitorSpeedBoostAdapter : MonoBehaviour
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _baseSpeed = _agent.speed;
+
+        if (_agent != null)
+            _baseSpeed = _agent.speed;
     }
 
     private void Update()

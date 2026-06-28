@@ -1516,8 +1516,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
-  _product: {fileID: 11400000, guid: b569314fecb2c5c4384c7be2fcc5394c, type: 2}
-  _defaultFrame: {fileID: 0}
+  _config: {fileID: 11400000, guid: b569314fecb2c5c4384c7be2fcc5394c, type: 2}
+  _icon: {fileID: 1334748727}
+  _titleText: {fileID: 1947852015}
+  _durationText: {fileID: 0}
+  _normalFrame: {fileID: 0}
   _selectedFrame: {fileID: 0}
 --- !u!1 &82226378
 GameObject:
@@ -12811,6 +12814,30 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1993878195}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1856992748}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &474361264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16071,7 +16098,6 @@ GameObject:
   - component: {fileID: 648658862}
   - component: {fileID: 648658861}
   - component: {fileID: 648658860}
-  - component: {fileID: 648658864}
   m_Layer: 5
   m_Name: CoinsButton
   m_TagString: Untagged
@@ -16206,21 +16232,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 648658858}
   m_CullTransparentMesh: 1
---- !u!114 &648658864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 648658858}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
-  _product: {fileID: 11400000, guid: da0a4f821bad6f14c9ea3e6f6c97e59c, type: 2}
-  _defaultFrame: {fileID: 0}
-  _selectedFrame: {fileID: 0}
 --- !u!1 &649950804
 GameObject:
   m_ObjectHideFlags: 0
@@ -22163,7 +22174,6 @@ GameObject:
   - component: {fileID: 822380726}
   - component: {fileID: 822380725}
   - component: {fileID: 822380724}
-  - component: {fileID: 822380728}
   m_Layer: 5
   m_Name: GemsButton
   m_TagString: Untagged
@@ -22298,21 +22308,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 822380722}
   m_CullTransparentMesh: 1
---- !u!114 &822380728
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 822380722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
-  _product: {fileID: 11400000, guid: 3ac8a0a2c87eb8e4d8352373c16f2b19, type: 2}
-  _defaultFrame: {fileID: 0}
-  _selectedFrame: {fileID: 0}
 --- !u!1001 &823620281
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28342,8 +28337,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
-  _product: {fileID: 11400000, guid: a2e7313e4a2f47443a9e5550d0408b50, type: 2}
-  _defaultFrame: {fileID: 0}
+  _config: {fileID: 11400000, guid: a2e7313e4a2f47443a9e5550d0408b50, type: 2}
+  _icon: {fileID: 1520580859}
+  _titleText: {fileID: 1571606549}
+  _durationText: {fileID: 0}
+  _normalFrame: {fileID: 0}
   _selectedFrame: {fileID: 0}
 --- !u!1 &1082883631
 GameObject:
@@ -30363,6 +30361,30 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1856992748}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1993878195}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!1 &1176126353
 GameObject:
@@ -39639,7 +39661,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.34, y: 0.26000002}
   m_AnchorMax: {x: 0.8887185, y: 0.75000006}
-  m_AnchoredPosition: {x: -0.42300415, y: -0.5}
+  m_AnchoredPosition: {x: -0.42300034, y: -0.5}
   m_SizeDelta: {x: -2.0099945, y: 1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1450083780
@@ -42831,8 +42853,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a3fe94711125a64ba20127059c4d46e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopProductButton
-  _product: {fileID: 11400000, guid: 36bfada0cbc61bc4d815ab91362c622a, type: 2}
-  _defaultFrame: {fileID: 0}
+  _config: {fileID: 11400000, guid: 36bfada0cbc61bc4d815ab91362c622a, type: 2}
+  _icon: {fileID: 1882020896}
+  _titleText: {fileID: 1159221799}
+  _durationText: {fileID: 0}
+  _normalFrame: {fileID: 0}
   _selectedFrame: {fileID: 0}
 --- !u!1 &1598643554
 GameObject:
@@ -50003,14 +50028,13 @@ GameObject:
   - component: {fileID: 1856992749}
   - component: {fileID: 1856992751}
   - component: {fileID: 1856992750}
-  - component: {fileID: 1856992752}
   m_Layer: 5
   m_Name: PotionPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1856992749
 RectTransform:
   m_ObjectHideFlags: 0
@@ -50061,25 +50085,6 @@ MonoBehaviour:
   _uiRectTransform: {fileID: 1856992749}
   _canvasGroup: {fileID: 1856992750}
   _transitionDuration: 0.5
---- !u!114 &1856992752
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1856992748}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcec1eba68a2f7842805543a53ea1883, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopPageController
-  _actionService: {fileID: 1861126621}
-  _infoPanel: {fileID: 1878892519}
-  _productButtons:
-  - {fileID: 77609683}
-  - {fileID: 1081430565}
-  - {fileID: 1588416168}
-  _selectFirstProductOnEnable: 1
 --- !u!1 &1859790637
 GameObject:
   m_ObjectHideFlags: 0
@@ -50206,8 +50211,6 @@ GameObject:
   - component: {fileID: 1861126619}
   - component: {fileID: 1861126618}
   - component: {fileID: 1861126620}
-  - component: {fileID: 1861126622}
-  - component: {fileID: 1861126621}
   m_Layer: 5
   m_Name: ShopPanel
   m_TagString: Untagged
@@ -50312,7 +50315,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d7ce5f99bef1c64781711f30e676a1d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UniversalShopWindow
-  _actionService: {fileID: 1861126621}
+  _purchaseService: {fileID: 0}
   _products:
   - {fileID: 11400000, guid: b569314fecb2c5c4384c7be2fcc5394c, type: 2}
   - {fileID: 11400000, guid: a2e7313e4a2f47443a9e5550d0408b50, type: 2}
@@ -50323,38 +50326,7 @@ MonoBehaviour:
   - {fileID: 1081430565}
   - {fileID: 1588416168}
   _potionsTabButton: {fileID: 474361263}
-  _resourcesTabButton: {fileID: 1175572720}
---- !u!114 &1861126621
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1861126614}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dda7a0195e883624fae44e54ba3734f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopActionService
-  _gemsData: {fileID: 89083771}
-  _coinsData: {fileID: 89083772}
-  _potionEffectService: {fileID: 1502559007}
---- !u!114 &1861126622
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1861126614}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cef2b7f58715ff84caca8a6ccca8063a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopPanelSwitcher
-  _potionsButton: {fileID: 474361263}
-  _resourcesButton: {fileID: 1175572720}
-  _potionsPanel: {fileID: 1856992748}
-  _resourcesPanel: {fileID: 1993878195}
+  _gemsTabButton: {fileID: 1175572720}
 --- !u!1 &1864682011
 GameObject:
   m_ObjectHideFlags: 0
@@ -50832,14 +50804,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8feba1ba4388a34eb51f19dad0bbeec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopProductInfoPanel
-  _productIcon: {fileID: 2105174669}
+  _icon: {fileID: 2105174669}
+  _titleText: {fileID: 0}
   _descriptionText: {fileID: 313849504}
-  _actionButton: {fileID: 425644014}
   _durationText: {fileID: 1060286376}
   _priceText: {fileID: 2003611434}
-  _durationRoot: {fileID: 0}
-  _priceRoot: {fileID: 0}
-  _actionButtonText: {fileID: 872280791}
+  _buyButton: {fileID: 425644014}
 --- !u!1 &1879924669
 GameObject:
   m_ObjectHideFlags: 0
@@ -52315,7 +52285,6 @@ GameObject:
   - component: {fileID: 1925014351}
   - component: {fileID: 1925014353}
   - component: {fileID: 1925014352}
-  - component: {fileID: 1925014354}
   m_Layer: 5
   m_Name: InfoPanel
   m_TagString: Untagged
@@ -52383,26 +52352,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925014350}
   m_CullTransparentMesh: 1
---- !u!114 &1925014354
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1925014350}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8feba1ba4388a34eb51f19dad0bbeec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopProductInfoPanel
-  _productIcon: {fileID: 1450451118}
-  _descriptionText: {fileID: 1640895382}
-  _actionButton: {fileID: 1127014057}
-  _durationText: {fileID: 0}
-  _priceText: {fileID: 0}
-  _durationRoot: {fileID: 0}
-  _priceRoot: {fileID: 0}
-  _actionButtonText: {fileID: 1808393354}
 --- !u!1 &1926309414
 GameObject:
   m_ObjectHideFlags: 0
@@ -54158,14 +54107,13 @@ GameObject:
   - component: {fileID: 1993878198}
   - component: {fileID: 1993878197}
   - component: {fileID: 1993878196}
-  - component: {fileID: 1993878199}
   m_Layer: 5
   m_Name: ResoursePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1993878196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54215,24 +54163,6 @@ RectTransform:
   m_AnchoredPosition: {x: 1, y: 0.9720459}
   m_SizeDelta: {x: -2, y: 0.70599365}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1993878199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1993878195}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcec1eba68a2f7842805543a53ea1883, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopPageController
-  _actionService: {fileID: 1861126621}
-  _infoPanel: {fileID: 1925014354}
-  _productButtons:
-  - {fileID: 648658864}
-  - {fileID: 822380728}
-  _selectFirstProductOnEnable: 1
 --- !u!1 &1997698496 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3276218597293095061, guid: b0855061b337938439f6ab38583de348, type: 3}

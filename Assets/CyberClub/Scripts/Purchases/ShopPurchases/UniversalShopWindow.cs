@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class UniversalShopWindow : MonoBehaviour
 {
-    [Header("Services")]
-    [SerializeField] private PotionPurchaseService _purchaseService;
+    [Header("New service")]
+    [SerializeField] private ShopActionService _actionService;
 
     [Header("Products")]
     [SerializeField] private List<ShopProductConfig> _products = new();
@@ -16,16 +16,42 @@ public class UniversalShopWindow : MonoBehaviour
 
     [Header("Tabs")]
     [SerializeField] private Button _potionsTabButton;
-    [SerializeField] private Button _gemsTabButton;
+    [SerializeField] private Button _resourcesTabButton;
 
     private readonly List<ShopProductButton> _activeButtons = new();
     private ShopProductButton _selectedButton;
-    private ShopProductCategory _currentCategory = ShopProductCategory.Potions;
+    private bool _showPotions = true;
 
     private void Awake()
     {
+        Initialize();
+    }
+
+    private void OnEnable()
+    {
+        if (_potionsTabButton != null)
+            _potionsTabButton.onClick.AddListener(ShowPotions);
+
+        if (_resourcesTabButton != null)
+            _resourcesTabButton.onClick.AddListener(ShowResources);
+
+        Initialize();
+        RebuildCurrentCategory();
+    }
+
+    private void OnDisable()
+    {
+        if (_potionsTabButton != null)
+            _potionsTabButton.onClick.RemoveListener(ShowPotions);
+
+        if (_resourcesTabButton != null)
+            _resourcesTabButton.onClick.RemoveListener(ShowResources);
+    }
+
+    private void Initialize()
+    {
         if (_infoPanel != null)
-            _infoPanel.Construct(_purchaseService);
+            _infoPanel.Initialize(_actionService);
 
         foreach (ShopProductButton button in _productButtons)
         {
@@ -37,45 +63,21 @@ public class UniversalShopWindow : MonoBehaviour
         }
     }
 
-    private void OnEnable()
+    public void ShowPotions()
     {
-        if (_potionsTabButton != null)
-            _potionsTabButton.onClick.AddListener(ShowPotions);
-
-        if (_gemsTabButton != null)
-            _gemsTabButton.onClick.AddListener(ShowGems);
-
+        _showPotions = true;
         RebuildCurrentCategory();
     }
 
-    private void OnDisable()
+    public void ShowResources()
     {
-        if (_potionsTabButton != null)
-            _potionsTabButton.onClick.RemoveListener(ShowPotions);
-
-        if (_gemsTabButton != null)
-            _gemsTabButton.onClick.RemoveListener(ShowGems);
-    }
-
-    public void ShowPotions()
-    {
-        ShowCategory(ShopProductCategory.Potions);
-    }
-
-    public void ShowGems()
-    {
-        ShowCategory(ShopProductCategory.Gems);
-    }
-
-    public void ShowCategory(ShopProductCategory category)
-    {
-        _currentCategory = category;
+        _showPotions = false;
         RebuildCurrentCategory();
     }
 
     public void SelectProduct(ShopProductButton button)
     {
-        if (button == null || button.Config == null)
+        if (button == null || button.Product == null)
             return;
 
         if (_selectedButton != null)
@@ -85,14 +87,14 @@ public class UniversalShopWindow : MonoBehaviour
         _selectedButton.SetSelected(true);
 
         if (_infoPanel != null)
-            _infoPanel.Show(button.Config);
+            _infoPanel.Show(button.Product);
     }
 
     private void RebuildCurrentCategory()
     {
         _activeButtons.Clear();
 
-        List<ShopProductConfig> categoryProducts = _products.FindAll(product => product != null && product.Category == _currentCategory);
+        List<ShopProductConfig> products = GetCurrentProducts();
 
         for (int i = 0; i < _productButtons.Count; i++)
         {
@@ -101,15 +103,14 @@ public class UniversalShopWindow : MonoBehaviour
             if (button == null)
                 continue;
 
-            bool hasProduct = i < categoryProducts.Count;
+            bool hasProduct = i < products.Count;
             button.gameObject.SetActive(hasProduct);
             button.SetSelected(false);
 
             if (!hasProduct)
                 continue;
 
-            button.SetConfig(categoryProducts[i]);
-            button.Construct(this);
+            button.SetConfig(products[i]);
             _activeButtons.Add(button);
         }
 
@@ -119,5 +120,16 @@ public class UniversalShopWindow : MonoBehaviour
             SelectProduct(_activeButtons[0]);
         else if (_infoPanel != null)
             _infoPanel.Show(null);
+    }
+
+    private List<ShopProductConfig> GetCurrentProducts()
+    {
+        if (_showPotions)
+            return _products.FindAll(product => product != null && product.ActionType == ShopProductActionType.Potion);
+
+        return _products.FindAll(product =>
+            product != null &&
+            (product.ActionType == ShopProductActionType.RewardGems ||
+             product.ActionType == ShopProductActionType.RewardCoins));
     }
 }

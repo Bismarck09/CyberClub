@@ -14,7 +14,7 @@ public class PotionPurchaseService : MonoBehaviour
         if (product == null)
             return false;
 
-        if (product.Category != ShopProductCategory.Potions)
+        if (product.ActionType != ShopProductActionType.Potion)
         {
             Debug.LogWarning($"PotionPurchaseService: товар {product.name} не является зельем.");
             return false;
@@ -34,12 +34,15 @@ public class PotionPurchaseService : MonoBehaviour
 
         if (_gemsData.TryBuy(product.PriceGems) == false)
         {
+            Debug.Log($"Недостаточно гемов для покупки {product.name}. Нужно: {product.PriceGems}, есть: {_gemsData.CurrentGems}.");
             OnNotEnoughGems?.Invoke(product);
             return false;
         }
 
         _potionEffectService.Activate(product);
         OnPotionPurchased?.Invoke(product);
+
+        Debug.Log($"Куплено зелье: {product.name}.");
         return true;
     }
 }

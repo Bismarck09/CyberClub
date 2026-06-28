@@ -40,10 +40,11 @@ public class VisitorService : MonoBehaviour
     {
         admin.SetBusy(true);
 
-        float adminMultiplier = GetAdminServiceMultiplier();
-        float serviceDelay = admin.GetServiceInterval() / Mathf.Max(1f, adminMultiplier);
+        float adminMultiplier = _speedPotionEffectService != null
+            ? _speedPotionEffectService.AdminServiceMultiplier
+            : 1f;
 
-        yield return new WaitForSeconds(serviceDelay);
+        yield return new WaitForSeconds(admin.GetServiceInterval() / Mathf.Max(1f, adminMultiplier));
 
         if (visitor == null || freeDevice == null || freeDevice.Device == null)
         {
@@ -68,7 +69,10 @@ public class VisitorService : MonoBehaviour
             yield break;
         }
 
-        float sessionMultiplier = GetDeviceSessionMultiplier();
+        float sessionMultiplier = _speedPotionEffectService != null
+            ? _speedPotionEffectService.DeviceSessionMultiplier
+            : 1f;
+
         float actualSessionTime = _sessionTime / Mathf.Max(1f, sessionMultiplier);
 
         movement.Move(device.TargetPoint.position, () =>
@@ -86,25 +90,5 @@ public class VisitorService : MonoBehaviour
 
         OnVisitorServiced?.Invoke(freeDevice);
         admin.SetBusy(false);
-    }
-
-    private float GetAdminServiceMultiplier()
-    {
-        if (_speedPotionEffectService != null)
-            return _speedPotionEffectService.AdminServiceMultiplier;
-
-        return SpeedPotionEffectService.Current != null
-            ? SpeedPotionEffectService.Current.AdminServiceMultiplier
-            : 1f;
-    }
-
-    private float GetDeviceSessionMultiplier()
-    {
-        if (_speedPotionEffectService != null)
-            return _speedPotionEffectService.DeviceSessionMultiplier;
-
-        return SpeedPotionEffectService.Current != null
-            ? SpeedPotionEffectService.Current.DeviceSessionMultiplier
-            : 1f;
     }
 }

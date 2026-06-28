@@ -17,22 +17,32 @@ public class PotionEffectService : MonoBehaviour
         switch (product.PotionType)
         {
             case PotionType.Coins:
-                ActivateCoinsPotion(product.DurationSeconds, product.Multiplier);
+                ActivateCoinsPotion(product.DurationSeconds, product.EffectMultiplier);
                 break;
 
             case PotionType.Speed:
-                if (_speedPotionEffectService != null)
-                    _speedPotionEffectService.Activate(product.DurationSeconds, product.Multiplier);
+                if (_speedPotionEffectService == null)
+                {
+                    Debug.LogError("PotionEffectService: не назначен SpeedPotionEffectService.");
+                    return;
+                }
+
+                _speedPotionEffectService.Activate(product.DurationSeconds, product.EffectMultiplier);
                 break;
 
             case PotionType.Rating:
-                if (_ratingPotionEffectService != null)
-                    _ratingPotionEffectService.Activate(product.DurationSeconds, product.Multiplier);
+                if (_ratingPotionEffectService == null)
+                {
+                    Debug.LogError("PotionEffectService: не назначен RatingPotionEffectService.");
+                    return;
+                }
+
+                _ratingPotionEffectService.Activate(product.DurationSeconds, product.EffectMultiplier);
                 break;
         }
     }
 
-    private void ActivateCoinsPotion(float duration, float multiplier)
+    private void ActivateCoinsPotion(float duration, int multiplier)
     {
         if (_resourcesMultiplier == null)
         {
@@ -40,16 +50,17 @@ public class PotionEffectService : MonoBehaviour
             return;
         }
 
-        int roundedMultiplier = Mathf.Max(1, Mathf.RoundToInt(multiplier));
-        _resourcesMultiplier.SetMultiplier(ResourceType.Coins, roundedMultiplier);
+        _resourcesMultiplier.SetMultiplier(ResourceType.Coins, Mathf.Max(1, multiplier));
 
         if (_coinsPotionCoroutine != null)
             StopCoroutine(_coinsPotionCoroutine);
 
-        _coinsPotionCoroutine = StartCoroutine(ResetCoinsMultiplierAfter(duration));
+        _coinsPotionCoroutine = StartCoroutine(ResetCoinsPotionAfter(duration));
+
+        Debug.Log($"Зелье монет активировано: x{multiplier} на {duration} секунд.");
     }
 
-    private IEnumerator ResetCoinsMultiplierAfter(float duration)
+    private IEnumerator ResetCoinsPotionAfter(float duration)
     {
         yield return new WaitForSeconds(Mathf.Max(0.1f, duration));
 
@@ -57,5 +68,7 @@ public class PotionEffectService : MonoBehaviour
             _resourcesMultiplier.ResetMultiplier(ResourceType.Coins);
 
         _coinsPotionCoroutine = null;
+
+        Debug.Log("Зелье монет закончилось.");
     }
 }
