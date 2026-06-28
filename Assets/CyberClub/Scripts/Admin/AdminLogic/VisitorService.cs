@@ -8,8 +8,16 @@ public class VisitorService : MonoBehaviour
     [SerializeField] private VisitorQueue _visitorQueue;
     [SerializeField] private float _sessionTime = 15f;
 
-    [Header("Optional. If empty, service uses SpeedPotionEffectService.Current")]
+    [Header("Speed potion")]
     [SerializeField] private SpeedPotionEffectService _speedPotionEffectService;
+
+    [Header("Rating")]
+    [SerializeField] private RatingData _ratingData;
+    [SerializeField] private float _goodQueueWaitTime = 3f;
+    [SerializeField] private float _positiveRatingChange = 0.05f;
+    [SerializeField] private float _negativeRatingChange = 0.08f;
+    [SerializeField] private float _extraPenaltyEverySeconds = 3f;
+    [SerializeField] private float _extraPenaltyAmount = 0.03f;
 
     public event Action<DeviceEntry> OnVisitorServiced;
 
@@ -42,9 +50,7 @@ public class VisitorService : MonoBehaviour
     {
         admin.SetBusy(true);
 
-        float adminMultiplier = GetAdminServiceMultiplier();
-        float serviceDelay = admin.GetServiceInterval() / Mathf.Max(1f, adminMultiplier);
-
+        float serviceDelay = admin.GetServiceInterval() / Mathf.Max(1f, GetAdminServiceMultiplier());
         yield return new WaitForSeconds(serviceDelay);
 
         if (visitor == null || freeDevice == null || freeDevice.Device == null)
@@ -56,6 +62,7 @@ public class VisitorService : MonoBehaviour
             yield break;
         }
 
+        EvaluateVisitorRating(visitor);
         _visitorQueue.RemoveVisitor(admin, visitor);
 
         VisitorMovement movement = visitor.GetComponent<VisitorMovement>();
@@ -70,15 +77,7 @@ public class VisitorService : MonoBehaviour
             yield break;
         }
 
-        float sessionMultiplier = GetDeviceSessionMultiplier();
-        float actualSessionTime = _sessionTime / Mathf.Max(1f, sessionMultiplier);
-
-        Debug.Log(
-            $"VisitorService: serviceDelay={serviceDelay}, " +
-            $"sessionTime={actualSessionTime}, " +
-            $"adminMultiplier={adminMultiplier}, " +
-            $"sessionMultiplier={sessionMultiplier}"
-        );
+        float actualSessionTime = _sessionTime / Mathf.Max(1f, GetDeviceSessionMultiplier());
 
         movement.Move(device.TargetPoint.position, () =>
         {
@@ -97,23 +96,40 @@ public class VisitorService : MonoBehaviour
         admin.SetBusy(false);
     }
 
-    private SpeedPotionEffectService GetSpeedService()
+    private void EvaluateVisitorRating(Visitor visitor)
     {
-        if (_speedPotionEffectService != null)
-            return _speedPotionEffectService;
+        if (_ratingData == null || visitor == null)
+            return;
 
-        return SpeedPotionEffectService.Current;
+        VisitorRatingTracker ratingTracker = visitor.GetComponent<VisitorRatingTracker>();
+
+        if (ratingTracker == null)
+            return;
+
+        ratingTracker.EvaluateWaitingTime(
+            _ratingData,
+            _goodQueueWaitTime,
+            _positiveRatingChange,
+            _negativeRatingChange,
+            _extraPenaltyEverySeconds,
+            _extraPenaltyAmount
+        );
     }
 
     private float GetAdminServiceMultiplier()
     {
-        SpeedPotionEffectService speedService = GetSpeedService();
-        return speedService != null ? speedService.AdminServiceMultiplier : 1f;
+        if (_speedPotionEffectService != null)
+            return _speedPotionEffectService.AdminServiceMultiplier;
+
+        return SpeedPotionEffectService.Current != null ? SpeedPotionEffectService.Current.AdminServiceMultiplier : 1f;
     }
 
     private float GetDeviceSessionMultiplier()
     {
-        SpeedPotionEffectService speedService = GetSpeedService();
-        return speedService != null ? speedService.DeviceSessionMultiplier : 1f;
+        if (_speedPotionEffectService != null)
+            return _speedPotionEffectService.DeviceSessionMultiplier;
+
+        return SpeedPotionEffectService.Current != null ? SpeedPotionEffectService.Current.DeviceSessionMultiplier : 1f;
     }
 }
+

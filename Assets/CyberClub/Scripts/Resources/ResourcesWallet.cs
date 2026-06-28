@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class ResourcesWallet : MonoBehaviour
 {
@@ -8,22 +7,22 @@ public class ResourcesWallet : MonoBehaviour
     [SerializeField] private VisitorService _visitorService;
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private GemsData _gemsData;
-    [SerializeField] private LocationInformation _locationInformation;
+    [SerializeField] private RatingData _ratingData;
 
-    private List<IResource> _resources = new();
+    private readonly List<IResource> _resources = new();
 
-    void Awake()
+    private void Awake()
     {
         _resources.Add(_coinsData);
         _resources.Add(_gemsData);
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         _visitorService.OnVisitorServiced += AddResources;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         _visitorService.OnVisitorServiced -= AddResources;
     }
@@ -35,8 +34,9 @@ public class ResourcesWallet : MonoBehaviour
 
         float globalCoinsMultiplier = _resourceMultiplier.GetMultiplier(_coinsData.Type);
         float roomCoinsMultiplier = device.RoomCoinsMultiplier;
+        float ratingMultiplier = _ratingData != null ? _ratingData.IncomeMultiplier : 1f;
 
-        float coinsMultiplier = globalCoinsMultiplier + roomCoinsMultiplier;
+        float coinsMultiplier = (globalCoinsMultiplier + roomCoinsMultiplier) * ratingMultiplier;
 
         _coinsData.AddResource(device.PriceOfHourCoins, coinsMultiplier);
 

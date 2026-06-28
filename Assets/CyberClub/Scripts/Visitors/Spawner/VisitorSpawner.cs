@@ -6,14 +6,17 @@ public class VisitorSpawner : MonoBehaviour
 {
     [SerializeField] private DeviceRegistry _deviceRegistry;
     [SerializeField] private Transform _spawnPoint;
-
     [SerializeField] private List<GameObject> _visitorPrefabs;
     [SerializeField] private VisitorQueue _visitorQueue;
 
-    [SerializeField] private float _baseSpawnDelay;         
-    [SerializeField] private float _groupSpawnDelay;       
-    [SerializeField] private int _minGroupSize;
-    [SerializeField] private int _maxGroupSize;
+    [Header("Spawn")]
+    [SerializeField] private float _baseSpawnDelay = 8f;
+    [SerializeField] private float _groupSpawnDelay = 0.5f;
+    [SerializeField] private int _minGroupSize = 1;
+    [SerializeField] private int _maxGroupSize = 3;
+
+    [Header("Rating")]
+    [SerializeField] private RatingData _ratingData;
 
     private int _currentVisitors;
 
@@ -26,7 +29,8 @@ public class VisitorSpawner : MonoBehaviour
     {
         while (true)
         {
-            int maxVisitors = _deviceRegistry.CurrentDeviceCount;
+            int deviceCount = _deviceRegistry.CurrentDeviceCount;
+            int maxVisitors = GetMaxVisitors(deviceCount);
 
             if (_currentVisitors >= maxVisitors || maxVisitors == 0)
             {
@@ -40,7 +44,9 @@ public class VisitorSpawner : MonoBehaviour
 
             yield return StartCoroutine(SpawnGroup(groupSize));
 
-            float dynamicDelay = Mathf.Clamp(_baseSpawnDelay - maxVisitors * 0.2f, 1.5f, _baseSpawnDelay);
+            float dynamicDelay = Mathf.Clamp(_baseSpawnDelay - deviceCount * 0.2f, 1.5f, _baseSpawnDelay);
+            dynamicDelay *= GetRatingSpawnDelayMultiplier();
+
             yield return new WaitForSeconds(dynamicDelay);
         }
     }
@@ -50,7 +56,6 @@ public class VisitorSpawner : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             SpawnOne();
-
             yield return new WaitForSeconds(_groupSpawnDelay);
         }
     }
@@ -60,23 +65,42 @@ public class VisitorSpawner : MonoBehaviour
         if (_visitorPrefabs.Count == 0 || _spawnPoint == null)
             return;
 
-        var prefab = _visitorPrefabs[Random.Range(0, _visitorPrefabs.Count)];
-
+        GameObject prefab = _visitorPrefabs[Random.Range(0, _visitorPrefabs.Count)];
         GameObject obj = Instantiate(prefab, _spawnPoint.position, Quaternion.identity);
 
-        var movement = obj.GetComponent<VisitorMovement>();
-        var registration = obj.GetComponent<VisitorRegistration>();
+        if (obj.GetComponent<VisitorRatingTracker>() == null)
+            obj.AddComponent<VisitorRatingTracker>();
 
-        registration.Init(movement, _visitorQueue);
+        VisitorMovement movement = obj.GetComponent<VisitorMovement>();
+        VisitorRegistration registration = obj.GetComponent<VisitorRegistration>();
+
+        if (registration != null)
+            registration.Init(movement, _visitorQueue);
 
         _currentVisitors++;
 
-        var visitorExit = obj.GetComponent<VisitorExit>();
-        visitorExit.OnVisitorExit += OnVisitorLeft;
+        VisitorExit visitorExit = obj.GetComponent<VisitorExit>();
+
+        if (visitorExit != null)
+            visitorExit.OnVisitorExit += OnVisitorLeft;
     }
 
     private void OnVisitorLeft()
     {
-        _currentVisitors--;
+        _currentVisitors = Mathf.Max(0, _currentVisitors - 1);
+    }
+
+    private int GetMaxVisitors(int deviceCount)
+    {
+        if (deviceCount <= 0)
+            return 0;
+
+        float multiplier = _ratingData != null ? _ratingData.VisitorCapacityMultiplier : 1f;
+        return Mathf.Max(1, Mathf.RoundToInt(deviceCount * multiplier));
+    }
+
+    private float GetRatingSpawnDelayMultiplier()
+    {
+        return _ratingData != null ? _ratingData.SpawnDelayMultiplier : 1f;
     }
 }

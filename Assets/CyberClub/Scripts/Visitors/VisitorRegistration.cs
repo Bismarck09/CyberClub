@@ -13,7 +13,6 @@ public class VisitorRegistration : MonoBehaviour
         _visitorMovement = visitorMovement;
         _visitorQueue = visitorQueue;
         IsRegistered = false;
-
         MoveToQueue();
     }
 
@@ -28,5 +27,6 @@ public class VisitorRegistration : MonoBehaviour
     private void RegisterVisitor()
     {
         IsRegistered = true;
+        GetComponent<VisitorRatingTracker>()?.StartWaiting();
     }
 }

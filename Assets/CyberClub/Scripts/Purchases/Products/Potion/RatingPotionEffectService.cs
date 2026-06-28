@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class RatingPotionEffectService : MonoBehaviour
 {
+    [SerializeField] private RatingData _ratingData;
+
     private Coroutine _legacyTimerCoroutine;
 
     public bool IsActive { get; private set; }
@@ -13,7 +15,10 @@ public class RatingPotionEffectService : MonoBehaviour
         IsActive = true;
         Multiplier = Mathf.Max(1, multiplier);
 
-        Debug.Log($"Зелье рейтинга применено как заготовка. x{Multiplier}.");
+        if (_ratingData != null)
+            _ratingData.SetRatingDropProtection(true);
+
+        Debug.Log("Зелье рейтинга применено: рейтинг не будет падать, пока зелье активно.");
     }
 
     public void Activate(float duration, int multiplier)
@@ -43,6 +48,9 @@ public class RatingPotionEffectService : MonoBehaviour
 
         IsActive = false;
         Multiplier = 1;
+
+        if (_ratingData != null)
+            _ratingData.SetRatingDropProtection(false);
 
         Debug.Log("Зелье рейтинга выключено.");
     }
