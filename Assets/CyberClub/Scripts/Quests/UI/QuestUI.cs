@@ -15,7 +15,7 @@ public class QuestUI : MonoBehaviour
 
     public void Init(QuestData data)
     {
-        _description.text = data.GetDescription();
+        _description.text = data.Description;
         _reward.text = data.RewardValue.ToString();
 
         _completePanel.gameObject.SetActive(false);

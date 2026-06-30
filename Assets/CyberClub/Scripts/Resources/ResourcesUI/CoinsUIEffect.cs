@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
 
@@ -10,51 +9,63 @@ public class CoinsUIEffect : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _coinsText;
     [SerializeField] private FloatingResourceText _floatingTextPrefab;
     [SerializeField] private Transform _effectsRoot;
-    [SerializeField] private Vector3 _defaultScale;
+    [SerializeField] private Vector3 _defaultScale = Vector3.one;
+
+    private void Start()
+    {
+        UpdateCoinsText();
+    }
 
     private void OnEnable()
     {
-        _coinsData.OnCoinsChanged += OnCoinsChanged;
+        if (_coinsData != null)
+            _coinsData.OnCoinsChanged += OnCoinsChanged;
+
+        UpdateCoinsText();
     }
 
     private void OnDisable()
     {
-        _coinsData.OnCoinsChanged -= OnCoinsChanged;
+        if (_coinsData != null)
+            _coinsData.OnCoinsChanged -= OnCoinsChanged;
+
+        if (_coinsPanel != null)
+            _coinsPanel.DOKill();
     }
 
     private void OnCoinsChanged(int amount)
     {
         PlayFloatingText(amount);
         PlayPanelPunch();
-
         UpdateCoinsText();
     }
 
     private void UpdateCoinsText()
     {
-        _coinsText.text = _coinsData.CurrentCoins.ToString();
+        if (_coinsText == null || _coinsData == null)
+            return;
+
+        _coinsText.text = ResourceValueFormatter.Format(_coinsData.CurrentCoins);
     }
 
     private void PlayFloatingText(int amount)
     {
-        Color color = amount >= 0
-            ? new Color(1f, 0.85f, 0.2f)
-            : new Color(1f, 0.3f, 0.3f);
+        if (_floatingTextPrefab == null || _effectsRoot == null || _coinsPanel == null)
+            return;
 
-        var text = Instantiate(_floatingTextPrefab, _effectsRoot);
-
+        Color color = amount >= 0 ? new Color(1f, 0.85f, 0.2f) : new Color(1f, 0.3f, 0.3f);
+        FloatingResourceText text = Instantiate(_floatingTextPrefab, _effectsRoot);
         text.transform.position = _coinsPanel.position;
-
         text.Play(amount, color);
     }
 
     private void PlayPanelPunch()
     {
+        if (_coinsPanel == null)
+            return;
+
         _coinsPanel.DOKill();
         _coinsPanel.localScale = _defaultScale;
-
-        _coinsPanel
-            .DOPunchScale(Vector3.one * 0.15f, 0.3f, 8, 0.5f);
-        
+        _coinsPanel.DOPunchScale(Vector3.one * 0.15f, 0.3f, 8, 0.5f);
     }
 }

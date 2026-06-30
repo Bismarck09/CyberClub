@@ -4,34 +4,42 @@ using UnityEngine;
 public class QuestData : ScriptableObject
 {
     [SerializeField] private QuestType _questType;
-    [SerializeField] private string _descriptionTemplate;
     [SerializeField] private int _targetValue;
     [SerializeField] private int _rewardValue;
+    [SerializeField] private string _description;
 
     public QuestType Type => _questType;
     public int TargetValue => _targetValue;
     public int RewardValue => _rewardValue;
 
-    public string GetDescription()
+    public string Description
     {
-        if (string.IsNullOrWhiteSpace(_descriptionTemplate))
-            return GetDefaultDescription();
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_description))
+                return _description;
 
-        return string.Format(_descriptionTemplate, _targetValue);
+            return _questType switch
+            {
+                QuestType.BuyDevice => $"Купи {_targetValue} компьютера",
+                QuestType.VisitorService => $"Обслужи {_targetValue} клиентов",
+                _ => "Выполни задание"
+            };
+        }
     }
 
-    private string GetDefaultDescription()
+    public void InitRuntime(QuestType questType, int targetValue, int rewardValue, string description)
     {
-        switch (_questType)
-        {
-            case QuestType.VisitorService:
-                return $"Обслужи {_targetValue} клиентов";
+        _questType = questType;
+        _targetValue = Mathf.Max(1, targetValue);
+        _rewardValue = Mathf.Max(0, rewardValue);
+        _description = description;
+    }
 
-            case QuestType.BuyDevice:
-                return $"Купи {_targetValue} компьютеров";
-
-            default:
-                return $"Выполни действие {_targetValue} раз";
-        }
+    public static QuestData CreateRuntime(QuestType questType, int targetValue, int rewardValue, string description)
+    {
+        QuestData data = CreateInstance<QuestData>();
+        data.InitRuntime(questType, targetValue, rewardValue, description);
+        return data;
     }
 }

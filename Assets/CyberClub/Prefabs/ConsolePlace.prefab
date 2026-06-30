@@ -81,6 +81,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameDevice
   _targetPoint: {fileID: 6013814192725093917}
   _sitPoint: {fileID: 6391358239513384041}
+  _repairIncomeMultiplier: 3
 --- !u!1 &5664781539933043366
 GameObject:
   m_ObjectHideFlags: 0

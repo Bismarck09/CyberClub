@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class AudioSettingsService : MonoBehaviour
 {
+    private const int CurrentSettingsVersion = 2;
+
+    private const string SettingsVersionKey = "Audio_SettingsVersion";
     private const string MusicEnabledKey = "Audio_MusicEnabled";
     private const string EffectsEnabledKey = "Audio_EffectsEnabled";
     private const string MusicVolumeKey = "Audio_MusicVolume";
@@ -14,8 +17,12 @@ public class AudioSettingsService : MonoBehaviour
     [SerializeField] private List<AudioSource> _effectsSources = new();
 
     [Header("Defaults")]
-    [Range(0f, 1f)] [SerializeField] private float _defaultMusicVolume = 0.5f;
-    [Range(0f, 1f)] [SerializeField] private float _defaultEffectsVolume = 0.5f;
+    [Range(0f, 1f)]
+    [SerializeField] private float _defaultMusicVolume = 0.5f;
+    [Range(0f, 1f)]
+    [SerializeField] private float _defaultEffectsVolume = 0.5f;
+    [SerializeField] private bool _defaultMusicEnabled = true;
+    [SerializeField] private bool _defaultEffectsEnabled = true;
 
     public bool IsMusicEnabled { get; private set; }
     public bool AreEffectsEnabled { get; private set; }
@@ -54,6 +61,17 @@ public class AudioSettingsService : MonoBehaviour
         SaveAndApply();
     }
 
+    [ContextMenu("Reset Audio Settings To Defaults")]
+    public void ResetToDefaults()
+    {
+        IsMusicEnabled = _defaultMusicEnabled;
+        AreEffectsEnabled = _defaultEffectsEnabled;
+        MusicVolume = Mathf.Clamp01(_defaultMusicVolume);
+        EffectsVolume = Mathf.Clamp01(_defaultEffectsVolume);
+
+        SaveAndApply();
+    }
+
     public void RegisterMusicSource(AudioSource source)
     {
         if (source == null || _musicSources.Contains(source))
@@ -74,14 +92,28 @@ public class AudioSettingsService : MonoBehaviour
 
     private void Load()
     {
-        IsMusicEnabled = PlayerPrefs.GetInt(MusicEnabledKey, 1) == 1;
-        AreEffectsEnabled = PlayerPrefs.GetInt(EffectsEnabledKey, 1) == 1;
+        int savedVersion = PlayerPrefs.GetInt(SettingsVersionKey, 0);
+
+        if (savedVersion < CurrentSettingsVersion)
+        {
+            IsMusicEnabled = _defaultMusicEnabled;
+            AreEffectsEnabled = _defaultEffectsEnabled;
+            MusicVolume = Mathf.Clamp01(_defaultMusicVolume);
+            EffectsVolume = Mathf.Clamp01(_defaultEffectsVolume);
+
+            Save();
+            return;
+        }
+
+        IsMusicEnabled = PlayerPrefs.GetInt(MusicEnabledKey, _defaultMusicEnabled ? 1 : 0) == 1;
+        AreEffectsEnabled = PlayerPrefs.GetInt(EffectsEnabledKey, _defaultEffectsEnabled ? 1 : 0) == 1;
         MusicVolume = PlayerPrefs.GetFloat(MusicVolumeKey, _defaultMusicVolume);
         EffectsVolume = PlayerPrefs.GetFloat(EffectsVolumeKey, _defaultEffectsVolume);
     }
 
     private void Save()
     {
+        PlayerPrefs.SetInt(SettingsVersionKey, CurrentSettingsVersion);
         PlayerPrefs.SetInt(MusicEnabledKey, IsMusicEnabled ? 1 : 0);
         PlayerPrefs.SetInt(EffectsEnabledKey, AreEffectsEnabled ? 1 : 0);
         PlayerPrefs.SetFloat(MusicVolumeKey, MusicVolume);
@@ -112,7 +144,7 @@ public class AudioSettingsService : MonoBehaviour
             return;
 
         source.mute = !IsMusicEnabled;
-        source.volume = MusicVolume;
+        source.volume = IsMusicEnabled ? MusicVolume : 0f;
     }
 
     private void ApplyEffectsSource(AudioSource source)
@@ -121,6 +153,6 @@ public class AudioSettingsService : MonoBehaviour
             return;
 
         source.mute = !AreEffectsEnabled;
-        source.volume = EffectsVolume;
+        source.volume = AreEffectsEnabled ? EffectsVolume : 0f;
     }
 }

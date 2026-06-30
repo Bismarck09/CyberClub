@@ -13,36 +13,24 @@ public class AudioSettingsUI : MonoBehaviour
     [SerializeField] private Slider _musicVolumeSlider;
     [SerializeField] private Slider _effectsVolumeSlider;
 
+    private void Awake()
+    {
+        if (_audioSettingsService == null)
+            _audioSettingsService = FindFirstObjectByType<AudioSettingsService>();
+    }
+
     private void OnEnable()
     {
+        if (_audioSettingsService == null)
+            _audioSettingsService = FindFirstObjectByType<AudioSettingsService>();
+
+        Subscribe();
         Refresh();
-
-        if (_musicToggle != null)
-            _musicToggle.onValueChanged.AddListener(OnMusicToggleChanged);
-
-        if (_effectsToggle != null)
-            _effectsToggle.onValueChanged.AddListener(OnEffectsToggleChanged);
-
-        if (_musicVolumeSlider != null)
-            _musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
-
-        if (_effectsVolumeSlider != null)
-            _effectsVolumeSlider.onValueChanged.AddListener(OnEffectsVolumeChanged);
     }
 
     private void OnDisable()
     {
-        if (_musicToggle != null)
-            _musicToggle.onValueChanged.RemoveListener(OnMusicToggleChanged);
-
-        if (_effectsToggle != null)
-            _effectsToggle.onValueChanged.RemoveListener(OnEffectsToggleChanged);
-
-        if (_musicVolumeSlider != null)
-            _musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
-
-        if (_effectsVolumeSlider != null)
-            _effectsVolumeSlider.onValueChanged.RemoveListener(OnEffectsVolumeChanged);
+        Unsubscribe();
     }
 
     public void Refresh()
@@ -61,6 +49,42 @@ public class AudioSettingsUI : MonoBehaviour
 
         if (_effectsVolumeSlider != null)
             _effectsVolumeSlider.SetValueWithoutNotify(_audioSettingsService.EffectsVolume);
+    }
+
+    private void Subscribe()
+    {
+        if (_musicToggle != null)
+            _musicToggle.onValueChanged.AddListener(OnMusicToggleChanged);
+
+        if (_effectsToggle != null)
+            _effectsToggle.onValueChanged.AddListener(OnEffectsToggleChanged);
+
+        if (_musicVolumeSlider != null)
+            _musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+
+        if (_effectsVolumeSlider != null)
+            _effectsVolumeSlider.onValueChanged.AddListener(OnEffectsVolumeChanged);
+
+        if (_audioSettingsService != null)
+            _audioSettingsService.OnSettingsChanged += Refresh;
+    }
+
+    private void Unsubscribe()
+    {
+        if (_musicToggle != null)
+            _musicToggle.onValueChanged.RemoveListener(OnMusicToggleChanged);
+
+        if (_effectsToggle != null)
+            _effectsToggle.onValueChanged.RemoveListener(OnEffectsToggleChanged);
+
+        if (_musicVolumeSlider != null)
+            _musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
+
+        if (_effectsVolumeSlider != null)
+            _effectsVolumeSlider.onValueChanged.RemoveListener(OnEffectsVolumeChanged);
+
+        if (_audioSettingsService != null)
+            _audioSettingsService.OnSettingsChanged -= Refresh;
     }
 
     private void OnMusicToggleChanged(bool value)

@@ -409,6 +409,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BarrierDissolve
   _dissolveDuration: 0
+  _lock: {fileID: 0}
+  _canvas: {fileID: 0}
+  _zonePurchase: {fileID: 0}
 --- !u!1 &4451316080267409280
 GameObject:
   m_ObjectHideFlags: 0
@@ -476,8 +479,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u0417\u0435\u043B\u0435\u043D\u0430\u044F \u0437\u043E\u043D\u0430"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e99ff11028f2bb45aaa7443169fd51f, type: 2}
+  m_sharedMaterial: {fileID: 4967842788553206373, guid: 2e99ff11028f2bb45aaa7443169fd51f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -501,13 +504,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.25
+  m_fontSize: 0.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 0
   m_fontSizeMax: 1
-  m_fontStyle: 0
+  m_fontStyle: 4
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -590,6 +593,7 @@ GameObject:
   - component: {fileID: 2452663194833063817}
   - component: {fileID: 8913485252222712342}
   - component: {fileID: 1687990013690276826}
+  - component: {fileID: 2730820438661440860}
   m_Layer: 3
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -646,8 +650,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 10000
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2e99ff11028f2bb45aaa7443169fd51f, type: 2}
+  m_sharedMaterial: {fileID: 4967842788553206373, guid: 2e99ff11028f2bb45aaa7443169fd51f, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -671,7 +675,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.3
+  m_fontSize: 0.25
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -716,6 +720,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2730820438661440860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6876636554032437581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b768ffe99bda9e44be5f130aaf833fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ZonePurchasePriceText
+  _zonePurchaseConfig: {fileID: -5220447501734848477}
+  _priceText: {fileID: 1687990013690276826}
 --- !u!1 &7329092478846253220
 GameObject:
   m_ObjectHideFlags: 0

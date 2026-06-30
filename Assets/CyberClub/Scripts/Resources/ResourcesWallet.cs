@@ -19,12 +19,14 @@ public class ResourcesWallet : MonoBehaviour
 
     private void OnEnable()
     {
-        _visitorService.OnVisitorServiced += AddResources;
+        if (_visitorService != null)
+            _visitorService.OnVisitorServiced += AddResources;
     }
 
     private void OnDisable()
     {
-        _visitorService.OnVisitorServiced -= AddResources;
+        if (_visitorService != null)
+            _visitorService.OnVisitorServiced -= AddResources;
     }
 
     private void AddResources(DeviceEntry device)
@@ -32,15 +34,20 @@ public class ResourcesWallet : MonoBehaviour
         if (device == null)
             return;
 
-        float globalCoinsMultiplier = _resourceMultiplier.GetMultiplier(_coinsData.Type);
+        float globalCoinsMultiplier = _resourceMultiplier != null ? _resourceMultiplier.GetMultiplier(_coinsData.Type) : 1f;
         float roomCoinsMultiplier = device.RoomCoinsMultiplier;
         float ratingMultiplier = _ratingData != null ? _ratingData.IncomeMultiplier : 1f;
+        float repairBonusMultiplier = device.Device != null ? device.Device.ConsumeRepairIncomeMultiplier() : 1f;
 
-        float coinsMultiplier = (globalCoinsMultiplier + roomCoinsMultiplier) * ratingMultiplier;
-
+        float coinsMultiplier = (globalCoinsMultiplier + roomCoinsMultiplier) * ratingMultiplier * repairBonusMultiplier;
         _coinsData.AddResource(device.PriceOfHourCoins, coinsMultiplier);
 
-        float gemsMultiplier = _resourceMultiplier.GetMultiplier(_gemsData.Type);
-        _gemsData.AddResource(device.PriceOfHourGems, gemsMultiplier);
+        int gemsReward = device.RollGemsReward();
+
+        if (gemsReward <= 0)
+            return;
+
+        float gemsMultiplier = _resourceMultiplier != null ? _resourceMultiplier.GetMultiplier(_gemsData.Type) : 1f;
+        _gemsData.AddResource(gemsReward, gemsMultiplier);
     }
 }
