@@ -7,7 +7,7 @@ public class CursorActive : MonoBehaviour
     private void Awake()
     {
         if (_interactionWithUI == null)
-            _interactionWithUI = FindAnyObjectByType<InteractionWithUI>();
+            _interactionWithUI = FindFirstObjectByType<InteractionWithUI>();
     }
 
     private void OnEnable()

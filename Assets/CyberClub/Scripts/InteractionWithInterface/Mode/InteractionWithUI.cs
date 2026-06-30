@@ -10,10 +10,10 @@ public class InteractionWithUI : MonoBehaviour
 
     private InputAction _interactAction;
     private bool _isInteracts;
-    private bool _isModeSwitchAllowed = true;
+    private bool _isSwitchAllowed = true;
 
     public bool IsInteracts => _isInteracts;
-    public bool IsModeSwitchAllowed => _isModeSwitchAllowed;
+    public bool IsSwitchAllowed => _isSwitchAllowed;
 
     public event Action<bool> IsInteractsChanged;
 
@@ -45,9 +45,9 @@ public class InteractionWithUI : MonoBehaviour
             _interactAction.performed -= SwitchMode;
     }
 
-    public void SetModeSwitchAllowed(bool value)
+    public void SetSwitchAllowed(bool value)
     {
-        _isModeSwitchAllowed = value;
+        _isSwitchAllowed = value;
     }
 
     public void SetInteracts(bool value)
@@ -55,17 +55,12 @@ public class InteractionWithUI : MonoBehaviour
         SetInteracts(value, false);
     }
 
-    public void Toggle()
+    private void SwitchMode(InputAction.CallbackContext context)
     {
-        if (!_isModeSwitchAllowed)
+        if (!_isSwitchAllowed)
             return;
 
         SetInteracts(!_isInteracts);
-    }
-
-    private void SwitchMode(InputAction.CallbackContext context)
-    {
-        Toggle();
     }
 
     private void SetInteracts(bool value, bool force)

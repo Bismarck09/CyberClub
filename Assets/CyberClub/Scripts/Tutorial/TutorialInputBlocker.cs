@@ -1,18 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GameplayInputBlocker : MonoBehaviour
+public class TutorialInputBlocker : MonoBehaviour
 {
     [SerializeField] private PlayerInput _playerInput;
 
-    [Header("Actions blocked during tutorial")]
-    [SerializeField] private string[] _actionNamesToDisable =
-    {
-        "Move",
-        "Look"
-    };
+    [Header("Disable only gameplay actions")]
+    [SerializeField] private string[] _blockedActionNames = { "Move", "Look" };
 
-    private InputAction[] _actions;
+    private InputAction[] _blockedActions;
     private bool _isBlocked;
 
     public bool IsBlocked => _isBlocked;
@@ -25,6 +21,11 @@ public class GameplayInputBlocker : MonoBehaviour
         CacheActions();
     }
 
+    private void OnDisable()
+    {
+        SetBlocked(false);
+    }
+
     public void SetBlocked(bool value)
     {
         if (_isBlocked == value)
@@ -32,10 +33,10 @@ public class GameplayInputBlocker : MonoBehaviour
 
         _isBlocked = value;
 
-        if (_actions == null || _actions.Length == 0)
+        if (_blockedActions == null || _blockedActions.Length == 0)
             CacheActions();
 
-        foreach (InputAction action in _actions)
+        foreach (InputAction action in _blockedActions)
         {
             if (action == null)
                 continue;
@@ -52,12 +53,9 @@ public class GameplayInputBlocker : MonoBehaviour
         if (_playerInput == null || _playerInput.actions == null)
             return;
 
-        _actions = new InputAction[_actionNamesToDisable.Length];
+        _blockedActions = new InputAction[_blockedActionNames.Length];
 
-        for (int i = 0; i < _actionNamesToDisable.Length; i++)
-        {
-            string actionName = _actionNamesToDisable[i];
-            _actions[i] = _playerInput.actions.FindAction(actionName, false);
-        }
+        for (int i = 0; i < _blockedActionNames.Length; i++)
+            _blockedActions[i] = _playerInput.actions.FindAction(_blockedActionNames[i], false);
     }
 }

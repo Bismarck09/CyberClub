@@ -8,10 +8,10 @@ public class TutorialPanel : MonoBehaviour
     [SerializeField] private GameObject _root;
     [SerializeField] private TMP_Text _titleText;
     [SerializeField] private TMP_Text _bodyText;
-    [SerializeField] private Button _nextButton;
-    [SerializeField] private TMP_Text _nextButtonText;
+    [SerializeField] private Button _button;
+    [SerializeField] private TMP_Text _buttonText;
 
-    private Action _onNext;
+    private Action _onClick;
 
     private void Awake()
     {
@@ -20,17 +20,17 @@ public class TutorialPanel : MonoBehaviour
 
         Hide();
 
-        if (_nextButton != null)
-            _nextButton.onClick.AddListener(Next);
+        if (_button != null)
+            _button.onClick.AddListener(Click);
     }
 
     private void OnDestroy()
     {
-        if (_nextButton != null)
-            _nextButton.onClick.RemoveListener(Next);
+        if (_button != null)
+            _button.onClick.RemoveListener(Click);
     }
 
-    public void Show(string title, string body, string buttonText, Action onNext = null, bool showButton = true)
+    public void ShowWindow(string title, string body, string buttonText, Action onClick)
     {
         if (_root != null)
             _root.SetActive(true);
@@ -41,13 +41,30 @@ public class TutorialPanel : MonoBehaviour
         if (_bodyText != null)
             _bodyText.text = body;
 
-        if (_nextButtonText != null)
-            _nextButtonText.text = string.IsNullOrWhiteSpace(buttonText) ? "Далее" : buttonText;
+        if (_buttonText != null)
+            _buttonText.text = string.IsNullOrWhiteSpace(buttonText) ? "Далее" : buttonText;
 
-        if (_nextButton != null)
-            _nextButton.gameObject.SetActive(showButton);
+        if (_button != null)
+            _button.gameObject.SetActive(true);
 
-        _onNext = onNext;
+        _onClick = onClick;
+    }
+
+    public void ShowInfo(string title, string body)
+    {
+        if (_root != null)
+            _root.SetActive(true);
+
+        if (_titleText != null)
+            _titleText.text = title;
+
+        if (_bodyText != null)
+            _bodyText.text = body;
+
+        if (_button != null)
+            _button.gameObject.SetActive(false);
+
+        _onClick = null;
     }
 
     public void Hide()
@@ -55,13 +72,13 @@ public class TutorialPanel : MonoBehaviour
         if (_root != null)
             _root.SetActive(false);
 
-        _onNext = null;
+        _onClick = null;
     }
 
-    private void Next()
+    private void Click()
     {
-        Action callback = _onNext;
-        _onNext = null;
+        Action callback = _onClick;
+        _onClick = null;
         callback?.Invoke();
     }
 }
