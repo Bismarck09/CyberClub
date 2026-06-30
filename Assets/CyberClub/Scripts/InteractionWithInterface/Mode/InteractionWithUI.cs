@@ -6,11 +6,14 @@ public class InteractionWithUI : MonoBehaviour
 {
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private string _actionName = "InteractionWithInterface";
+    [SerializeField] private bool _startInInterfaceMode;
 
     private InputAction _interactAction;
     private bool _isInteracts;
+    private bool _isModeSwitchAllowed = true;
 
     public bool IsInteracts => _isInteracts;
+    public bool IsModeSwitchAllowed => _isModeSwitchAllowed;
 
     public event Action<bool> IsInteractsChanged;
 
@@ -19,10 +22,10 @@ public class InteractionWithUI : MonoBehaviour
         if (_playerInput == null)
             _playerInput = GetComponent<PlayerInput>();
 
-        if (_playerInput != null)
-            _interactAction = _playerInput.actions[_actionName];
+        if (_playerInput != null && _playerInput.actions != null)
+            _interactAction = _playerInput.actions.FindAction(_actionName, false);
 
-        SetInteracts(false, true);
+        SetInteracts(_startInInterfaceMode, true);
     }
 
     private void Start()
@@ -42,6 +45,11 @@ public class InteractionWithUI : MonoBehaviour
             _interactAction.performed -= SwitchMode;
     }
 
+    public void SetModeSwitchAllowed(bool value)
+    {
+        _isModeSwitchAllowed = value;
+    }
+
     public void SetInteracts(bool value)
     {
         SetInteracts(value, false);
@@ -49,6 +57,9 @@ public class InteractionWithUI : MonoBehaviour
 
     public void Toggle()
     {
+        if (!_isModeSwitchAllowed)
+            return;
+
         SetInteracts(!_isInteracts);
     }
 

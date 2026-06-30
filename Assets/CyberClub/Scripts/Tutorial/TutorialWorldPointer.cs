@@ -1,11 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TutorialWorldPointer : MonoBehaviour
 {
     [SerializeField] private RectTransform _pointer;
     [SerializeField] private Camera _camera;
     [SerializeField] private Vector2 _screenOffset = new Vector2(0f, 70f);
-    [SerializeField] private bool _hideWhenNoTarget = true;
+
+    [Header("Visual")]
+    [SerializeField] private Vector2 _pointerSize = new Vector2(90f, 90f);
+    [SerializeField] private bool _forcePointerSize = true;
 
     private Transform _target;
 
@@ -14,6 +18,7 @@ public class TutorialWorldPointer : MonoBehaviour
         if (_camera == null)
             _camera = Camera.main;
 
+        PreparePointer();
         Hide();
     }
 
@@ -21,24 +26,14 @@ public class TutorialWorldPointer : MonoBehaviour
     {
         if (_target == null)
         {
-            if (_hideWhenNoTarget)
-                Hide();
-
+            Hide();
             return;
         }
 
-        if (_camera == null)
-            _camera = Camera.main;
-
-        if (_camera == null || _pointer == null)
+        if (_pointer == null)
             return;
 
-        Vector3 screenPoint = _camera.WorldToScreenPoint(_target.position);
-
-        bool isBehindCamera = screenPoint.z < 0f;
-
-        if (isBehindCamera)
-            screenPoint *= -1f;
+        Vector3 screenPoint = GetTargetScreenPoint(_target);
 
         screenPoint.x = Mathf.Clamp(screenPoint.x, 80f, Screen.width - 80f);
         screenPoint.y = Mathf.Clamp(screenPoint.y, 80f, Screen.height - 80f);
@@ -51,6 +46,8 @@ public class TutorialWorldPointer : MonoBehaviour
     {
         _target = target;
 
+        PreparePointer();
+
         if (_pointer != null)
             _pointer.gameObject.SetActive(_target != null);
     }
@@ -61,5 +58,52 @@ public class TutorialWorldPointer : MonoBehaviour
 
         if (_pointer != null)
             _pointer.gameObject.SetActive(false);
+    }
+
+    private Vector3 GetTargetScreenPoint(Transform target)
+    {
+        if (target is RectTransform rectTransform)
+            return GetRectTransformScreenPoint(rectTransform);
+
+        if (_camera == null)
+            _camera = Camera.main;
+
+        if (_camera == null)
+            return Vector3.zero;
+
+        Vector3 point = _camera.WorldToScreenPoint(target.position);
+
+        if (point.z < 0f)
+            point *= -1f;
+
+        return point;
+    }
+
+    private Vector3 GetRectTransformScreenPoint(RectTransform rectTransform)
+    {
+        Canvas canvas = rectTransform.GetComponentInParent<Canvas>();
+
+        if (canvas == null)
+            return rectTransform.position;
+
+        if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+            return rectTransform.position;
+
+        Camera eventCamera = canvas.worldCamera != null ? canvas.worldCamera : _camera;
+        return RectTransformUtility.WorldToScreenPoint(eventCamera, rectTransform.position);
+    }
+
+    private void PreparePointer()
+    {
+        if (_pointer == null)
+            return;
+
+        if (_forcePointerSize)
+            _pointer.sizeDelta = _pointerSize;
+
+        Image image = _pointer.GetComponent<Image>();
+
+        if (image != null)
+            image.raycastTarget = false;
     }
 }
