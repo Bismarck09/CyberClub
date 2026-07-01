@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZoneDeviceConfig
   _deviceType: 1
   _devicePrefab: {fileID: 3298852077758282747, guid: 32f728676d9324af2bb020633e44994d, type: 3}
-  _priceOfHourCoins: 6000
-  _priceOfHourGems: 0
-  _baseDevicePrice: 100000
+  _priceOfHourCoins: 150000
+  _gemsDropChancePercent: 74
+  _minGemsReward: 1
+  _maxGemsReward: 5
+  _baseDevicePrice: 750000
   _devicePriceGrowthPercent: 10

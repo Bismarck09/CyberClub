@@ -112,7 +112,7 @@ public class CyberClubTutorialManager : MonoBehaviour
         {
             _panel.ShowWindow(
                 "Добро пожаловать в CyberClub",
-                "Ты управляешь компьютерным клубом.\n\nПокупай комнаты и компьютеры, обслуживай клиентов, улучшай интерьер и следи за рейтингом.\n\n<b>Сейчас курсор скрыт.</b> Чтобы нажать кнопку в этом окне, нажми <b>Пробел</b> — курсор появится. Потом нажми кнопку <b>Далее</b>.\n\nВ игре Пробел переключает режимы:\n• курсор виден — можно нажимать UI, но камера не вращается;\n• курсор скрыт — можно ходить и вращать камеру.",
+                "Ты управляешь компьютерным клубом.\n\nПокупай комнаты и компьютеры, обслуживай клиентов, улучшай интерьер и следи за рейтингом.\n\n<b>Сейчас курсор скрыт.</b> Чтобы нажать кнопку в этом окне, нажми <b>Пробел</b> — курсор появится. Потом нажми кнопку <b>Далее</b>.\n\nВ игре Пробел переключает режимы:\n• курсор виден — можно нажимать кнопки, но камера не вращается;\n• курсор скрыт — можно ходить и вращать камеру.",
                 "Далее",
                 BeginGoToFirstRoom
             );
@@ -148,8 +148,11 @@ public class CyberClubTutorialManager : MonoBehaviour
             "Поломка компьютера",
             "Иногда компьютеры ломаются. Сломанный компьютер не принимает клиентов.\n\nПодойди к нему, включи курсор через <b>Пробел</b> и зажми иконку поломки. За ремонт ты получишь бонусные монеты.",
             "Понял",
-            () => EnableGameplay(false)
-        );
+            () =>
+            {
+                EnableGameplay(false);
+                HideAllTutorialUI();
+            });
     }
 
     private void BeginGoToFirstRoom()
@@ -269,6 +272,7 @@ public class CyberClubTutorialManager : MonoBehaviour
             {
                 HideArrow();
                 EnableGameplay(false);
+                HideAllTutorialUI();
             }
         );
     }
@@ -354,27 +358,27 @@ public class CyberClubTutorialManager : MonoBehaviour
     private void FindReferences()
     {
         if (_panel == null)
-            _panel = FindFirstObjectByType<TutorialPanel>();
+            _panel = FindAnyObjectByType<TutorialPanel>();
 
         if (_objectiveHint == null)
-            _objectiveHint = FindFirstObjectByType<TutorialObjectiveHint>();
+            _objectiveHint = FindAnyObjectByType<TutorialObjectiveHint>();
 
         if (_arrow == null)
-            _arrow = FindFirstObjectByType<TutorialArrowPointer>();
+            _arrow = FindAnyObjectByType<TutorialArrowPointer>();
 
         if (_interactionWithUI == null)
-            _interactionWithUI = FindFirstObjectByType<InteractionWithUI>();
+            _interactionWithUI = FindAnyObjectByType<InteractionWithUI>();
 
         if (_inputBlocker == null)
-            _inputBlocker = FindFirstObjectByType<TutorialInputBlocker>();
+            _inputBlocker = FindAnyObjectByType<TutorialInputBlocker>();
 
         if (_zoneSwitcher == null)
-            _zoneSwitcher = FindFirstObjectByType<ZoneSwitcher>();
+            _zoneSwitcher = FindAnyObjectByType<ZoneSwitcher>();
 
         if (_devicePurchase == null)
-            _devicePurchase = FindFirstObjectByType<DevicePurchase>();
+            _devicePurchase = FindAnyObjectByType<DevicePurchase>();
 
         if (_ratingData == null)
-            _ratingData = FindFirstObjectByType<RatingData>();
+            _ratingData = FindAnyObjectByType<RatingData>();
     }
 }

@@ -6,7 +6,7 @@ public class VisitorService : MonoBehaviour
 {
     [SerializeField] private DeviceRegistry _deviceRegistry;
     [SerializeField] private VisitorQueue _visitorQueue;
-    [SerializeField] private float _sessionTime = 15f;
+    [SerializeField] private float _sessionTime = 8f;
 
     [Header("Speed potion")]
     [SerializeField] private SpeedPotionEffectService _speedPotionEffectService;

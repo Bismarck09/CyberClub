@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class ComputerBreakdownService : MonoBehaviour
 {
+    [SerializeField] private UIQuestPulseFeedback _uiQuestPulseFeedback;
+    [SerializeField] private CyberClubTutorialManager _tutorialManager;
     [SerializeField] private DeviceRegistry _deviceRegistry;
     [SerializeField] private BrokenComputerRepairButton _repairButtonPrefab;
     [SerializeField] private Transform _repairButtonsParent;
@@ -21,11 +23,11 @@ public class ComputerBreakdownService : MonoBehaviour
     [Header("Breakdown timing")]
     [SerializeField] private bool _autoStart = true;
     [SerializeField] private float _startDelay = 45f;
-    [SerializeField] private float _minTimeBetweenBreakdowns = 60f;
-    [SerializeField] private float _maxTimeBetweenBreakdowns = 120f;
+    [SerializeField] private float _minTimeBetweenBreakdowns = 25f;
+    [SerializeField] private float _maxTimeBetweenBreakdowns = 35f;
 
     [Header("Breakdown rules")]
-    [SerializeField] private int _maxBrokenDevicesAtSameTime = 1;
+    [SerializeField] private int _maxBrokenDevicesAtSameTime = 5;
     [Range(0, 100)]
     [SerializeField] private int _breakdownChancePercent = 100;
 
@@ -75,13 +77,11 @@ public class ComputerBreakdownService : MonoBehaviour
     private IEnumerator BreakdownLoop()
     {
         yield return new WaitForSeconds(Mathf.Max(0f, _startDelay));
+        _tutorialManager.ShowBreakdownTutorial();
 
         while (true)
         {
-            float minTime = Mathf.Min(_minTimeBetweenBreakdowns, _maxTimeBetweenBreakdowns);
-            float maxTime = Mathf.Max(_minTimeBetweenBreakdowns, _maxTimeBetweenBreakdowns);
-
-            yield return new WaitForSeconds(Random.Range(minTime, maxTime));
+            yield return new WaitForSeconds(Random.Range(_minTimeBetweenBreakdowns, _maxTimeBetweenBreakdowns));
 
             if (Random.Range(0, 100) >= _breakdownChancePercent)
                 continue;
@@ -112,7 +112,10 @@ public class ComputerBreakdownService : MonoBehaviour
         CreateRepairButton(entry);
 
         if (_notification != null)
+        {
             _notification.ShowBreakdown(entry.ZoneName);
+            _uiQuestPulseFeedback.ActivatePulse();
+        }
     }
 
     private void CreateRepairButton(DeviceEntry entry)

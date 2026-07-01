@@ -4118,12 +4118,12 @@ MonoBehaviour:
   - {fileID: 1213596466}
   _interiorsPrice: e02e0000204e0000b8880000d8d60000084c0100d0fb0100
   _multipliers:
-  - 0.25
-  - 0.35
+  - 0.41
+  - 0.41
+  - 0.41
+  - 0.41
+  - 0.41
   - 0.45
-  - 0.55
-  - 0.65
-  - 0.75
 --- !u!1 &147176136
 GameObject:
   m_ObjectHideFlags: 0
@@ -7544,11 +7544,11 @@ MonoBehaviour:
   - {fileID: 503986447}
   _interiorsPrice: 7064080000350c00804f1200a0f01900009f2400
   _multipliers:
-  - 0.6
-  - 0.75
-  - 0.85
-  - 0.9
-  - 1
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
 --- !u!1 &282300255
 GameObject:
   m_ObjectHideFlags: 0
@@ -8169,15 +8169,15 @@ MonoBehaviour:
   - {fileID: 157824961}
   _interiorsPrice: b004000008070000280a0000d80e00007c150000401f0000ec2c000074400000c05d0000
   _multipliers:
-  - 0.1
-  - 0.15
-  - 0.2
-  - 0.25
+  - 0.27
+  - 0.27
+  - 0.27
+  - 0.27
+  - 0.27
   - 0.3
-  - 0.35
-  - 0.4
-  - 0.45
-  - 0.5
+  - 0.27
+  - 0.27
+  - 0.28
 --- !u!1 &303296956
 GameObject:
   m_ObjectHideFlags: 0
@@ -13677,7 +13677,7 @@ MonoBehaviour:
   _canvas: {fileID: 539576229}
   _worldCamera: {fileID: 330585545}
   _arrow: {fileID: 1931643861}
-  _screenOffset: {x: 70, y: -5.58}
+  _screenOffset: {x: 150, y: -20}
   _screenPadding: {x: 70, y: 70}
   _size: {x: 90, y: 90}
   _forceSize: 1
@@ -14157,6 +14157,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 613343041}
   - {fileID: 1133226411}
   - {fileID: 912652341}
   - {fileID: 1366884404}
@@ -14165,13 +14166,12 @@ RectTransform:
   - {fileID: 587537388}
   - {fileID: 381246555}
   - {fileID: 1689243785}
-  - {fileID: 584521804}
   - {fileID: 82226379}
-  - {fileID: 1861126615}
   - {fileID: 1790656428}
-  - {fileID: 613343041}
   - {fileID: 517411889}
   - {fileID: 2032733452}
+  - {fileID: 584521804}
+  - {fileID: 1861126615}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -15841,7 +15841,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.56600004, y: 0.2698511}
   m_AnchorMax: {x: 0.9172948, y: 0.83136195}
-  m_AnchoredPosition: {x: -2.4200134, y: -0.63200366}
+  m_AnchoredPosition: {x: -2.420044, y: -0.6319885}
   m_SizeDelta: {x: 0.043999672, y: -4.3200073}
   m_Pivot: {x: 0.5, y: 0.50000006}
 --- !u!114 &613343042
@@ -17760,8 +17760,8 @@ MonoBehaviour:
   - {fileID: 888277529777587481}
   _interiorsPrice: e093040010eb0900
   _multipliers:
-  - 1
-  - 2
+  - 1.25
+  - 1.25
 --- !u!1 &681210979
 GameObject:
   m_ObjectHideFlags: 0
@@ -18959,7 +18959,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 42.15
+  m_fontSize: 31.45
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -19026,10 +19026,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1790656428}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.25031263}
-  m_AnchorMax: {x: 1, y: 0.683}
-  m_AnchoredPosition: {x: -0.0010528564, y: -0.5110016}
-  m_SizeDelta: {x: 0.23001099, y: 0.6360016}
+  m_AnchorMin: {x: 0, y: 0.30018833}
+  m_AnchorMax: {x: 1, y: 0.63312423}
+  m_AnchoredPosition: {x: -0.058044434, y: -1.0249996}
+  m_SizeDelta: {x: 0.11603, y: -0.724}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &749559280
 GameObject:
@@ -23812,7 +23812,7 @@ Transform:
   m_GameObject: {fileID: 878779718}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -26.31753, y: 0, z: -8.511}
+  m_LocalPosition: {x: -26.31753, y: 0, z: -8.26}
   m_LocalScale: {x: 1.3000001, y: 1.5, z: 1.3000001}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -23864,15 +23864,15 @@ MonoBehaviour:
   - {fileID: 1344906460}
   - {fileID: 1675681077}
   _levels:
-  - _upgradePrice: 100
-    _serviceInterval: 1
-  - _upgradePrice: 200
-    _serviceInterval: 0.8
-  - _upgradePrice: 500
-    _serviceInterval: 0.6
-  - _upgradePrice: 750
-    _serviceInterval: 0.5
   - _upgradePrice: 1000
+    _serviceInterval: 2
+  - _upgradePrice: 1000
+    _serviceInterval: 1.5
+  - _upgradePrice: 3000
+    _serviceInterval: 1
+  - _upgradePrice: 5000
+    _serviceInterval: 0.5
+  - _upgradePrice: 10000
     _serviceInterval: 0.3
 --- !u!114 &878779723
 MonoBehaviour:
@@ -23906,8 +23906,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9854222, y: 1, z: 1.8059096}
-  m_Center: {x: 0.0072899684, y: 0, z: 2.3748794}
+  m_Size: {x: 1.4547844, y: 1, z: 1.8059096}
+  m_Center: {x: -0.015577354, y: 0, z: 2.3748794}
 --- !u!1 &879090906
 GameObject:
   m_ObjectHideFlags: 0
@@ -25616,14 +25616,14 @@ MonoBehaviour:
   - {fileID: 1478854874}
   _interiorsPrice: 64000000c8000000f4010000bc02000020030000e8030000b0040000dc050000
   _multipliers:
-  - 0.1
-  - 0.1
-  - 0.2
-  - 0.2
-  - 0.3
-  - 0.3
-  - 0.4
-  - 0.4
+  - 0.31
+  - 0.31
+  - 0.31
+  - 0.31
+  - 0.31
+  - 0.32
+  - 0.31
+  - 0.32
 --- !u!1 &943345985 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6151040893538166033, guid: b0855061b337938439f6ab38583de348, type: 3}
@@ -26405,7 +26405,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.17655586, y: 0.7876601}
   m_AnchorMax: {x: 0.8235169, y: 0.9534902}
-  m_AnchoredPosition: {x: -0.000015258789, y: 1.0960083}
+  m_AnchoredPosition: {x: 0, y: 1.0960083}
   m_SizeDelta: {x: 1.52, y: -0.19400024}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &965368435
@@ -30346,13 +30346,13 @@ MonoBehaviour:
   - {fileID: 889752227}
   _interiorsPrice: 50c3000080380100d0fb01005034030020300500603d080050f80c00
   _multipliers:
-  - 0.25
   - 0.35
-  - 0.45
-  - 0.55
-  - 0.65
-  - 0.75
-  - 0.8
+  - 0.35
+  - 0.35
+  - 0.35
+  - 0.35
+  - 0.35
+  - 0.4
 --- !u!1 &1133226410
 GameObject:
   m_ObjectHideFlags: 0
@@ -31813,10 +31813,10 @@ MonoBehaviour:
   - {fileID: 271380696996321284, guid: aea68ca0d758f4c23ba2e08d9bf3a20d, type: 3}
   - {fileID: 1334703385667871909, guid: d690c86b980574599a9a62640dc4da06, type: 3}
   _visitorQueue: {fileID: 1774507684}
-  _baseSpawnDelay: 5
+  _baseSpawnDelay: 3
   _groupSpawnDelay: 0.5
   _minGroupSize: 1
-  _maxGroupSize: 3
+  _maxGroupSize: 10
   _ratingData: {fileID: 1395716839}
 --- !u!4 &1190019336
 Transform:
@@ -32309,11 +32309,11 @@ MonoBehaviour:
   - {fileID: 2139042962}
   _interiorsPrice: 00093d0060ec5300e07072008096980060fecd00
   _multipliers:
-  - 0.8
-  - 1
-  - 1.1
-  - 1.2
-  - 1.2
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
 --- !u!1 &1209570880
 GameObject:
   m_ObjectHideFlags: 0
@@ -39242,11 +39242,11 @@ MonoBehaviour:
   - {fileID: 869655535}
   _interiorsPrice: 40771b0080b92a0040164000c09a5e0040548900
   _multipliers:
-  - 0.8
-  - 1
-  - 1.1
-  - 1.2
-  - 1.2
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
+  - 0.5
 --- !u!1 &1584732919
 GameObject:
   m_ObjectHideFlags: 0
@@ -43667,13 +43667,14 @@ GameObject:
   - component: {fileID: 1790656428}
   - component: {fileID: 1790656427}
   - component: {fileID: 1790656429}
+  - component: {fileID: 1790656430}
   m_Layer: 5
   m_Name: Notification
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1790656427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43688,7 +43689,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComputerBreakdownNotification
   _canvasGroup: {fileID: 1790656429}
   _messageText: {fileID: 743417602}
-  _showSeconds: 3
+  _showSeconds: 5
   _messageTemplate: "\u0421\u043B\u043E\u043C\u0430\u043B\u0441\u044F \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440:
     {0}"
 --- !u!224 &1790656428
@@ -43720,10 +43721,22 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1790656426}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &1790656430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790656426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cb2764ca50683a45994cecc58406232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIQuestPulseFeedback
 --- !u!1 &1796595152
 GameObject:
   m_ObjectHideFlags: 0
@@ -48247,7 +48260,7 @@ MonoBehaviour:
   _interactionWithUI: {fileID: 422191990}
   _inputBlocker: {fileID: 388455132}
   _startOnStart: 1
-  _saveProgress: 1
+  _saveProgress: 0
 --- !u!4 &1906820513
 Transform:
   m_ObjectHideFlags: 0
@@ -49807,7 +49820,7 @@ Transform:
   m_GameObject: {fileID: 1940016160}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -26.31753, y: 0, z: -6.45}
+  m_LocalPosition: {x: -26.31753, y: 0, z: -5.75}
   m_LocalScale: {x: 1.3000001, y: 1.5, z: 1.3000001}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -49860,14 +49873,14 @@ MonoBehaviour:
   - {fileID: 1075993143}
   _levels:
   - _upgradePrice: 100
+    _serviceInterval: 2
+  - _upgradePrice: 10000
+    _serviceInterval: 1.5
+  - _upgradePrice: 12000
     _serviceInterval: 1
-  - _upgradePrice: 200
-    _serviceInterval: 0.8
-  - _upgradePrice: 500
-    _serviceInterval: 0.6
-  - _upgradePrice: 750
+  - _upgradePrice: 15000
     _serviceInterval: 0.5
-  - _upgradePrice: 1000
+  - _upgradePrice: 2000
     _serviceInterval: 0.3
 --- !u!65 &1940016165
 BoxCollider:
@@ -49888,8 +49901,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9854222, y: 1, z: 1.8059096}
-  m_Center: {x: 0.0072899684, y: 0, z: 2.3748794}
+  m_Size: {x: 1.561611, y: 1, z: 1.80591}
+  m_Center: {x: 0.0034355202, y: 0, z: 2.3748796}
 --- !u!114 &1940016166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52149,8 +52162,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2032733452}
   - component: {fileID: 2032733453}
+  - component: {fileID: 2032733455}
+  - component: {fileID: 2032733454}
   m_Layer: 5
-  m_Name: GameObject
+  m_Name: Objective
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52190,6 +52205,44 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TutorialObjectiveHint
   _root: {fileID: 2032733451}
   _text: {fileID: 1524832463}
+--- !u!114 &2032733454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032733451}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.34901962}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 0.27
+--- !u!222 &2032733455
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032733451}
+  m_CullTransparentMesh: 1
 --- !u!1 &2043822867
 GameObject:
   m_ObjectHideFlags: 0
@@ -52722,15 +52775,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.740566, b: 0.7453062, a: 0.46666667}
+  m_Color: {r: 1, g: 0.0047169924, b: 0.019797143, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1694919605, guid: 05161d4ce0d7ead4fbe68a0bd24c042b, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -52738,7 +52791,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_PixelsPerUnitMultiplier: 0.4
 --- !u!222 &2070470874
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -52958,6 +53011,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 000f543a9d8255d4ea224a52521c6df0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ComputerBreakdownService
+  _uiQuestPulseFeedback: {fileID: 1790656430}
+  _tutorialManager: {fileID: 1906820512}
   _deviceRegistry: {fileID: 1114299402}
   _repairButtonPrefab: {fileID: 8054751598269581036, guid: 5191da66435a5a84aac812cdffec83a0, type: 3}
   _repairButtonsParent: {fileID: 0}
@@ -52970,9 +53025,9 @@ MonoBehaviour:
   _repairRewardMultiplier: 3
   _autoStart: 1
   _startDelay: 45
-  _minTimeBetweenBreakdowns: 45
-  _maxTimeBetweenBreakdowns: 60
-  _maxBrokenDevicesAtSameTime: 1
+  _minTimeBetweenBreakdowns: 30
+  _maxTimeBetweenBreakdowns: 40
+  _maxBrokenDevicesAtSameTime: 5
   _breakdownChancePercent: 100
   _buttonWorldOffset: {x: 0, y: 2.2, z: 0}
 --- !u!4 &2080619492
@@ -57062,11 +57117,11 @@ MonoBehaviour:
   - {fileID: 345155312}
   _levels:
   - _upgradePrice: 100
-    _serviceInterval: 1
+    _serviceInterval: 2
   - _upgradePrice: 200
-    _serviceInterval: 0.8
+    _serviceInterval: 1.5
   - _upgradePrice: 500
-    _serviceInterval: 0.6
+    _serviceInterval: 1
   - _upgradePrice: 750
     _serviceInterval: 0.5
   - _upgradePrice: 1000
@@ -57090,8 +57145,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9854222, y: 1, z: 1.8059096}
-  m_Center: {x: 0.0072899684, y: 0, z: 2.3748794}
+  m_Size: {x: 1.7112963, y: 1, z: 1.8059096}
+  m_Center: {x: 0.021885678, y: 0, z: 2.3748794}
 --- !u!114 &2925184380328719902
 MonoBehaviour:
   m_ObjectHideFlags: 0
