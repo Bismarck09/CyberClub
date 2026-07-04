@@ -807,7 +807,7 @@ PlayerSettings:
   webGLDebugSymbols: 0
   webGLEmscriptenArgs: 
   webGLModulesDirectory: 
-  webGLTemplate: APPLICATION:Default
+  webGLTemplate: PROJECT:YandexGames
   webGLAnalyzeBuildSize: 0
   webGLUseEmbeddedResources: 0
   webGLCompressionFormat: 0
@@ -828,24 +828,24 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: DOTWEEN
+    Android: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
     EmbeddedLinux: DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: DOTWEEN
     Kepler: DOTWEEN
-    LinuxHeadlessSimulation: DOTWEEN
-    Nintendo Switch: DOTWEEN
+    LinuxHeadlessSimulation: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
+    Nintendo Switch: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
     Nintendo Switch 2: DOTWEEN
-    PS4: DOTWEEN
-    PS5: DOTWEEN
+    PS4: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
+    PS5: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
     QNX: DOTWEEN
-    Standalone: TOOLBOX_FORCE_DEFAULT_LISTS;DOTWEEN
+    Standalone: TOOLBOX_FORCE_DEFAULT_LISTS;DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
     VisionOS: DOTWEEN
-    WebGL: DOTWEEN
-    Windows Store Apps: DOTWEEN
-    XboxOne: DOTWEEN
-    iPhone: DOTWEEN
-    tvOS: DOTWEEN
+    WebGL: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
+    Windows Store Apps: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
+    XboxOne: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
+    iPhone: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
+    tvOS: DOTWEEN;YandexGamesPlatform_yg;PLUGIN_YG_2;TMP_YG2;RU_YG2
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

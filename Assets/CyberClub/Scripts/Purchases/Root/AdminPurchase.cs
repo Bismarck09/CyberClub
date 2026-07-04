@@ -13,20 +13,20 @@ public class AdminPurchase : MonoBehaviour, IPurchasable
     {
         AdminWorker admin = GetNextNotHiredAdmin();
 
-        if (admin == null)
+        if (admin == null || _coinsData == null)
             return false;
 
-        return _coinsData.TryBuy(admin.HirePrice);
+        return _coinsData.CurrentCoins >= admin.HirePrice;
     }
 
     public void Buy()
     {
         AdminWorker admin = GetNextNotHiredAdmin();
 
-        if (admin == null)
+        if (admin == null || _coinsData == null)
             return;
 
-        if (!CanBuy())
+        if (!_coinsData.TryBuy(admin.HirePrice))
             return;
 
         admin.Hire();

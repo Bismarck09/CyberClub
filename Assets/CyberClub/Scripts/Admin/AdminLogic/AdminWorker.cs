@@ -21,16 +21,14 @@ public class AdminWorker : MonoBehaviour
     public bool IsHired => _isHired;
     public bool IsBusy => _isBusy;
     public int Level => _levelIndex + 1;
+    public int LevelIndex => _levelIndex;
     public int QueueCount => _queue.Count;
 
-    public event Action OnChanged;
+    public event Action<AdminWorker> OnChanged;
 
     private void Awake()
     {
-        if (_isHiredOnStart)
-            Hire();
-        else
-            SetQueuePointsActive(false);
+        RestoreState(_isHiredOnStart, 0);
     }
 
     public bool HasFreeQueueSlot()
@@ -75,18 +73,13 @@ public class AdminWorker : MonoBehaviour
         {
             _queue.Remove(visitor);
             MoveQueue();
-            OnChanged?.Invoke();
+            OnChanged?.Invoke(this);
         }
     }
 
     public void Hire()
     {
-        _isHired = true;
-        _levelIndex = 0;
-        gameObject.SetActive(true);
-
-        SetQueuePointsActive(true);
-        OnChanged?.Invoke();
+        RestoreState(true, 0);
     }
 
     public bool CanUpgrade()
@@ -108,7 +101,7 @@ public class AdminWorker : MonoBehaviour
             return;
 
         _levelIndex++;
-        OnChanged?.Invoke();
+        OnChanged?.Invoke(this);
     }
 
     public float GetServiceInterval()
@@ -122,7 +115,19 @@ public class AdminWorker : MonoBehaviour
     public void SetBusy(bool value)
     {
         _isBusy = value;
-        OnChanged?.Invoke();
+        OnChanged?.Invoke(this);
+    }
+
+    public void RestoreState(bool isHired, int levelIndex)
+    {
+        _queue.Clear();
+        _isBusy = false;
+        _isHired = isHired;
+        _levelIndex = Mathf.Clamp(levelIndex, 0, Mathf.Max(0, _levels.Count - 1));
+
+        gameObject.SetActive(_isHired);
+        SetQueuePointsActive(_isHired);
+        OnChanged?.Invoke(this);
     }
 
     private void MoveQueue()

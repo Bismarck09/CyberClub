@@ -23,25 +23,46 @@ public class DeviceSpawner : MonoBehaviour
 
     private void OnEnable()
     {
-        _devicePurchase.OnDevicePurchased += SpawnDevice;
+        if (_devicePurchase != null)
+            _devicePurchase.OnDevicePurchased += SpawnDeviceInCurrentZone;
     }
 
     private void OnDisable()
     {
-        _devicePurchase.OnDevicePurchased -= SpawnDevice;
+        if (_devicePurchase != null)
+            _devicePurchase.OnDevicePurchased -= SpawnDeviceInCurrentZone;
     }
 
-    private void SpawnDevice()
+    private void SpawnDeviceInCurrentZone()
     {
-        if (_locationInformation.CurrentZoneInformation == null)
+        if (_locationInformation == null || _locationInformation.CurrentZoneInformation == null)
         {
             Debug.LogError("DeviceSpawner: нет текущей зоны для спавна устройства.");
             return;
         }
 
-        if (!_locationInformation.IsDeviceRemained)
+        SpawnDevice(_locationInformation.CurrentZoneInformation);
+    }
+
+    public void RestoreDevices(ZoneInformation zoneInformation, int count)
+    {
+        if (zoneInformation == null || zoneInformation.SpawnPoints == null)
             return;
 
-        _deviceFactory.SpawnDevice(_locationInformation.CurrentZoneInformation);
+        zoneInformation.SpawnPoints.ResetSpawnPoints();
+
+        for (int i = 0; i < count; i++)
+            SpawnDevice(zoneInformation);
+    }
+
+    public void SpawnDevice(ZoneInformation zoneInformation)
+    {
+        if (zoneInformation == null)
+            return;
+
+        if (zoneInformation.SpawnPoints == null || zoneInformation.SpawnPoints.HasSpawnPoints == false)
+            return;
+
+        _deviceFactory.SpawnDevice(zoneInformation);
     }
 }

@@ -15,8 +15,6 @@ MonoBehaviour:
   _deviceType: 0
   _devicePrefab: {fileID: 4992565479310964409, guid: 7d17e5e83ba13c644bebf36a3bc5e2fe, type: 3}
   _priceOfHourCoins: 25920
-  _gemsDropChancePercent: 50
-  _minGemsReward: 2
-  _maxGemsReward: 3
-  _baseDevicePrice: 130000
-  _devicePriceGrowthPercent: 10
+  _priceOfHourGems: 0
+  _devicePrice: 100000
+  _priceGrowthPercent: 10

@@ -5,15 +5,28 @@ public class SpawnPointsHolder : MonoBehaviour
 {
     [SerializeField] private List<Transform> _spawnPoints;
 
-    public bool HasSpawnPoints => _spawnPoints.Count > 0;
+    private readonly List<Transform> _runtimeSpawnPoints = new();
+
+    public bool HasSpawnPoints => _runtimeSpawnPoints.Count > 0;
+
+    private void Awake()
+    {
+        ResetSpawnPoints();
+    }
 
     public Transform GetSpawnPoint()
     {
-        if (_spawnPoints.Count == 0)
+        if (_runtimeSpawnPoints.Count == 0)
             return null;
 
-        Transform spawnPoint = _spawnPoints[0];
-        _spawnPoints.RemoveAt(0);
+        Transform spawnPoint = _runtimeSpawnPoints[0];
+        _runtimeSpawnPoints.RemoveAt(0);
         return spawnPoint;
+    }
+
+    public void ResetSpawnPoints()
+    {
+        _runtimeSpawnPoints.Clear();
+        _runtimeSpawnPoints.AddRange(_spawnPoints);
     }
 }

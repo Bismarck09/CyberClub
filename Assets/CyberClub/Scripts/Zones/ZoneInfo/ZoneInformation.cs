@@ -8,7 +8,7 @@ public class ZoneInformation : MonoBehaviour
     [SerializeField] private string _zoneName;
     [SerializeField] private InteriorData _interiorData;
 
-    private ZoneRuntimeData _runtimeData;
+    private int _currentDevicePurchases;
 
     public ZoneDeviceConfig ZoneConfig => _zoneDeviceConfig;
     public SpawnPointsHolder SpawnPoints => _spawnPointsHolder;
@@ -16,53 +16,21 @@ public class ZoneInformation : MonoBehaviour
     public Color ZoneColor => _color;
     public string ZoneName => _zoneName;
 
-    public ZoneRuntimeData RuntimeData
-    {
-        get
-        {
-            if (_runtimeData == null)
-                InitializeRuntimeData();
+    public int CurrentDevicePurchases => _currentDevicePurchases;
+    public int CurrentDevicePrice => _zoneDeviceConfig != null ? _zoneDeviceConfig.CalculateDevicePrice(_currentDevicePurchases) : 0;
 
-            return _runtimeData;
-        }
+    public void RegisterDevicePurchase()
+    {
+        _currentDevicePurchases++;
     }
 
-    public int CurrentDevicePrice => RuntimeData.CurrentDevicePrice;
-    public int PurchasedDeviceCount => RuntimeData.PurchasedDeviceCount;
-
-    private void Awake()
+    public void RestoreDevicePurchases(int count)
     {
-        InitializeRuntimeData();
+        _currentDevicePurchases = Mathf.Max(0, count);
     }
 
     public float GetCoinsMultiplier()
     {
         return _interiorData != null ? _interiorData.GetCoinsMultiplier() : 0f;
-    }
-
-    public void RegisterDevicePurchase()
-    {
-        RuntimeData.RegisterDevicePurchase();
-    }
-
-    public void ResetRuntimeData()
-    {
-        InitializeRuntimeData(0);
-    }
-
-    public ZoneRuntimeSaveData GetRuntimeSaveData()
-    {
-        return RuntimeData.ToSaveData(ZoneName);
-    }
-
-    public void ApplyRuntimeSaveData(ZoneRuntimeSaveData saveData)
-    {
-        RuntimeData.ApplySaveData(saveData);
-    }
-
-    private void InitializeRuntimeData(int purchasedDeviceCount = 0)
-    {
-        _runtimeData ??= new ZoneRuntimeData();
-        _runtimeData.Initialize(_zoneDeviceConfig, purchasedDeviceCount);
     }
 }

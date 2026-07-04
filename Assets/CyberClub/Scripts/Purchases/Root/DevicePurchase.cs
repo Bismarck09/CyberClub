@@ -38,9 +38,6 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     {
         if (_zoneSwitcher != null)
             _zoneSwitcher.OnZoneChanged -= UpdateZoneInformation;
-
-        if (_zoneInformation != null && _zoneInformation.RuntimeData != null)
-            _zoneInformation.RuntimeData.OnChanged -= NotifyDeviceStateChanged;
     }
 
     public bool CanBuy()
@@ -77,33 +74,19 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
         }
 
         _zoneInformation.RegisterDevicePurchase();
-
-        // Важно: сначала вызываем покупку, чтобы DeviceSpawner успел создать девайс
-        // и SpawnPointsHolder успел забрать следующую точку.
         OnDevicePurchased?.Invoke();
-
-        // После этого обновляем UI. Теперь IsDeviceLimitReached уже должен быть актуальным.
         NotifyDeviceStateChanged();
     }
 
     private void UpdateZoneInformation(ZoneInformation zoneInformation)
     {
-        if (_zoneInformation != null && _zoneInformation.RuntimeData != null)
-            _zoneInformation.RuntimeData.OnChanged -= NotifyDeviceStateChanged;
-
         _zoneInformation = zoneInformation;
-
-        if (_zoneInformation != null && _zoneInformation.RuntimeData != null)
-            _zoneInformation.RuntimeData.OnChanged += NotifyDeviceStateChanged;
-
         NotifyDeviceStateChanged();
     }
 
     private void NotifyDeviceStateChanged()
     {
-        int price = CurrentDevicePrice;
-
-        OnDevicePriceChanged?.Invoke(price);
+        OnDevicePriceChanged?.Invoke(CurrentDevicePrice);
         OnDeviceStateChanged?.Invoke();
     }
 }

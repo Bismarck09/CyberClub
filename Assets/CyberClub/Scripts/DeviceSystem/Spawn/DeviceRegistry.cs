@@ -99,6 +99,6 @@ public class DeviceEntry
         if (_zoneInformation == null || _zoneInformation.ZoneConfig == null)
             return 0;
 
-        return _zoneInformation.ZoneConfig.RollGemsReward();
+        return _zoneInformation.ZoneConfig.PriceOfHourGems;
     }
 }

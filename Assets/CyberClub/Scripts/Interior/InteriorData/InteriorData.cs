@@ -9,6 +9,7 @@ public class InteriorData : MonoBehaviour
 
     private int _currentBoughtInteriorObjects;
 
+    public int CurrentBoughtInteriorObjects => _currentBoughtInteriorObjects;
     public bool IsMaxPurchased => _currentBoughtInteriorObjects >= _interiorObjects.Count;
 
     public int InteriorsPrice
@@ -28,16 +29,18 @@ public class InteriorData : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        RefreshVisuals();
+    }
+
     public float GetCoinsMultiplier()
     {
         float multiplier = 0f;
-
         int count = Mathf.Min(_currentBoughtInteriorObjects, _multipliers.Count);
 
         for (int i = 0; i < count; i++)
-        {
             multiplier += _multipliers[i];
-        }
 
         return multiplier;
     }
@@ -65,13 +68,22 @@ public class InteriorData : MonoBehaviour
             return;
         }
 
-        GameObject interiorObject = _interiorObjects[_currentBoughtInteriorObjects];
-
-        if (interiorObject != null)
-        {
-            interiorObject.SetActive(true);
-        }
-
         _currentBoughtInteriorObjects++;
+        RefreshVisuals();
+    }
+
+    public void RestoreBoughtInteriorObjects(int count)
+    {
+        _currentBoughtInteriorObjects = Mathf.Clamp(count, 0, _interiorObjects.Count);
+        RefreshVisuals();
+    }
+
+    private void RefreshVisuals()
+    {
+        for (int i = 0; i < _interiorObjects.Count; i++)
+        {
+            if (_interiorObjects[i] != null)
+                _interiorObjects[i].SetActive(i < _currentBoughtInteriorObjects);
+        }
     }
 }

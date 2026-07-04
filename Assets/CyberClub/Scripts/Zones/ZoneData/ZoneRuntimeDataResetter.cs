@@ -12,7 +12,7 @@ public class ZoneRuntimeDataResetter : MonoBehaviour
             if (zone == null)
                 continue;
 
-            zone.ResetRuntimeData();
+            //zone.ResetRuntimeData();
         }
 
         Debug.Log("Runtime-данные всех зон сброшены.");
