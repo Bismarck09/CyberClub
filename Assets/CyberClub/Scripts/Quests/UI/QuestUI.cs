@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -11,72 +12,178 @@ public class QuestUI : MonoBehaviour
     [SerializeField] private Button _completePanel;
     [SerializeField] private Image _progressBar;
 
-    private Quest _quest;
+    private Quest _trackedQuest;
+
+    private QuestData _rewardQuestData;
+    private IResource _rewardResourceData;
+    private int _questIndex;
+    private Action<int> _onRewardClaimed;
+
+    private bool _isRewardAvailable;
+    private bool _isClaimed;
 
     public void Init(QuestData data)
     {
-        _description.text = data.Description;
-        _reward.text = data.RewardValue.ToString();
+        ClearQuestSubscriptions();
 
-        _completePanel.gameObject.SetActive(false);
+        _rewardQuestData = null;
+        _rewardResourceData = null;
+        _questIndex = -1;
+        _onRewardClaimed = null;
+        _isRewardAvailable = false;
+        _isClaimed = false;
 
-        if (_progressBar != null)
-            _progressBar.fillAmount = 0f;
+        SetText(data);
+        SetProgress(0f);
+
+        if (_startPanel != null)
+            _startPanel.SetActive(true);
+
+        if (_completePanel != null)
+        {
+            _completePanel.onClick.RemoveListener(ClaimReward);
+            _completePanel.onClick.AddListener(ClaimReward);
+            _completePanel.interactable = true;
+            _completePanel.gameObject.SetActive(false);
+        }
     }
 
-    public void Activate(Quest quest)
+    public void ActivateTracking(Quest quest, QuestData data, int questIndex, Action<int> onRewardClaimed)
     {
-        _startPanel.SetActive(false);
+        Init(data);
 
-        _quest = quest;
+        if (_startPanel != null)
+            _startPanel.SetActive(false);
 
-        _quest.OnProgressChanged += UpdateUI;
-        _quest.OnCompleted += CompleteQuest;
-        _quest.OnCompleted += _questPulseFeedback.ActivatePulse;
+        _trackedQuest = quest;
+        _rewardQuestData = data;
+        _rewardResourceData = quest.ResourceData;
+        _questIndex = questIndex;
+        _onRewardClaimed = onRewardClaimed;
 
-        _completePanel.onClick.RemoveListener(ClaimReward);
-        _completePanel.onClick.AddListener(ClaimReward);
+        _trackedQuest.OnProgressChanged += UpdateUI;
+
+        UpdateUI(_trackedQuest.CurrentProgress, data.TargetValue);
     }
 
-    private void CompleteQuest()
+    public void ShowPendingReward(QuestData data, IResource resourceData, int questIndex, Action<int> onRewardClaimed)
     {
-        _completePanel.gameObject.SetActive(true);
+        Init(data);
 
-        _quest.OnCompleted -= CompleteQuest;
-        _quest.OnCompleted -= _questPulseFeedback.ActivatePulse;
-        _quest.OnProgressChanged -= UpdateUI;
+        if (_startPanel != null)
+            _startPanel.SetActive(false);
+
+        _rewardQuestData = data;
+        _rewardResourceData = resourceData;
+        _questIndex = questIndex;
+        _onRewardClaimed = onRewardClaimed;
+
+        SetProgress(1f);
+        MarkRewardAvailable(false);
+    }
+
+    public void MarkRewardAvailable(bool playPulse = true)
+    {
+        if (_isRewardAvailable || _isClaimed)
+            return;
+
+        ClearQuestSubscriptions();
+
+        _isRewardAvailable = true;
+
+        if (_completePanel != null)
+        {
+            _completePanel.interactable = true;
+            _completePanel.gameObject.SetActive(true);
+        }
+
+        SetProgress(1f);
+
+        if (playPulse && _questPulseFeedback != null)
+            _questPulseFeedback.ActivatePulse();
+    }
+
+    public void Deactivate()
+    {
+        ClearQuestSubscriptions();
+
+        if (_completePanel != null)
+        {
+            _completePanel.interactable = true;
+            _completePanel.gameObject.SetActive(false);
+        }
+
+        _rewardQuestData = null;
+        _rewardResourceData = null;
+        _onRewardClaimed = null;
+        _isRewardAvailable = false;
+        _isClaimed = false;
+
+        gameObject.SetActive(false);
     }
 
     private void ClaimReward()
     {
-        if (_quest == null)
+        if (_isClaimed)
             return;
 
-        _quest.ResourceData.AddResource(_quest.GetData().RewardValue, 1);
+        if (!_isRewardAvailable || _rewardQuestData == null || _rewardResourceData == null)
+            return;
 
-        _completePanel.onClick.RemoveListener(ClaimReward);
-        _questPulseFeedback.StopPulse();
-        Destroy(gameObject);
+        _isClaimed = true;
+
+        if (_completePanel != null)
+            _completePanel.interactable = false;
+
+        _rewardResourceData.AddResource(_rewardQuestData.RewardValue, 1f);
+
+        _onRewardClaimed?.Invoke(_questIndex);
+
+        Deactivate();
     }
 
     private void UpdateUI(int currentProgress, int targetProgress)
     {
-        if (_progressBar == null || targetProgress <= 0)
+        if (targetProgress <= 0)
+        {
+            SetProgress(0f);
+            return;
+        }
+
+        SetProgress((float)currentProgress / targetProgress);
+    }
+
+    private void SetText(QuestData data)
+    {
+        if (data == null)
             return;
 
-        _progressBar.fillAmount = (float)currentProgress / targetProgress;
+        if (_description != null)
+            _description.text = data.Description;
+
+        if (_reward != null)
+            _reward.text = data.RewardValue.ToString();
+    }
+
+    private void SetProgress(float value)
+    {
+        if (_progressBar != null)
+            _progressBar.fillAmount = Mathf.Clamp01(value);
+    }
+
+    private void ClearQuestSubscriptions()
+    {
+        if (_trackedQuest != null)
+            _trackedQuest.OnProgressChanged -= UpdateUI;
+
+        _trackedQuest = null;
     }
 
     private void OnDestroy()
     {
-        if (_quest == null)
-            return;
+        if (_completePanel != null)
+            _completePanel.onClick.RemoveListener(ClaimReward);
 
-        _quest.OnCompleted -= CompleteQuest;
-        _quest.OnProgressChanged -= UpdateUI;
-        _quest.OnCompleted -= _questPulseFeedback.ActivatePulse;
-        
-        _completePanel.onClick.RemoveListener(ClaimReward);
-        _questPulseFeedback.StopPulse();
+        ClearQuestSubscriptions();
     }
 }

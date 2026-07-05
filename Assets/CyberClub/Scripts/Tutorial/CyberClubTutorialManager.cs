@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class CyberClubTutorialManager : MonoBehaviour
 {
-    private const string SaveKey = "CyberClub_Tutorial_Simplified_v1";
-
     private enum TutorialStep
     {
         Welcome,
@@ -38,21 +36,19 @@ public class CyberClubTutorialManager : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private bool _startOnStart = true;
-    [SerializeField] private bool _saveProgress;
 
     private TutorialStep _step;
     private bool _breakdownTutorialShown;
     private bool _ratingTutorialShown;
+    private bool _wasRestored;
+
+    public int StepIndex => (int)_step;
+    public bool BreakdownTutorialShown => _breakdownTutorialShown;
+    public bool RatingTutorialShown => _ratingTutorialShown;
 
     private void Awake()
     {
         FindReferences();
-
-        if (_saveProgress && PlayerPrefs.GetInt(SaveKey, 0) == 1)
-            _step = TutorialStep.Completed;
-        else
-            _step = TutorialStep.Welcome;
-
         HideAllTutorialUI();
     }
 
@@ -82,22 +78,61 @@ public class CyberClubTutorialManager : MonoBehaviour
 
     private void Start()
     {
-        if (_startOnStart && _step == TutorialStep.Welcome)
+        if (_wasRestored)
+            return;
+
+        if (_startOnStart)
             StartTutorial();
     }
 
-    [ContextMenu("Reset Tutorial Save")]
-    public void ResetTutorialSave()
+    public TutorialSaveData CaptureSave()
     {
-        PlayerPrefs.DeleteKey(SaveKey);
-        PlayerPrefs.Save();
+        return new TutorialSaveData
+        {
+            HasTutorialSave = true,
+            Step = (int)_step,
+            BreakdownTutorialShown = _breakdownTutorialShown,
+            RatingTutorialShown = _ratingTutorialShown
+        };
+    }
 
-        _step = TutorialStep.Welcome;
-        _breakdownTutorialShown = false;
-        _ratingTutorialShown = false;
+    public void RestoreSave(TutorialSaveData data)
+    {
+        if (data == null || data.HasTutorialSave == false)
+            return;
+
+        _step = (TutorialStep)Mathf.Clamp(data.Step, 0, (int)TutorialStep.Completed);
+        _breakdownTutorialShown = data.BreakdownTutorialShown;
+        _ratingTutorialShown = data.RatingTutorialShown;
+        _wasRestored = true;
 
         HideAllTutorialUI();
-        EnableGameplay(false);
+
+        switch (_step)
+        {
+            case TutorialStep.Completed:
+                EnableGameplay(false);
+                break;
+
+            case TutorialStep.WaitFirstRoom:
+                EnableGameplay(false);
+                ShowObjective("Иди к красной комнате. Если она закрыта — купи её.");
+                PointArrowTo(_firstRoomTarget);
+                break;
+
+            case TutorialStep.WaitFirstDevicePurchase:
+                HidePanel();
+                ShowObjective("Купи первый компьютер в панели улучшений.");
+                PointArrowTo(_buyDeviceButtonTarget);
+                BlockGameplay();
+                ForceCursor(true);
+                SetSpaceSwitchAllowed(false);
+                break;
+
+            default:
+                StartTutorial();
+                break;
+        }
     }
 
     public void StartTutorial()
@@ -111,8 +146,8 @@ public class CyberClubTutorialManager : MonoBehaviour
         if (_panel != null)
         {
             _panel.ShowWindow(
-                "Добро пожаловать в CyberClub",
-                "Ты управляешь компьютерным клубом.\n\nПокупай комнаты и компьютеры, обслуживай клиентов, улучшай интерьер и следи за рейтингом.\n\n<b>Сейчас курсор скрыт.</b> Чтобы нажать кнопку в этом окне, нажми <b>Пробел</b> — курсор появится. Потом нажми кнопку <b>Далее</b>.\n\nВ игре Пробел переключает режимы:\n• курсор виден — можно нажимать кнопки, но камера не вращается;\n• курсор скрыт — можно ходить и вращать камеру.",
+                "Добро пожаловать в Кибер Клуб",
+                "Ты управляешь компьютерным клубом.\n\nПокупай комнаты и компьютеры, обслуживай клиентов, улучшай интерьер и следи за рейтингом.\n\n<b>Сейчас курсор скрыт.</b> Чтобы нажать кнопку в этом окне, нажми <b>Пробел</b> — курсор появится. Потом нажми кнопку <b>Далее</b>.\n\nВ игре Пробел переключает режимы:\n• курсор виден — можно нажимать на кнопки, но камера не вращается;\n• курсор скрыт — можно ходить и вращать камеру.",
                 "Далее",
                 BeginGoToFirstRoom
             );
@@ -148,11 +183,8 @@ public class CyberClubTutorialManager : MonoBehaviour
             "Поломка компьютера",
             "Иногда компьютеры ломаются. Сломанный компьютер не принимает клиентов.\n\nПодойди к нему, включи курсор через <b>Пробел</b> и зажми иконку поломки. За ремонт ты получишь бонусные монеты.",
             "Понял",
-            () =>
-            {
-                EnableGameplay(false);
-                HideAllTutorialUI();
-            });
+            ClosePopupTutorialAndReturnToGame
+        );
     }
 
     private void BeginGoToFirstRoom()
@@ -160,7 +192,6 @@ public class CyberClubTutorialManager : MonoBehaviour
         _step = TutorialStep.WaitFirstRoom;
 
         HidePanel();
-
         EnableGameplay(false);
 
         ShowObjective("Иди к красной комнате. Если она закрыта — купи её.");
@@ -175,9 +206,6 @@ public class CyberClubTutorialManager : MonoBehaviour
         ShowObjective("Купи первый компьютер в панели улучшений.");
         PointArrowTo(_buyDeviceButtonTarget);
 
-        // Игрок должен нажать UI-кнопку покупки. Поэтому курсор виден,
-        // движение и камера заблокированы, а Пробел временно отключён,
-        // чтобы игрок случайно не спрятал курсор.
         BlockGameplay();
         ForceCursor(true);
         SetSpaceSwitchAllowed(false);
@@ -216,15 +244,13 @@ public class CyberClubTutorialManager : MonoBehaviour
     private void CompleteBasicTutorial()
     {
         _step = TutorialStep.Completed;
+        ClosePopupTutorialAndReturnToGame();
+    }
 
+    private void ClosePopupTutorialAndReturnToGame()
+    {
         HideAllTutorialUI();
         EnableGameplay(false);
-
-        if (_saveProgress)
-        {
-            PlayerPrefs.SetInt(SaveKey, 1);
-            PlayerPrefs.Save();
-        }
     }
 
     private void OnZoneChanged(ZoneInformation zone)
@@ -268,12 +294,7 @@ public class CyberClubTutorialManager : MonoBehaviour
             "Рейтинг и админы",
             "Рейтинг начал падать — значит клиенты слишком долго ждут в очереди.\n\nКупи нового админа или прокачай текущих, чтобы они быстрее отправляли клиентов за компьютеры.",
             "Понял",
-            () =>
-            {
-                HideArrow();
-                EnableGameplay(false);
-                HideAllTutorialUI();
-            }
+            ClosePopupTutorialAndReturnToGame
         );
     }
 
@@ -284,7 +305,12 @@ public class CyberClubTutorialManager : MonoBehaviour
         SetSpaceSwitchAllowed(false);
 
         if (_panel != null)
-            _panel.ShowWindow(title, body, button, onClick);
+        {
+            _panel.ShowWindow(title, body, button, () =>
+            {
+                onClick?.Invoke();
+            });
+        }
     }
 
     private void BlockGameplay()
@@ -359,25 +385,18 @@ public class CyberClubTutorialManager : MonoBehaviour
     {
         if (_panel == null)
             _panel = FindAnyObjectByType<TutorialPanel>();
-
         if (_objectiveHint == null)
             _objectiveHint = FindAnyObjectByType<TutorialObjectiveHint>();
-
         if (_arrow == null)
             _arrow = FindAnyObjectByType<TutorialArrowPointer>();
-
         if (_interactionWithUI == null)
             _interactionWithUI = FindAnyObjectByType<InteractionWithUI>();
-
         if (_inputBlocker == null)
             _inputBlocker = FindAnyObjectByType<TutorialInputBlocker>();
-
         if (_zoneSwitcher == null)
             _zoneSwitcher = FindAnyObjectByType<ZoneSwitcher>();
-
         if (_devicePurchase == null)
             _devicePurchase = FindAnyObjectByType<DevicePurchase>();
-
         if (_ratingData == null)
             _ratingData = FindAnyObjectByType<RatingData>();
     }

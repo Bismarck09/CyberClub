@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Purchase : MonoBehaviour
+public class PurchaseProduct : MonoBehaviour
 {
     [SerializeField] private float _purchaseCooldown = 0.5f;
 

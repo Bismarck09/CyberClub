@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public abstract class Quest
 {
@@ -20,33 +21,70 @@ public abstract class Quest
 
     public void Activate(QuestData questData)
     {
+        ForceUnsubscribe();
+
         _questData = questData;
         CurrentProgress = 0;
         IsCompleted = false;
 
         Subscribe();
-        OnProgressChanged?.Invoke(CurrentProgress, _questData.TargetValue);
+        NotifyProgress();
+    }
+
+    public void Restore(QuestData questData, int currentProgress, bool isCompleted)
+    {
+        ForceUnsubscribe();
+
+        _questData = questData;
+        CurrentProgress = ClampProgress(currentProgress);
+        IsCompleted = isCompleted || CurrentProgress >= _questData.TargetValue;
+
+        if (!IsCompleted)
+            Subscribe();
+
+        NotifyProgress();
+
+        if (IsCompleted)
+            OnCompleted?.Invoke();
+    }
+
+    public void ForceUnsubscribe()
+    {
+        Unsubscribe();
     }
 
     protected void AddProgress(int amount)
     {
-        if (IsCompleted)
+        if (IsCompleted || _questData == null)
             return;
 
-        CurrentProgress += amount;
+        CurrentProgress = ClampProgress(CurrentProgress + amount);
 
         if (CurrentProgress >= _questData.TargetValue)
         {
-            CurrentProgress = _questData.TargetValue;
             IsCompleted = true;
+            NotifyProgress();
 
-            OnProgressChanged?.Invoke(CurrentProgress, _questData.TargetValue);
-
-            Unsubscribe();
+            ForceUnsubscribe();
             OnCompleted?.Invoke();
-
             return;
         }
+
+        NotifyProgress();
+    }
+
+    private int ClampProgress(int value)
+    {
+        if (_questData == null)
+            return 0;
+
+        return Mathf.Clamp(value, 0, _questData.TargetValue);
+    }
+
+    private void NotifyProgress()
+    {
+        if (_questData == null)
+            return;
 
         OnProgressChanged?.Invoke(CurrentProgress, _questData.TargetValue);
     }

@@ -15135,6 +15135,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 953788644}
+        m_TargetAssemblyTypeName: CyberClubYG2StickyBannerService, Assembly-CSharp
+        m_MethodName: ShowStickyBanner
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &580603229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15226,7 +15238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.23529412, g: 0.45623523, b: 0.8784314, a: 0.7294118}
+  m_Color: {r: 0.23529412, g: 0.45623523, b: 0.8784314, a: 0.3137255}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -26169,6 +26181,116 @@ Mesh:
       - serializedVersion: 1
         m_IndexStart: 0
         m_IndexCount: 0
+--- !u!1 &953788641
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 953788647}
+  - component: {fileID: 953788646}
+  - component: {fileID: 953788645}
+  - component: {fileID: 953788644}
+  - component: {fileID: 953788643}
+  - component: {fileID: 953788642}
+  m_Layer: 0
+  m_Name: YGServices
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &953788642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953788641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cae11f51a9d04c54b82713f7ad8deeb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CyberClubYG2PaymentsService
+  _premiumZoneProductId: premium_zone_100
+  _premiumLocationUnlocker: {fileID: 0}
+  _saveLoadManager: {fileID: 1492970798}
+--- !u!114 &953788643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953788641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5138ad258c5134eb8692ba3f72c5e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CyberClubYG2PauseBridge
+  _inputBlocker: {fileID: 388455132}
+--- !u!114 &953788644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953788641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e05fe7d84b43be45a06e8541d094b23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CyberClubYG2StickyBannerService
+  _showOnStart: 1
+--- !u!114 &953788645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953788641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 186fbdb3993075b4880f81202987c556, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CyberClubYG2RewardedAdsService
+  _coinsRewardId: reward_coins
+  _gemsRewardId: reward_gems
+  _coinsReward: 500
+  _gemsReward: 50
+  _coinsData: {fileID: 89083772}
+  _gemsData: {fileID: 89083771}
+  _saveLoadManager: {fileID: 1492970798}
+--- !u!114 &953788646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953788641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a8838ae85ba6034b8b2c1a0155f5504, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CyberClubYG2LifecycleService
+  _callGameReadyManually: 0
+  _sendGameplayStartOnStart: 1
+--- !u!4 &953788647
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 953788641}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -15.20044, y: 0, z: -2.37153}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &957534699
 GameObject:
   m_ObjectHideFlags: 0
@@ -34350,6 +34472,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 953788644}
+        m_TargetAssemblyTypeName: CyberClubYG2StickyBannerService, Assembly-CSharp
+        m_MethodName: HideStickyBanner
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &1366884406
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37247,6 +37381,8 @@ GameObject:
   - component: {fileID: 1492970796}
   - component: {fileID: 1492970795}
   - component: {fileID: 1492970794}
+  - component: {fileID: 1492970801}
+  - component: {fileID: 1492970800}
   m_Layer: 0
   m_Name: SaveLoadManager
   m_TagString: Untagged
@@ -37344,6 +37480,8 @@ MonoBehaviour:
   - {fileID: 1492970796}
   - {fileID: 1492970795}
   - {fileID: 1492970794}
+  - {fileID: 1492970801}
+  - {fileID: 1492970800}
   _loadOnStart: 1
   _autoSave: 1
   _autoSaveInterval: 15
@@ -37362,6 +37500,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1492970800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492970793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eaa85e815460924409e8c3ec30d2d8d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialSaveModule
+  _tutorialManager: {fileID: 1906820512}
+--- !u!114 &1492970801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492970793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 286083bc51a7e784897234e9c807c28f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuestsSaveModule
+  _questCreator: {fileID: 1684942217}
 --- !u!1 &1494258381
 GameObject:
   m_ObjectHideFlags: 0
@@ -39971,6 +40135,18 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+      - m_Target: {fileID: 953788644}
+        m_TargetAssemblyTypeName: CyberClubYG2StickyBannerService, Assembly-CSharp
+        m_MethodName: HideStickyBanner
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -47041,6 +47217,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 953788644}
+        m_TargetAssemblyTypeName: CyberClubYG2StickyBannerService, Assembly-CSharp
+        m_MethodName: ShowStickyBanner
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1856001007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47457,6 +47645,9 @@ MonoBehaviour:
   _gemsData: {fileID: 89083771}
   _coinsData: {fileID: 89083772}
   _potionEffectService: {fileID: 1502559007}
+  _saveLoadManager: {fileID: 1492970798}
+  _gemsRewardAdId: reward_gems
+  _coinsRewardAdId: reward_coins
 --- !u!114 &1861126622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48571,7 +48762,6 @@ MonoBehaviour:
   _interactionWithUI: {fileID: 422191990}
   _inputBlocker: {fileID: 388455132}
   _startOnStart: 1
-  _saveProgress: 0
 --- !u!4 &1906820513
 Transform:
   m_ObjectHideFlags: 0
@@ -62346,3 +62536,4 @@ SceneRoots:
   - {fileID: 388455131}
   - {fileID: 188880796}
   - {fileID: 1492970799}
+  - {fileID: 953788647}

@@ -1,4 +1,5 @@
 using UnityEngine;
+using YG;
 
 public class ShopActionService : MonoBehaviour
 {
@@ -8,6 +9,15 @@ public class ShopActionService : MonoBehaviour
 
     [Header("Potion effects")]
     [SerializeField] private PotionEffectService _potionEffectService;
+
+    [Header("Save")]
+    [SerializeField] private SaveLoadManager _saveLoadManager;
+
+    [Header("Rewarded ad IDs")]
+    [SerializeField] private string _gemsRewardAdId = "reward_gems";
+    [SerializeField] private string _coinsRewardAdId = "reward_coins";
+
+    private bool _isRewardAdOpening;
 
     public void Execute(ShopProductConfig product)
     {
@@ -24,11 +34,17 @@ public class ShopActionService : MonoBehaviour
                 break;
 
             case ShopProductActionType.RewardGems:
-                AddGems(product.RewardAmount);
+                ShowRewardAd(_gemsRewardAdId, () =>
+                {
+                    AddGems(product.RewardAmount);
+                });
                 break;
 
             case ShopProductActionType.RewardCoins:
-                AddCoins(product.RewardAmount);
+                ShowRewardAd(_coinsRewardAdId, () =>
+                {
+                    AddCoins(product.RewardAmount);
+                });
                 break;
 
             case ShopProductActionType.Unavailable:
@@ -41,63 +57,54 @@ public class ShopActionService : MonoBehaviour
         }
     }
 
-    private void BuyPotion(ShopProductConfig product)
+    private void ShowRewardAd(string rewardId, System.Action onReward)
     {
-        if (_gemsData == null)
-        {
-            Debug.LogError("ShopActionService: не назначен GemsData.");
+        if (_isRewardAdOpening)
             return;
-        }
 
-        if (_potionEffectService == null)
+        _isRewardAdOpening = true;
+
+        YG2.RewardedAdvShow(rewardId, () =>
         {
-            Debug.LogError("ShopActionService: не назначен PotionEffectService.");
-            return;
-        }
+            _isRewardAdOpening = false;
 
-        if (_gemsData.TryBuy(product.PriceGems) == false)
-        {
-            Debug.Log($"Недостаточно гемов для покупки: {product.name}. Нужно: {product.PriceGems}, есть: {_gemsData.CurrentGems}.");
-            return;
-        }
+            onReward?.Invoke();
 
-        _potionEffectService.Activate(product);
-        Debug.Log($"Куплено зелье: {product.name} за {product.PriceGems} гемов.");
+            if (_saveLoadManager != null)
+                _saveLoadManager.SaveGame();
+        });
     }
 
     private void AddGems(int amount)
     {
         if (_gemsData == null)
         {
-            Debug.LogError("ShopActionService: не назначен GemsData.");
-            return;
-        }
-
-        if (amount <= 0)
-        {
-            Debug.LogWarning("ShopActionService: награда гемов равна 0.");
+            Debug.LogError("ShopActionService: GemsData не назначен.");
             return;
         }
 
         _gemsData.AddResource(amount, 1f);
-        Debug.Log($"+{amount} гемов.");
     }
 
     private void AddCoins(int amount)
     {
         if (_coinsData == null)
         {
-            Debug.LogError("ShopActionService: не назначен CoinsData.");
-            return;
-        }
-
-        if (amount <= 0)
-        {
-            Debug.LogWarning("ShopActionService: награда монет равна 0.");
+            Debug.LogError("ShopActionService: CoinsData не назначен.");
             return;
         }
 
         _coinsData.AddResource(amount, 1f);
-        Debug.Log($"+{amount} монет.");
+    }
+
+    private void BuyPotion(ShopProductConfig product)
+    {
+        if (_potionEffectService == null)
+        {
+            Debug.LogError("ShopActionService: PotionEffectService не назначен.");
+            return;
+        }
+
+        _potionEffectService.Activate(product);
     }
 }

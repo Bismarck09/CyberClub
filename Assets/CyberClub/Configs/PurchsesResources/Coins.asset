@@ -19,7 +19,7 @@ MonoBehaviour:
   _rewardAmount: 500
   _priceGems: 0
   _icon: {fileID: -674856914, guid: 05161d4ce0d7ead4fbe68a0bd24c042b, type: 3}
-  _description: "\u041F\u043E\u043B\u0443\u0447\u0438\u0442\u044C \u043C\u043E\u043D\u0435\u0442\u044B
+  _description: "\u041F\u043E\u043B\u0443\u0447\u0438\u0442\u044C 500 \u043C\u043E\u043D\u0435\u0442
     \u0437\u0430 \u043F\u0440\u043E\u0441\u043C\u043E\u0442\u0440 \u0440\u0435\u043A\u043B\u0430\u043C\u044B"
   _durationText: 
   _buttonText: "\u041F\u043E\u043B\u0443\u0447\u0438\u0442\u044C"
