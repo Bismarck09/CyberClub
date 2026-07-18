@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EntranceAdminZone : MonoBehaviour
@@ -6,15 +7,22 @@ public class EntranceAdminZone : MonoBehaviour
     [SerializeField] private AdminUpgradePurchase _adminUpgradePurchase;
     [SerializeField] private AdminUpgradeButton _adminUpgradeButtonController;
 
+    // ИЗМЕНЕНО: учитываем все коллайдеры игрока.
+    private readonly HashSet<Collider> _playerColliders = new();
+
     private void OnTriggerEnter(Collider other)
     {
         if (!IsPlayer(other))
             return;
 
-        _panelView.ShowAdminShop();
+        bool wasOutside = _playerColliders.Count == 0;
+        _playerColliders.Add(other);
 
-        if (_adminUpgradeButtonController != null)
-            _adminUpgradeButtonController.SetAdminShopOpened(true);
+        if (!wasOutside)
+            return;
+
+        _panelView?.ShowAdminShop();
+        _adminUpgradeButtonController?.SetAdminShopOpened(true);
     }
 
     private void OnTriggerExit(Collider other)
@@ -22,17 +30,30 @@ public class EntranceAdminZone : MonoBehaviour
         if (!IsPlayer(other))
             return;
 
-        if (_adminUpgradePurchase != null)
-            _adminUpgradePurchase.ClearSelectedAdmin();
+        _playerColliders.Remove(other);
 
-        if (_adminUpgradeButtonController != null)
-            _adminUpgradeButtonController.SetAdminShopOpened(false);
+        if (_playerColliders.Count > 0)
+            return;
 
-        _panelView.HideAdminShop();
+        CloseAdminShop();
+    }
+
+    private void OnDisable()
+    {
+        _playerColliders.Clear();
+        CloseAdminShop();
+    }
+
+    private void CloseAdminShop()
+    {
+        _adminUpgradePurchase?.ClearSelectedAdmin();
+        _adminUpgradeButtonController?.SetAdminShopOpened(false);
+        _panelView?.HideAdminShop();
     }
 
     private bool IsPlayer(Collider other)
     {
-        return other.TryGetComponent(out PlayerMovement player);
+        return other != null &&
+               other.GetComponentInParent<PlayerMovement>() != null;
     }
 }

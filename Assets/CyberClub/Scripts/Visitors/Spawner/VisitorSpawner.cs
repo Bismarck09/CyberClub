@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class VisitorSpawner : MonoBehaviour
 {
@@ -29,23 +29,52 @@ public class VisitorSpawner : MonoBehaviour
     {
         while (true)
         {
-            int deviceCount = _deviceRegistry.CurrentDeviceCount;
-            int maxVisitors = GetMaxVisitors(deviceCount);
-
-            if (_currentVisitors >= maxVisitors || maxVisitors == 0)
+            if (_deviceRegistry == null ||
+                _visitorQueue == null)
             {
                 yield return new WaitForSeconds(1f);
                 continue;
             }
 
-            int freeSlots = maxVisitors - _currentVisitors;
-            int groupSize = Random.Range(_minGroupSize, _maxGroupSize + 1);
-            groupSize = Mathf.Min(groupSize, freeSlots);
+            int deviceCount = _deviceRegistry.CurrentDeviceCount;
+            int maxVisitors = GetMaxVisitors(deviceCount);
 
-            yield return StartCoroutine(SpawnGroup(groupSize));
+            // ИЗМЕНЕНО: учитываем не только компьютеры,
+            // но и фактическую вместимость очередей.
+            if (_currentVisitors >= maxVisitors ||
+                maxVisitors == 0 ||
+                !_visitorQueue.HasFreeSlot())
+            {
+                yield return new WaitForSeconds(0.5f);
+                continue;
+            }
 
-            float dynamicDelay = Mathf.Clamp(_baseSpawnDelay - deviceCount * 0.2f, 1.5f, _baseSpawnDelay);
-            dynamicDelay *= GetRatingSpawnDelayMultiplier();
+            int visitorCapacity =
+                maxVisitors - _currentVisitors;
+
+            int queueCapacity =
+                _visitorQueue.FreeSlotCount;
+
+            int groupSize =
+                Random.Range(
+                    _minGroupSize,
+                    _maxGroupSize + 1);
+
+            groupSize = Mathf.Min(
+                groupSize,
+                visitorCapacity,
+                queueCapacity);
+
+            if (groupSize > 0)
+                yield return StartCoroutine(SpawnGroup(groupSize));
+
+            float dynamicDelay = Mathf.Clamp(
+                _baseSpawnDelay - deviceCount * 0.2f,
+                1.5f,
+                _baseSpawnDelay);
+
+            dynamicDelay *=
+                GetRatingSpawnDelayMultiplier();
 
             yield return new WaitForSeconds(dynamicDelay);
         }
@@ -55,39 +84,91 @@ public class VisitorSpawner : MonoBehaviour
     {
         for (int i = 0; i < count; i++)
         {
+            // ИЗМЕНЕНО: повторная проверка перед каждым
+            // посетителем, потому что очередь могла измениться.
+            if (_visitorQueue == null ||
+                !_visitorQueue.HasFreeSlot())
+            {
+                yield break;
+            }
+
+            int maxVisitors =
+                GetMaxVisitors(_deviceRegistry.CurrentDeviceCount);
+
+            if (_currentVisitors >= maxVisitors)
+                yield break;
+
             SpawnOne();
+
             yield return new WaitForSeconds(_groupSpawnDelay);
         }
     }
 
-    private void SpawnOne()
+    private bool SpawnOne()
     {
-        if (_visitorPrefabs.Count == 0 || _spawnPoint == null)
-            return;
+        if (_visitorPrefabs == null ||
+            _visitorPrefabs.Count == 0 ||
+            _spawnPoint == null ||
+            _visitorQueue == null)
+        {
+            return false;
+        }
 
-        GameObject prefab = _visitorPrefabs[Random.Range(0, _visitorPrefabs.Count)];
-        GameObject obj = Instantiate(prefab, _spawnPoint.position, Quaternion.identity);
+        GameObject prefab =
+            _visitorPrefabs[
+                Random.Range(0, _visitorPrefabs.Count)];
+
+        if (prefab == null)
+            return false;
+
+        GameObject obj = Instantiate(
+            prefab,
+            _spawnPoint.position,
+            Quaternion.identity);
 
         if (obj.GetComponent<VisitorRatingTracker>() == null)
             obj.AddComponent<VisitorRatingTracker>();
 
-        VisitorMovement movement = obj.GetComponent<VisitorMovement>();
-        VisitorRegistration registration = obj.GetComponent<VisitorRegistration>();
+        VisitorMovement movement =
+            obj.GetComponent<VisitorMovement>();
 
-        if (registration != null)
-            registration.Init(movement, _visitorQueue);
+        VisitorRegistration registration =
+            obj.GetComponent<VisitorRegistration>();
 
+        VisitorExit visitorExit =
+            obj.GetComponent<VisitorExit>();
+
+        // ИЗМЕНЕНО: такой объект нельзя учитывать как посетителя,
+        // иначе счётчик никогда не уменьшится.
+        if (movement == null ||
+            registration == null ||
+            visitorExit == null)
+        {
+            Debug.LogError(
+                $"VisitorSpawner: префаб {prefab.name} настроен неправильно.");
+
+            Destroy(obj);
+            return false;
+        }
+
+        // ИЗМЕНЕНО: сначала успешная регистрация,
+        // потом увеличение счётчика.
+        if (!registration.Init(movement, _visitorQueue))
+        {
+            Destroy(obj);
+            return false;
+        }
+
+        visitorExit.OnVisitorExit += OnVisitorLeft;
         _currentVisitors++;
 
-        VisitorExit visitorExit = obj.GetComponent<VisitorExit>();
-
-        if (visitorExit != null)
-            visitorExit.OnVisitorExit += OnVisitorLeft;
+        return true;
     }
 
     private void OnVisitorLeft()
     {
-        _currentVisitors = Mathf.Max(0, _currentVisitors - 1);
+        _currentVisitors =
+            Mathf.Max(0, _currentVisitors - 1);
     }
 
     private int GetMaxVisitors(int deviceCount)
@@ -95,12 +176,20 @@ public class VisitorSpawner : MonoBehaviour
         if (deviceCount <= 0)
             return 0;
 
-        float multiplier = _ratingData != null ? _ratingData.VisitorCapacityMultiplier : 1f;
-        return Mathf.Max(1, Mathf.RoundToInt(deviceCount * multiplier));
+        float multiplier =
+            _ratingData != null
+                ? _ratingData.VisitorCapacityMultiplier
+                : 1f;
+
+        return Mathf.Max(
+            1,
+            Mathf.RoundToInt(deviceCount * multiplier));
     }
 
     private float GetRatingSpawnDelayMultiplier()
     {
-        return _ratingData != null ? _ratingData.SpawnDelayMultiplier : 1f;
+        return _ratingData != null
+            ? _ratingData.SpawnDelayMultiplier
+            : 1f;
     }
 }

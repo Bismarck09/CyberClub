@@ -6,6 +6,7 @@ public class AdminUpgradeButton : MonoBehaviour
     [SerializeField] private AdminUpgradePurchase _adminUpgradePurchase;
 
     private bool _isAdminShopOpened;
+    private AdminWorker _currentAdmin;
 
     private void OnEnable()
     {
@@ -23,26 +24,48 @@ public class AdminUpgradeButton : MonoBehaviour
     {
         _isAdminShopOpened = value;
 
-        if (_isAdminShopOpened == false)
-            _panelView.HideAdminUpgrade();
+        // ИЗМЕНЕНО: при повторном открытии получаем уже
+        // выбранного администратора, не ожидая нового OnTriggerEnter.
+        if (_isAdminShopOpened &&
+            _adminUpgradePurchase != null)
+        {
+            _currentAdmin =
+                _adminUpgradePurchase.SelectedAdmin;
+        }
+
+        RefreshPanel();
     }
 
     private void OnAdminSelected(AdminWorker admin)
     {
-        if (_isAdminShopOpened == false)
-            return;
-
-        if (admin == null || admin.IsHired == false)
-            return;
-
-        _panelView.ShowAdminUpgrade();
+        _currentAdmin = admin;
+        RefreshPanel();
     }
 
     private void OnAdminDeselected(AdminWorker admin)
     {
-        if (_isAdminShopOpened == false)
+        // ИЗМЕНЕНО: выход из зоны другого администратора
+        // не должен скрывать текущую карточку.
+        if (_currentAdmin != admin)
             return;
 
-        _panelView.HideAdminUpgrade();
+        _currentAdmin = null;
+        RefreshPanel();
+    }
+
+    private void RefreshPanel()
+    {
+        if (_panelView == null)
+            return;
+
+        bool shouldShow =
+            _isAdminShopOpened &&
+            _currentAdmin != null &&
+            _currentAdmin.IsHired;
+
+        if (shouldShow)
+            _panelView.ShowAdminUpgrade();
+        else
+            _panelView.HideAdminUpgrade();
     }
 }

@@ -28,34 +28,57 @@ public class VisitorService : MonoBehaviour
 
     private void ServiceVisitors()
     {
+        if (_visitorQueue == null || _deviceRegistry == null)
+            return;
+
         foreach (AdminWorker admin in _visitorQueue.GetAdmins())
         {
-            if (admin == null || admin.IsHired == false || admin.IsBusy)
+            if (admin == null ||
+                !admin.IsHired ||
+                admin.IsBusy)
+            {
                 continue;
+            }
 
-            Visitor visitor = _visitorQueue.GetNextVisitor(admin);
-            DeviceEntry freeDevice = _deviceRegistry.GetRandomFreeDevice();
+            Visitor visitor =
+                _visitorQueue.GetNextVisitor(admin);
 
-            if (visitor == null || freeDevice == null || freeDevice.Device == null)
+            DeviceEntry freeDevice =
+                _deviceRegistry.GetRandomFreeDevice();
+
+            if (visitor == null ||
+                freeDevice == null ||
+                freeDevice.Device == null)
+            {
                 continue;
+            }
 
             if (!freeDevice.Device.TryReserve())
                 continue;
 
-            StartCoroutine(Service(admin, visitor, freeDevice));
+            StartCoroutine(
+                Service(admin, visitor, freeDevice));
         }
     }
 
-    private IEnumerator Service(AdminWorker admin, Visitor visitor, DeviceEntry freeDevice)
+    private IEnumerator Service(
+        AdminWorker admin,
+        Visitor visitor,
+        DeviceEntry freeDevice)
     {
         admin.SetBusy(true);
 
-        float serviceDelay = admin.GetServiceInterval() / Mathf.Max(1f, GetAdminServiceMultiplier());
+        float serviceDelay =
+            admin.GetServiceInterval() /
+            Mathf.Max(1f, GetAdminServiceMultiplier());
+
         yield return new WaitForSeconds(serviceDelay);
 
-        if (visitor == null || freeDevice == null || freeDevice.Device == null)
+        if (visitor == null ||
+            freeDevice == null ||
+            freeDevice.Device == null)
         {
-            if (freeDevice != null && freeDevice.Device != null)
+            if (freeDevice?.Device != null)
                 freeDevice.Device.Release();
 
             admin.SetBusy(false);
@@ -65,34 +88,71 @@ public class VisitorService : MonoBehaviour
         EvaluateVisitorRating(visitor);
         _visitorQueue.RemoveVisitor(admin, visitor);
 
-        VisitorMovement movement = visitor.GetComponent<VisitorMovement>();
-        VisitorExit visitorExit = visitor.GetComponent<VisitorExit>();
-        VisitorSeat seatController = visitor.GetComponent<VisitorSeat>();
+        VisitorMovement movement =
+            visitor.GetComponent<VisitorMovement>();
+
+        VisitorExit visitorExit =
+            visitor.GetComponent<VisitorExit>();
+
+        VisitorSeat seatController =
+            visitor.GetComponent<VisitorSeat>();
+
         GameDevice device = freeDevice.Device;
 
-        if (movement == null || visitorExit == null || device.TargetPoint == null)
+        if (movement == null ||
+            visitorExit == null ||
+            device.TargetPoint == null)
         {
             device.Release();
             admin.SetBusy(false);
+
+            visitorExit?.MoveToExit();
             yield break;
         }
 
-        float actualSessionTime = _sessionTime / Mathf.Max(1f, GetDeviceSessionMultiplier());
+        float actualSessionTime =
+            _sessionTime /
+            Mathf.Max(1f, GetDeviceSessionMultiplier());
 
-        movement.Move(device.TargetPoint.position, () =>
+        bool movementStarted = movement.Move(
+            device.TargetPoint.position,
+            () =>
+            {
+                if (seatController != null &&
+                    device.SitPoint != null)
+                {
+                    seatController.SitAt(device);
+
+                    device.StartSession(
+                        actualSessionTime,
+                        visitorExit,
+                        seatController);
+                }
+                else
+                {
+                    device.Reserve(
+                        actualSessionTime,
+                        visitorExit);
+                }
+            },
+            () =>
+            {
+                // ИЗМЕНЕНО: раньше компьютер оставался
+                // зарезервированным навсегда.
+                device.Release();
+                visitorExit.MoveToExit();
+            });
+
+        if (!movementStarted)
         {
-            if (seatController != null && device.SitPoint != null)
-            {
-                seatController.SitAt(device);
-                device.StartSession(actualSessionTime, visitorExit, seatController);
-            }
-            else
-            {
-                device.Reserve(actualSessionTime, visitorExit);
-            }
-        });
+            device.Release();
+            visitorExit.MoveToExit();
+        }
+        else
+        {
+            OnVisitorServiced?.Invoke(freeDevice);
+        }
 
-        OnVisitorServiced?.Invoke(freeDevice);
         admin.SetBusy(false);
     }
 
@@ -101,7 +161,8 @@ public class VisitorService : MonoBehaviour
         if (_ratingData == null || visitor == null)
             return;
 
-        VisitorRatingTracker ratingTracker = visitor.GetComponent<VisitorRatingTracker>();
+        VisitorRatingTracker ratingTracker =
+            visitor.GetComponent<VisitorRatingTracker>();
 
         if (ratingTracker == null)
             return;
@@ -112,8 +173,7 @@ public class VisitorService : MonoBehaviour
             _positiveRatingChange,
             _negativeRatingChange,
             _extraPenaltyEverySeconds,
-            _extraPenaltyAmount
-        );
+            _extraPenaltyAmount);
     }
 
     private float GetAdminServiceMultiplier()
@@ -121,7 +181,9 @@ public class VisitorService : MonoBehaviour
         if (_speedPotionEffectService != null)
             return _speedPotionEffectService.AdminServiceMultiplier;
 
-        return SpeedPotionEffectService.Current != null ? SpeedPotionEffectService.Current.AdminServiceMultiplier : 1f;
+        return SpeedPotionEffectService.Current != null
+            ? SpeedPotionEffectService.Current.AdminServiceMultiplier
+            : 1f;
     }
 
     private float GetDeviceSessionMultiplier()
@@ -129,7 +191,8 @@ public class VisitorService : MonoBehaviour
         if (_speedPotionEffectService != null)
             return _speedPotionEffectService.DeviceSessionMultiplier;
 
-        return SpeedPotionEffectService.Current != null ? SpeedPotionEffectService.Current.DeviceSessionMultiplier : 1f;
+        return SpeedPotionEffectService.Current != null
+            ? SpeedPotionEffectService.Current.DeviceSessionMultiplier
+            : 1f;
     }
 }
-

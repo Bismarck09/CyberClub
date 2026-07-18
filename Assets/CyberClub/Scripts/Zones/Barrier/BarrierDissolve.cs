@@ -1,44 +1,112 @@
+using System;
 using DG.Tweening;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class BarrierDissolve : MonoBehaviour
 {
-    [SerializeField] private float _dissolveDuration;
+    [SerializeField] private float _dissolveDuration = 2f;
     [SerializeField] private GameObject _lock;
     [SerializeField] private Canvas _canvas;
-    [SerializeField] private ZonePurchase _zonePurchase;
-    
+
     private Renderer _renderer;
     private Material _dissolveMaterial;
+    private Tween _dissolveTween;
 
-    void Start()
+    private bool _isUnlocking;
+
+    public bool CanUnlock
     {
-        _renderer = GetComponent<Renderer>();
-
-        _dissolveMaterial = _renderer.materials[0];
+        get
+        {
+            return !_isUnlocking &&
+                   gameObject.activeInHierarchy &&
+                   EnsureInitialized();
+        }
     }
 
-    public void Init()
+    private void Awake()
     {
-        _zonePurchase.OnZonePurchased += Dissolve;
+        EnsureInitialized();
+    }
+
+    // ИЗМЕНЕНО: больше нет Init(),
+    // подписки и ссылки на общий ZonePurchase.
+    public bool TryUnlock(Action onCompleted = null)
+    {
+        if (_isUnlocking || !EnsureInitialized())
+            return false;
+
+        _isUnlocking = true;
+
+        if (_lock != null)
+            _lock.SetActive(false);
+
+        if (_canvas != null)
+            _canvas.enabled = false;
+
+        if (_dissolveDuration <= 0f)
+        {
+            _dissolveMaterial.SetFloat("_Value", 1f);
+            CompleteUnlock(onCompleted);
+            return true;
+        }
+
+        _dissolveTween?.Kill();
+
+        _dissolveTween = _dissolveMaterial
+            .DOFloat(1f, "_Value", _dissolveDuration)
+            .SetEase(Ease.Linear)
+            .OnComplete(() => CompleteUnlock(onCompleted));
+
+        return true;
+    }
+
+    private bool EnsureInitialized()
+    {
+        if (_dissolveMaterial != null)
+            return true;
+
+        if (_renderer == null)
+            _renderer = GetComponent<Renderer>();
+
+        if (_renderer == null)
+        {
+            Debug.LogError(
+                $"BarrierDissolve: на {name} отсутствует Renderer.");
+
+            return false;
+        }
+
+        Material[] materials = _renderer.materials;
+
+        if (materials == null || materials.Length == 0)
+        {
+            Debug.LogError(
+                $"BarrierDissolve: на {name} отсутствуют материалы.");
+
+            return false;
+        }
+
+        _dissolveMaterial = materials[0];
+        return _dissolveMaterial != null;
+    }
+
+    private void CompleteUnlock(Action onCompleted)
+    {
+        _dissolveTween = null;
+
+        // ИЗМЕНЕНО: сначала деактивируем объект,
+        // затем сохраняем состояние через callback.
+        gameObject.SetActive(false);
+
+        onCompleted?.Invoke();
+
+        Destroy(gameObject);
     }
 
     private void OnDestroy()
     {
-        _zonePurchase.OnZonePurchased -= Dissolve;
+        _dissolveTween?.Kill();
+        _dissolveTween = null;
     }
-
-
-    private void Dissolve()
-    {
-        _lock.SetActive(false);
-        _canvas.enabled = false;
-
-        _dissolveMaterial.DOFloat(1f, "_Value", _dissolveDuration).SetEase(Ease.Linear).OnComplete(() =>
-        {
-            Destroy(gameObject);
-        });
-    }
-    
 }

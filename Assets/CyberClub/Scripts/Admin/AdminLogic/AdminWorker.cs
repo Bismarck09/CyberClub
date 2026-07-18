@@ -24,6 +24,18 @@ public class AdminWorker : MonoBehaviour
     public int LevelIndex => _levelIndex;
     public int QueueCount => _queue.Count;
 
+    // ИЗМЕНЕНО: точное количество свободных мест.
+    public int FreeQueueSlotCount
+    {
+        get
+        {
+            if (!_isHired || _queuePoints == null)
+                return 0;
+
+            return Mathf.Max(0, _queuePoints.Count - _queue.Count);
+        }
+    }
+
     public event Action<AdminWorker> OnChanged;
 
     private void Awake()
@@ -33,16 +45,29 @@ public class AdminWorker : MonoBehaviour
 
     public bool HasFreeQueueSlot()
     {
-        return _isHired && _queue.Count < _queuePoints.Count;
+        return FreeQueueSlotCount > 0;
     }
 
     public Transform AddVisitorToQueue(Visitor visitor)
     {
-        if (!HasFreeQueueSlot())
+        // ИЗМЕНЕНО: защита от null и повторного добавления.
+        if (visitor == null || !HasFreeQueueSlot())
+            return null;
+
+        if (_queue.Contains(visitor))
             return null;
 
         _queue.Add(visitor);
-        return _queuePoints[_queue.Count - 1];
+
+        int pointIndex = _queue.Count - 1;
+
+        if (pointIndex < 0 || pointIndex >= _queuePoints.Count)
+        {
+            _queue.Remove(visitor);
+            return null;
+        }
+
+        return _queuePoints[pointIndex];
     }
 
     public Visitor GetNextVisitor()
@@ -59,9 +84,10 @@ public class AdminWorker : MonoBehaviour
             return null;
         }
 
-        VisitorRegistration registration = visitor.GetComponent<VisitorRegistration>();
+        VisitorRegistration registration =
+            visitor.GetComponent<VisitorRegistration>();
 
-        if (registration == null || registration.IsRegistered == false)
+        if (registration == null || !registration.IsRegistered)
             return null;
 
         return visitor;
@@ -69,12 +95,12 @@ public class AdminWorker : MonoBehaviour
 
     public void RemoveVisitor(Visitor visitor)
     {
-        if (_queue.Contains(visitor))
-        {
-            _queue.Remove(visitor);
-            MoveQueue();
-            OnChanged?.Invoke(this);
-        }
+        if (visitor == null || !_queue.Contains(visitor))
+            return;
+
+        _queue.Remove(visitor);
+        MoveQueue();
+        OnChanged?.Invoke(this);
     }
 
     public void Hire()
@@ -84,7 +110,7 @@ public class AdminWorker : MonoBehaviour
 
     public bool CanUpgrade()
     {
-        return _levelIndex + 1 < _levels.Count;
+        return _levels != null && _levelIndex + 1 < _levels.Count;
     }
 
     public int GetUpgradePrice()
@@ -106,7 +132,7 @@ public class AdminWorker : MonoBehaviour
 
     public float GetServiceInterval()
     {
-        if (_levels.Count == 0)
+        if (_levels == null || _levels.Count == 0)
             return 10f;
 
         return _levels[_levelIndex].ServiceInterval;
@@ -123,7 +149,13 @@ public class AdminWorker : MonoBehaviour
         _queue.Clear();
         _isBusy = false;
         _isHired = isHired;
-        _levelIndex = Mathf.Clamp(levelIndex, 0, Mathf.Max(0, _levels.Count - 1));
+
+        int maxLevelIndex =
+            _levels != null
+                ? Mathf.Max(0, _levels.Count - 1)
+                : 0;
+
+        _levelIndex = Mathf.Clamp(levelIndex, 0, maxLevelIndex);
 
         gameObject.SetActive(_isHired);
         SetQueuePointsActive(_isHired);
@@ -132,25 +164,38 @@ public class AdminWorker : MonoBehaviour
 
     private void MoveQueue()
     {
+        if (_queuePoints == null)
+            return;
+
         for (int i = 0; i < _queue.Count; i++)
         {
-            if (_queue[i] == null)
+            if (i >= _queuePoints.Count)
+                break;
+
+            Visitor visitor = _queue[i];
+
+            if (visitor == null)
                 continue;
 
-            VisitorRegistration registration = _queue[i].GetComponent<VisitorRegistration>();
+            VisitorRegistration registration =
+                visitor.GetComponent<VisitorRegistration>();
 
-            if (registration == null || registration.IsRegistered == false)
+            if (registration == null || !registration.IsRegistered)
                 continue;
 
-            VisitorMovement movement = _queue[i].GetComponent<VisitorMovement>();
+            VisitorMovement movement =
+                visitor.GetComponent<VisitorMovement>();
 
-            if (movement != null)
+            if (movement != null && _queuePoints[i] != null)
                 movement.Move(_queuePoints[i].position);
         }
     }
 
     private void SetQueuePointsActive(bool value)
     {
+        if (_queuePoints == null)
+            return;
+
         foreach (Transform point in _queuePoints)
         {
             if (point != null)

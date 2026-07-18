@@ -1,34 +1,72 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
-
-public class ZonePurchase : MonoBehaviour, IPurchasable
+public class ZonePurchase : MonoBehaviour
 {
     [SerializeField] private CoinsData _coinsData;
-    
-    private ZonePurchaseConfig _zonePurchaseConfig;
-    private BarrierDissolve _barrierData;
+    [SerializeField] private SaveLoadManager _saveLoadManager;
 
+    // Событие можно оставить для квестов, звука и аналитики.
+    // BarrierDissolve больше на него не подписывается.
     public event Action OnZonePurchased;
 
-    public void Buy()
+    // ИЗМЕНЕНО: метод получает конкретную покупаемую зону.
+    public void Buy(ZonePurchaseConfig config)
     {
-        if (CanBuy())
+        if (!CanBuy(config))
+            return;
+
+        BarrierDissolve barrier =
+            config.GetComponent<BarrierDissolve>();
+
+        int price = config.ZonePrice;
+
+        // ИЗМЕНЕНО: списание происходит ровно один раз
+        // и только после полной проверки объекта.
+        if (!_coinsData.TryBuy(price))
+            return;
+
+        bool unlockStarted = barrier.TryUnlock(() =>
         {
-            OnZonePurchased?.Invoke();
+            // Барьер к этому моменту уже выключен,
+            // поэтому ZonesSaveModule увидит зону открытой.
+            _saveLoadManager?.SaveGame();
+        });
+
+        if (!unlockStarted)
+        {
+            // Страховка: если после оплаты открытие не запустилось,
+            // полностью возвращаем деньги.
+            _coinsData.AddResource(price, 1f);
+
+            Debug.LogError(
+                $"ZonePurchase: не удалось открыть {config.name}. " +
+                $"Деньги возвращены.");
+
+            return;
         }
+
+        OnZonePurchased?.Invoke();
     }
 
-
-    public bool CanBuy()
+    // ИЗМЕНЕНО: чистая проверка без изменения CoinsData.
+    public bool CanBuy(ZonePurchaseConfig config)
     {
-        return _coinsData.TryBuy(_zonePurchaseConfig.ZonePrice);
-    }
+        if (config == null || _coinsData == null)
+            return false;
 
-    public void ChangeZoneData(ZonePurchaseConfig config)
-    {
-        _zonePurchaseConfig = config;
-        _barrierData = config.GetComponent<BarrierDissolve>();
-        _barrierData.Init();
+        if (config.BarrierObject == null ||
+            !config.BarrierObject.activeSelf)
+        {
+            return false;
+        }
+
+        BarrierDissolve barrier =
+            config.GetComponent<BarrierDissolve>();
+
+        if (barrier == null || !barrier.CanUnlock)
+            return false;
+
+        return _coinsData.CurrentCoins >= config.ZonePrice;
     }
 }
