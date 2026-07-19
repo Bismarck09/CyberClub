@@ -19,15 +19,15 @@ public static class ResourceValueFormatter
             return value.ToString(Culture);
 
         if (absValue < 1_000_000)
-            return sign + FormatShort(absValue / 1000d, "к");
+            return sign + FormatShort(absValue / 1000d, "k");
 
         if (absValue < 1_000_000_000)
-            return sign + FormatShort(absValue / 1_000_000d, "м");
+            return sign + FormatShort(absValue / 1_000_000d, "m");
 
         if (absValue < 1_000_000_000_000)
-            return sign + FormatShort(absValue / 1_000_000_000d, "б");
+            return sign + FormatShort(absValue / 1_000_000_000d, "b");
 
-        return sign + FormatShort(absValue / 1_000_000_000_000d, "т");
+        return sign + FormatShort(absValue / 1_000_000_000_000d, "t");
     }
 
     public static string FormatSigned(int value)

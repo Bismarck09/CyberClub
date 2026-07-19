@@ -7,8 +7,8 @@ public class ShopActionService : MonoBehaviour
     [SerializeField] private GemsData _gemsData;
     [SerializeField] private CoinsData _coinsData;
 
-    [Header("Potion effects")]
-    [SerializeField] private PotionEffectService _potionEffectService;
+    [Header("Potion purchase")]
+    [SerializeField] private PotionPurchaseService _potionPurchaseService;
 
     [Header("Save")]
     [SerializeField] private SaveLoadManager _saveLoadManager;
@@ -99,12 +99,12 @@ public class ShopActionService : MonoBehaviour
 
     private void BuyPotion(ShopProductConfig product)
     {
-        if (_potionEffectService == null)
+        if (_potionPurchaseService == null)
         {
-            Debug.LogError("ShopActionService: PotionEffectService не назначен.");
+            Debug.LogError("ShopActionService: PotionPurchaseService не назначен.");
             return;
         }
 
-        _potionEffectService.Activate(product);
+        _potionPurchaseService.TryBuy(product);
     }
 }

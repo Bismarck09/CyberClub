@@ -4,7 +4,6 @@ using UnityEngine;
 public class EntranceAdminZone : MonoBehaviour
 {
     [SerializeField] private AdminUpgradePanelView _panelView;
-    [SerializeField] private AdminUpgradePurchase _adminUpgradePurchase;
     [SerializeField] private AdminUpgradeButton _adminUpgradeButtonController;
 
     // ИЗМЕНЕНО: учитываем все коллайдеры игрока.
@@ -46,7 +45,6 @@ public class EntranceAdminZone : MonoBehaviour
 
     private void CloseAdminShop()
     {
-        _adminUpgradePurchase?.ClearSelectedAdmin();
         _adminUpgradeButtonController?.SetAdminShopOpened(false);
         _panelView?.HideAdminShop();
     }

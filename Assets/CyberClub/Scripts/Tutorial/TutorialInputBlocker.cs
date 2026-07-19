@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class TutorialInputBlocker : MonoBehaviour
 {
     [SerializeField] private PlayerInput _playerInput;
+    [SerializeField] private PlayerInputReader _inputReader;
 
     [Header("Disable only gameplay actions")]
     [SerializeField] private string[] _blockedActionNames = { "Move", "Look" };
@@ -15,9 +16,6 @@ public class TutorialInputBlocker : MonoBehaviour
 
     private void Awake()
     {
-        if (_playerInput == null)
-            _playerInput = FindFirstObjectByType<PlayerInput>();
-
         CacheActions();
     }
 
@@ -32,6 +30,7 @@ public class TutorialInputBlocker : MonoBehaviour
             return;
 
         _isBlocked = value;
+        _inputReader?.SetBlocked(value);
 
         if (_blockedActions == null || _blockedActions.Length == 0)
             CacheActions();

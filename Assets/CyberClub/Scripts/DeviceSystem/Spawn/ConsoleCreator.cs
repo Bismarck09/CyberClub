@@ -1,16 +1,28 @@
 using UnityEngine;
 
-public class ConsoleCreator : MonoBehaviour, IDeviceCreator
+public class ConsoleCreator : IDeviceCreator
 {
     public DeviceType Type => DeviceType.Console;
 
     public GameDevice Create(ZoneDeviceConfig config, Transform spawnPoint)
     {
-        var consolePrefab = Instantiate(config.DevicePrefab, spawnPoint);
+        if (config == null || config.DevicePrefab == null || spawnPoint == null)
+        {
+            Debug.LogError("ConsoleCreator: не переданы config, prefab или spawn point.");
+            return null;
+        }
 
-        if (consolePrefab.TryGetComponent<GameDevice>(out var gameDevice))
+        GameObject consolePrefab = Object.Instantiate(config.DevicePrefab, spawnPoint);
+
+        if (consolePrefab.TryGetComponent(out GameDevice gameDevice))
             return gameDevice;
 
-        return consolePrefab.AddComponent<GameDevice>();
+        Debug.LogError(
+            $"ConsoleCreator: prefab {config.DevicePrefab.name} не содержит GameDevice. Созданный объект удалён.",
+            config.DevicePrefab);
+
+        consolePrefab.SetActive(false);
+        Object.Destroy(consolePrefab);
+        return null;
     }
 }

@@ -6,6 +6,20 @@ public class AdminsSaveModule : MonoBehaviour, ISaveModule
 {
     [SerializeField] private List<AdminSaveSlot> _admins = new();
 
+    private void Awake()
+    {
+        HashSet<string> ids = new();
+
+        foreach (AdminSaveSlot slot in _admins)
+        {
+            if (slot == null || string.IsNullOrWhiteSpace(slot.Id))
+                continue;
+
+            if (!ids.Add(slot.Id))
+                Debug.LogError($"AdminsSaveModule: повторяющийся ID администратора '{slot.Id}'.", this);
+        }
+    }
+
     public void Capture(GameSaveData saveData)
     {
         saveData.Admins.Clear();

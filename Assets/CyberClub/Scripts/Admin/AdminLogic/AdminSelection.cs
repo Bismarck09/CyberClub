@@ -1,18 +1,14 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class AdminSelection : MonoBehaviour
 {
-    [SerializeField] private AdminWorker _admin;
+    [SerializeField] private List<AdminWorker> _admins = new();
+    [SerializeField] private AdminUpgradePurchase _adminUpgradePurchase;
+    [SerializeField, Min(0f)] private float _selectionHysteresis = 0.35f;
 
-    public static event Action<AdminWorker> OnAdminSelected;
-    public static event Action<AdminWorker> OnAdminDeselected;
-
-    // ИЗМЕНЕНО: учитываем все коллайдеры игрока.
     private readonly HashSet<Collider> _playerColliders = new();
-
-    private bool _isSelected;
+    private Transform _player;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -20,7 +16,8 @@ public class AdminSelection : MonoBehaviour
             return;
 
         _playerColliders.Add(other);
-        TrySelectAdmin();
+        _player = other.GetComponentInParent<PlayerMovement>().transform;
+        SelectClosestAdmin();
     }
 
     // ИЗМЕНЕНО: восстанавливает состояние, если администратор
@@ -31,7 +28,8 @@ public class AdminSelection : MonoBehaviour
             return;
 
         _playerColliders.Add(other);
-        TrySelectAdmin();
+        _player = other.GetComponentInParent<PlayerMovement>().transform;
+        SelectClosestAdmin();
     }
 
     private void OnTriggerExit(Collider other)
@@ -46,36 +44,64 @@ public class AdminSelection : MonoBehaviour
         if (_playerColliders.Count > 0)
             return;
 
-        DeselectAdmin();
+        _player = null;
+        _adminUpgradePurchase?.ClearSelectedAdmin();
+    }
+
+    private void Update()
+    {
+        if (_player != null && _playerColliders.Count > 0)
+            SelectClosestAdmin();
     }
 
     private void OnDisable()
     {
         _playerColliders.Clear();
-        DeselectAdmin();
+        _player = null;
+        _adminUpgradePurchase?.ClearSelectedAdmin();
     }
 
-    private void TrySelectAdmin()
+    private void SelectClosestAdmin()
     {
-        if (_isSelected)
+        if (_player == null || _adminUpgradePurchase == null)
             return;
 
-        if (_admin == null || !_admin.IsHired)
+        AdminWorker closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (AdminWorker admin in _admins)
+        {
+            if (admin == null || !admin.IsHired || !admin.gameObject.activeInHierarchy)
+                continue;
+
+            float distance = Vector3.Distance(_player.position, admin.transform.position);
+
+            if (distance >= closestDistance)
+                continue;
+
+            closest = admin;
+            closestDistance = distance;
+        }
+
+        AdminWorker current = _adminUpgradePurchase.SelectedAdmin;
+
+        if (closest == null)
+        {
+            _adminUpgradePurchase.ClearSelectedAdmin();
             return;
+        }
 
-        _isSelected = true;
-        OnAdminSelected?.Invoke(_admin);
-    }
+        if (current != null && current.IsHired && current.gameObject.activeInHierarchy)
+        {
+            float currentDistance = Vector3.Distance(_player.position, current.transform.position);
 
-    private void DeselectAdmin()
-    {
-        if (!_isSelected)
-            return;
+            // ИЗМЕНЕНО: гистерезис не даёт карточке дрожать на границе
+            // между двумя близко стоящими администраторами.
+            if (closest != current && closestDistance + _selectionHysteresis >= currentDistance)
+                return;
+        }
 
-        _isSelected = false;
-
-        if (_admin != null)
-            OnAdminDeselected?.Invoke(_admin);
+        _adminUpgradePurchase.SelectAdmin(closest);
     }
 
     private bool IsPlayer(Collider other)

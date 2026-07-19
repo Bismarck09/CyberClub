@@ -382,6 +382,7 @@ GameObject:
   - component: {fileID: 1707721717541070575}
   - component: {fileID: 3452100434090100410}
   - component: {fileID: -8113088546825867508}
+  - component: {fileID: 700000000000000001}
   m_Layer: 0
   m_Name: VisitorChild1
   m_TagString: Untagged
@@ -2564,3 +2565,15 @@ Transform:
   - {fileID: 8766800069224503242}
   m_Father: {fileID: 4901546351950765360}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &700000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1857908477458024446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b02b020eeeed9094693deeaf6b055a5f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VisitorSpeedBoostAdapter

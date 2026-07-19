@@ -56,6 +56,19 @@ public class VisitorService : MonoBehaviour
             if (!freeDevice.Device.TryReserve())
                 continue;
 
+            VisitorExit visitorExit = visitor.GetComponent<VisitorExit>();
+
+            if (visitorExit == null)
+            {
+                freeDevice.Device.Release();
+                Debug.LogError($"VisitorService: у {visitor.name} отсутствует VisitorExit на этапе резервирования.", visitor);
+                continue;
+            }
+
+            // ИЗМЕНЕНО: резерв связывается с посетителем до coroutine-задержки,
+            // поэтому OnDestroy всегда сможет освободить устройство.
+            visitorExit.TrackReservedDevice(freeDevice.Device);
+
             StartCoroutine(
                 Service(admin, visitor, freeDevice));
         }
@@ -91,8 +104,7 @@ public class VisitorService : MonoBehaviour
         VisitorMovement movement =
             visitor.GetComponent<VisitorMovement>();
 
-        VisitorExit visitorExit =
-            visitor.GetComponent<VisitorExit>();
+        VisitorExit visitorExit = visitor.GetComponent<VisitorExit>();
 
         VisitorSeat seatController =
             visitor.GetComponent<VisitorSeat>();
@@ -140,20 +152,44 @@ public class VisitorService : MonoBehaviour
                 // ИЗМЕНЕНО: раньше компьютер оставался
                 // зарезервированным навсегда.
                 device.Release();
+                visitorExit.ClearReservedDevice(device);
+                Debug.LogWarning($"VisitorService: {visitor.name} не дошёл до устройства {device.name}.", visitor);
                 visitorExit.MoveToExit();
             });
 
         if (!movementStarted)
         {
             device.Release();
+            visitorExit.ClearReservedDevice(device);
+            Debug.LogWarning($"VisitorService: путь к устройству не запущен для {visitor.name}.", visitor);
             visitorExit.MoveToExit();
         }
         else
         {
-            OnVisitorServiced?.Invoke(freeDevice);
+            NotifyVisitorServicedSafely(freeDevice);
         }
 
         admin.SetBusy(false);
+    }
+
+    private void NotifyVisitorServicedSafely(DeviceEntry device)
+    {
+        if (OnVisitorServiced == null)
+            return;
+
+        // ИЗМЕНЕНО: доход/туториал уведомляются независимо, а администратор освобождается
+        // даже при ошибке одного внешнего подписчика.
+        foreach (Delegate handler in OnVisitorServiced.GetInvocationList())
+        {
+            try
+            {
+                ((Action<DeviceEntry>)handler).Invoke(device);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
     }
 
     private void EvaluateVisitorRating(Visitor visitor)

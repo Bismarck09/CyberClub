@@ -15,6 +15,7 @@ public class AdminWorker : MonoBehaviour
     private int _levelIndex;
     private bool _isHired;
     private bool _isBusy;
+    private bool _isInitialized;
 
     public string DisplayName => _displayName;
     public int HirePrice => _hirePrice;
@@ -40,6 +41,9 @@ public class AdminWorker : MonoBehaviour
 
     private void Awake()
     {
+        if (_isInitialized)
+            return;
+
         RestoreState(_isHiredOnStart, 0);
     }
 
@@ -100,12 +104,21 @@ public class AdminWorker : MonoBehaviour
 
         _queue.Remove(visitor);
         MoveQueue();
-        OnChanged?.Invoke(this);
+        NotifyChanged();
     }
 
     public void Hire()
     {
+        TryHire();
+    }
+
+    public bool TryHire()
+    {
+        if (_isHired)
+            return false;
+
         RestoreState(true, 0);
+        return _isHired;
     }
 
     public bool CanUpgrade()
@@ -123,11 +136,17 @@ public class AdminWorker : MonoBehaviour
 
     public void Upgrade()
     {
+        TryUpgrade();
+    }
+
+    public bool TryUpgrade()
+    {
         if (!CanUpgrade())
-            return;
+            return false;
 
         _levelIndex++;
-        OnChanged?.Invoke(this);
+        NotifyChanged();
+        return true;
     }
 
     public float GetServiceInterval()
@@ -141,11 +160,15 @@ public class AdminWorker : MonoBehaviour
     public void SetBusy(bool value)
     {
         _isBusy = value;
-        OnChanged?.Invoke(this);
+        NotifyChanged();
     }
 
     public void RestoreState(bool isHired, int levelIndex)
     {
+        // ИЗМЕНЕНО: состояние помечается инициализированным до SetActive,
+        // иначе первый найм неактивного объекта повторно запускал Awake
+        // и отменял покупку значением _isHiredOnStart.
+        _isInitialized = true;
         _queue.Clear();
         _isBusy = false;
         _isHired = isHired;
@@ -159,7 +182,7 @@ public class AdminWorker : MonoBehaviour
 
         gameObject.SetActive(_isHired);
         SetQueuePointsActive(_isHired);
-        OnChanged?.Invoke(this);
+        NotifyChanged();
     }
 
     private void MoveQueue()
@@ -186,8 +209,56 @@ public class AdminWorker : MonoBehaviour
             VisitorMovement movement =
                 visitor.GetComponent<VisitorMovement>();
 
-            if (movement != null && _queuePoints[i] != null)
-                movement.Move(_queuePoints[i].position);
+            if (movement == null || _queuePoints[i] == null)
+            {
+                if (HandleQueuedVisitorMoveFailed(visitor, "отсутствует движение или точка очереди"))
+                    i--;
+
+                continue;
+            }
+
+            bool movementStarted = movement.Move(
+                _queuePoints[i].position,
+                null,
+                () => HandleQueuedVisitorMoveFailed(visitor, "NavMesh не построил путь при сдвиге очереди"));
+
+            if (!movementStarted &&
+                HandleQueuedVisitorMoveFailed(visitor, "не удалось запустить сдвиг очереди"))
+            {
+                i--;
+            }
+        }
+    }
+
+    private bool HandleQueuedVisitorMoveFailed(Visitor visitor, string reason)
+    {
+        if (visitor == null || !_queue.Remove(visitor))
+            return false;
+
+        Debug.LogWarning(
+            $"AdminWorker: посетитель {visitor.name} удалён из очереди {name}: {reason}.",
+            visitor);
+
+        visitor.GetComponent<VisitorExit>()?.ExitImmediately();
+        NotifyChanged();
+        return true;
+    }
+
+    private void NotifyChanged()
+    {
+        if (OnChanged == null)
+            return;
+
+        foreach (Delegate handler in OnChanged.GetInvocationList())
+        {
+            try
+            {
+                ((Action<AdminWorker>)handler).Invoke(this);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
     }
 

@@ -1,14 +1,11 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class InteractionWithUI : MonoBehaviour
 {
-    [SerializeField] private PlayerInput _playerInput;
-    [SerializeField] private string _actionName = "InteractionWithInterface";
+    [SerializeField] private PlayerInputReader _inputReader;
     [SerializeField] private bool _startInInterfaceMode;
 
-    private InputAction _interactAction;
     private bool _isInteracts;
     private bool _isSwitchAllowed = true;
 
@@ -19,11 +16,8 @@ public class InteractionWithUI : MonoBehaviour
 
     private void Awake()
     {
-        if (_playerInput == null)
-            _playerInput = GetComponent<PlayerInput>();
-
-        if (_playerInput != null && _playerInput.actions != null)
-            _interactAction = _playerInput.actions.FindAction(_actionName, false);
+        if (_inputReader == null)
+            _inputReader = GetComponent<PlayerInputReader>();
 
         SetInteracts(_startInInterfaceMode, true);
     }
@@ -35,14 +29,14 @@ public class InteractionWithUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (_interactAction != null)
-            _interactAction.performed += SwitchMode;
+        if (_inputReader != null)
+            _inputReader.OnToggleCursorRequested += SwitchMode;
     }
 
     private void OnDisable()
     {
-        if (_interactAction != null)
-            _interactAction.performed -= SwitchMode;
+        if (_inputReader != null)
+            _inputReader.OnToggleCursorRequested -= SwitchMode;
     }
 
     public void SetSwitchAllowed(bool value)
@@ -55,7 +49,7 @@ public class InteractionWithUI : MonoBehaviour
         SetInteracts(value, false);
     }
 
-    private void SwitchMode(InputAction.CallbackContext context)
+    private void SwitchMode()
     {
         if (!_isSwitchAllowed)
             return;
@@ -69,6 +63,7 @@ public class InteractionWithUI : MonoBehaviour
             return;
 
         _isInteracts = value;
+        _inputReader?.SetInterfaceMode(value);
         IsInteractsChanged?.Invoke(_isInteracts);
     }
 }

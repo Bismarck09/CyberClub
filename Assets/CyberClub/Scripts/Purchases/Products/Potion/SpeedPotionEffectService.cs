@@ -45,7 +45,7 @@ public class SpeedPotionEffectService : MonoBehaviour
         DeviceSessionMultiplier = _affectDeviceSession ? safeMultiplier : 1f;
         VisitorMovementMultiplier = _affectVisitorMovement ? safeMultiplier : 1f;
 
-        OnChanged?.Invoke();
+        NotifyChanged();
 
         Debug.Log($"Зелье скорости применено: Admin x{AdminServiceMultiplier}, Session x{DeviceSessionMultiplier}, Movement x{VisitorMovementMultiplier}.");
     }
@@ -79,8 +79,26 @@ public class SpeedPotionEffectService : MonoBehaviour
         DeviceSessionMultiplier = 1f;
         VisitorMovementMultiplier = 1f;
 
-        OnChanged?.Invoke();
+        NotifyChanged();
 
         Debug.Log("Зелье скорости выключено.");
+    }
+
+    private void NotifyChanged()
+    {
+        if (OnChanged == null)
+            return;
+
+        foreach (Delegate handler in OnChanged.GetInvocationList())
+        {
+            try
+            {
+                ((Action)handler).Invoke();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
     }
 }

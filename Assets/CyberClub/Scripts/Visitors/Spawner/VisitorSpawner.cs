@@ -129,6 +129,9 @@ public class VisitorSpawner : MonoBehaviour
         if (obj.GetComponent<VisitorRatingTracker>() == null)
             obj.AddComponent<VisitorRatingTracker>();
 
+        if (obj.GetComponent<VisitorSpeedBoostAdapter>() == null)
+            obj.AddComponent<VisitorSpeedBoostAdapter>();
+
         VisitorMovement movement =
             obj.GetComponent<VisitorMovement>();
 

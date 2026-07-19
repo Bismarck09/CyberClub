@@ -1,16 +1,28 @@
 using UnityEngine;
 
-public class ComputerCreator : MonoBehaviour, IDeviceCreator
+public class ComputerCreator : IDeviceCreator
 {
     public DeviceType Type => DeviceType.Computer;
 
     public GameDevice Create(ZoneDeviceConfig config, Transform spawnPoint)
     {
-        var computerPrefab = Instantiate(config.DevicePrefab, spawnPoint);
+        if (config == null || config.DevicePrefab == null || spawnPoint == null)
+        {
+            Debug.LogError("ComputerCreator: не переданы config, prefab или spawn point.");
+            return null;
+        }
 
-        if (computerPrefab.TryGetComponent<GameDevice>(out var gameDevice))
+        GameObject computerPrefab = Object.Instantiate(config.DevicePrefab, spawnPoint);
+
+        if (computerPrefab.TryGetComponent(out GameDevice gameDevice))
             return gameDevice;
 
-        return computerPrefab.AddComponent<GameDevice>();
+        Debug.LogError(
+            $"ComputerCreator: prefab {config.DevicePrefab.name} не содержит GameDevice. Созданный объект удалён.",
+            config.DevicePrefab);
+
+        computerPrefab.SetActive(false);
+        Object.Destroy(computerPrefab);
+        return null;
     }
 }

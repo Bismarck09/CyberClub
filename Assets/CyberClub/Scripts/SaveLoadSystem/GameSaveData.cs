@@ -4,7 +4,7 @@ using System.Collections.Generic;
 [Serializable]
 public class GameSaveData
 {
-    public int Version = 3;
+    public int Version = 5;
 
     public ResourceSaveData Resources = new();
     public RatingSaveData Rating = new();
@@ -19,6 +19,7 @@ public class GameSaveData
 
     // Нужно для YG2-премиум локации. Если пока не используешь — просто останется пустым.
     public PremiumLocationSaveData PremiumLocation = new();
+    public PotionsSaveData Potions = new();
 }
 
 [Serializable]
@@ -85,6 +86,8 @@ public class TutorialSaveData
     public int Step;
     public bool BreakdownTutorialShown;
     public bool RatingTutorialShown;
+    public bool HasFirstVisitorIncome;
+    public bool FirstComputerCompensationGranted;
 }
 
 [Serializable]
@@ -92,4 +95,22 @@ public class PremiumLocationSaveData
 {
     public bool HasPremiumLocationSave;
     public bool IsUnlocked;
+    public bool HasBonusGrantState;
+    public bool BonusGranted;
+}
+
+[Serializable]
+public class PotionsSaveData
+{
+    public bool HasPotionSave;
+    public long SavedAtUtcTicks;
+    public List<ActivePotionSaveData> ActivePotions = new();
+}
+
+[Serializable]
+public class ActivePotionSaveData
+{
+    public PotionType PotionType;
+    public float Duration;
+    public float RemainingTime;
 }

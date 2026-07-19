@@ -13,6 +13,7 @@ public class GameDevice : MonoBehaviour
     private bool _isOccupied;
     private bool _isBroken;
     private bool _hasRepairIncomeBonus;
+    private bool _isApplicationQuitting;
     private Coroutine _sessionCoroutine;
 
     public bool IsOccupied => _isOccupied;
@@ -36,10 +37,17 @@ public class GameDevice : MonoBehaviour
 
     public void Release()
     {
-        if (_sessionCoroutine != null)
+        // ИЗМЕНЕНО: Release идемпотентен и не пытается останавливать coroutine
+        // на неактивном/уничтожаемом MonoBehaviour.
+        Coroutine sessionCoroutine = _sessionCoroutine;
+        _sessionCoroutine = null;
+
+        if (sessionCoroutine != null &&
+            !_isApplicationQuitting &&
+            isActiveAndEnabled &&
+            gameObject.activeInHierarchy)
         {
-            StopCoroutine(_sessionCoroutine);
-            _sessionCoroutine = null;
+            StopCoroutine(sessionCoroutine);
         }
 
         _isOccupied = false;
@@ -110,6 +118,12 @@ public class GameDevice : MonoBehaviour
         _sessionCoroutine = StartCoroutine(ReleaseAfterTime(time, visitorExit, seatController));
     }
 
+    private void OnApplicationQuit()
+    {
+        _isApplicationQuitting = true;
+        _sessionCoroutine = null;
+    }
+
     private IEnumerator ReleaseAfterTime(float time, VisitorExit visitorExit, VisitorSeat seatController)
     {
         yield return new WaitForSeconds(time);
@@ -121,6 +135,9 @@ public class GameDevice : MonoBehaviour
         _sessionCoroutine = null;
 
         if (visitorExit != null)
+        {
+            visitorExit.ClearReservedDevice(this);
             visitorExit.MoveToExit();
+        }
     }
 }

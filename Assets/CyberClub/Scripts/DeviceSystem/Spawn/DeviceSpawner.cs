@@ -4,7 +4,6 @@ using System.Collections.Generic;
 public class DeviceSpawner : MonoBehaviour
 {
     [SerializeField] private DeviceRegistry _deviceRegistry;
-    [SerializeField] private LocationInformation _locationInformation;
     [SerializeField] private DevicePurchase _devicePurchase;
 
     private GameDeviceFactory _deviceFactory;
@@ -24,24 +23,13 @@ public class DeviceSpawner : MonoBehaviour
     private void OnEnable()
     {
         if (_devicePurchase != null)
-            _devicePurchase.OnDevicePurchased += SpawnDeviceInCurrentZone;
+            _devicePurchase.RegisterDeviceSpawner(this);
     }
 
     private void OnDisable()
     {
         if (_devicePurchase != null)
-            _devicePurchase.OnDevicePurchased -= SpawnDeviceInCurrentZone;
-    }
-
-    private void SpawnDeviceInCurrentZone()
-    {
-        if (_locationInformation == null || _locationInformation.CurrentZoneInformation == null)
-        {
-            Debug.LogError("DeviceSpawner: нет текущей зоны для спавна устройства.");
-            return;
-        }
-
-        SpawnDevice(_locationInformation.CurrentZoneInformation);
+            _devicePurchase.UnregisterDeviceSpawner(this);
     }
 
     public void RestoreDevices(ZoneInformation zoneInformation, int count)
@@ -52,17 +40,39 @@ public class DeviceSpawner : MonoBehaviour
         zoneInformation.SpawnPoints.ResetSpawnPoints();
 
         for (int i = 0; i < count; i++)
-            SpawnDevice(zoneInformation);
+        {
+            if (!TrySpawnDevice(zoneInformation, out _))
+                break;
+        }
     }
 
     public void SpawnDevice(ZoneInformation zoneInformation)
     {
-        if (zoneInformation == null)
-            return;
+        TrySpawnDevice(zoneInformation, out _);
+    }
 
-        if (zoneInformation.SpawnPoints == null || zoneInformation.SpawnPoints.HasSpawnPoints == false)
-            return;
+    public bool CanSpawnDevice(ZoneInformation zoneInformation)
+    {
+        if (_deviceFactory == null || _deviceRegistry == null || zoneInformation == null)
+            return false;
 
-        _deviceFactory.SpawnDevice(zoneInformation);
+        ZoneDeviceConfig config = zoneInformation.ZoneConfig;
+        SpawnPointsHolder spawnPoints = zoneInformation.SpawnPoints;
+
+        return config != null &&
+               config.DevicePrefab != null &&
+               spawnPoints != null &&
+               spawnPoints.HasSpawnPoints &&
+               _deviceFactory.CanCreateDevice(zoneInformation);
+    }
+
+    public bool TrySpawnDevice(ZoneInformation zoneInformation, out GameDevice device)
+    {
+        device = null;
+
+        if (!CanSpawnDevice(zoneInformation))
+            return false;
+
+        return _deviceFactory.TrySpawnDevice(zoneInformation, out device);
     }
 }

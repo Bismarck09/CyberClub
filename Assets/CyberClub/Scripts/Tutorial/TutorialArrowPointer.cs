@@ -11,12 +11,14 @@ public class TutorialArrowPointer : MonoBehaviour
     [SerializeField] private RectTransform _arrow;
     [SerializeField] private Vector2 _screenOffset = new Vector2(0f, 80f);
     [SerializeField] private Vector2 _screenPadding = new Vector2(70f, 70f);
+    [SerializeField] private bool _rotateAtScreenEdge = true;
 
     [Header("Visual")]
     [SerializeField] private Vector2 _size = new Vector2(90f, 90f);
     [SerializeField] private bool _forceSize = true;
 
     private Transform _target;
+    private readonly Vector3[] _targetCorners = new Vector3[4];
 
     private void Awake()
     {
@@ -41,13 +43,42 @@ public class TutorialArrowPointer : MonoBehaviour
         if (_arrow == null)
             return;
 
-        Vector2 screenPoint = GetTargetScreenPoint(_target);
-        screenPoint += _screenOffset;
+        if (!TryGetTargetScreenPoint(_target, out Vector2 targetPoint, out bool isBehindCamera))
+        {
+            _arrow.gameObject.SetActive(false);
+            return;
+        }
 
-        screenPoint.x = Mathf.Clamp(screenPoint.x, _screenPadding.x, Screen.width - _screenPadding.x);
-        screenPoint.y = Mathf.Clamp(screenPoint.y, _screenPadding.y, Screen.height - _screenPadding.y);
+        Rect safeRect = GetPaddedSafeArea();
+        Vector2 screenCenter = safeRect.center;
 
-        MoveArrowToScreenPoint(screenPoint);
+        if (isBehindCamera)
+            targetPoint = screenCenter - (targetPoint - screenCenter);
+
+        Vector2 requestedPoint = targetPoint + _screenOffset;
+        bool isOnScreen = !isBehindCamera && safeRect.Contains(requestedPoint);
+        Vector2 finalPoint = isOnScreen
+            ? requestedPoint
+            : new Vector2(
+                Mathf.Clamp(requestedPoint.x, safeRect.xMin, safeRect.xMax),
+                Mathf.Clamp(requestedPoint.y, safeRect.yMin, safeRect.yMax));
+
+        if (_rotateAtScreenEdge && !isOnScreen)
+        {
+            Vector2 direction = targetPoint - screenCenter;
+
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+                _arrow.localRotation = Quaternion.Euler(0f, 0f, angle);
+            }
+        }
+        else
+        {
+            _arrow.localRotation = Quaternion.identity;
+        }
+
+        MoveArrowToScreenPoint(finalPoint);
     }
 
     public void PointTo(Transform target)
@@ -64,44 +95,59 @@ public class TutorialArrowPointer : MonoBehaviour
         _target = null;
 
         if (_arrow != null)
+        {
+            _arrow.localRotation = Quaternion.identity;
             _arrow.gameObject.SetActive(false);
+        }
     }
 
-    private Vector2 GetTargetScreenPoint(Transform target)
+    private bool TryGetTargetScreenPoint(Transform target, out Vector2 screenPoint, out bool isBehindCamera)
     {
+        screenPoint = Vector2.zero;
+        isBehindCamera = false;
         RectTransform rectTarget = target as RectTransform;
 
         if (rectTarget != null)
-            return GetRectTransformScreenPoint(rectTarget);
+        {
+            screenPoint = GetRectTransformScreenPoint(rectTarget);
+            return true;
+        }
 
         if (_worldCamera == null)
             _worldCamera = Camera.main;
 
         if (_worldCamera == null)
-            return Vector2.zero;
+            return false;
 
-        Vector3 screenPoint = _worldCamera.WorldToScreenPoint(target.position);
-
-        if (screenPoint.z < 0f)
-        {
-            screenPoint.x = Screen.width - screenPoint.x;
-            screenPoint.y = Screen.height - screenPoint.y;
-        }
-
-        return screenPoint;
+        Vector3 projected = _worldCamera.WorldToScreenPoint(target.position);
+        screenPoint = projected;
+        isBehindCamera = projected.z <= 0f;
+        return true;
     }
 
     private Vector2 GetRectTransformScreenPoint(RectTransform rectTarget)
     {
-        Vector3[] corners = new Vector3[4];
-        rectTarget.GetWorldCorners(corners);
+        rectTarget.GetWorldCorners(_targetCorners);
 
-        Vector3 worldCenter = (corners[0] + corners[1] + corners[2] + corners[3]) * 0.25f;
+        Vector3 worldCenter = (_targetCorners[0] + _targetCorners[1] + _targetCorners[2] + _targetCorners[3]) * 0.25f;
 
         Canvas targetCanvas = rectTarget.GetComponentInParent<Canvas>();
         Camera targetCamera = GetCameraForCanvas(targetCanvas);
 
         return RectTransformUtility.WorldToScreenPoint(targetCamera, worldCenter);
+    }
+
+    private Rect GetPaddedSafeArea()
+    {
+        Rect safeArea = Screen.safeArea;
+        float horizontalPadding = Mathf.Min(_screenPadding.x, safeArea.width * 0.45f);
+        float verticalPadding = Mathf.Min(_screenPadding.y, safeArea.height * 0.45f);
+
+        return new Rect(
+            safeArea.xMin + horizontalPadding,
+            safeArea.yMin + verticalPadding,
+            Mathf.Max(1f, safeArea.width - horizontalPadding * 2f),
+            Mathf.Max(1f, safeArea.height - verticalPadding * 2f));
     }
 
     private void MoveArrowToScreenPoint(Vector2 screenPoint)

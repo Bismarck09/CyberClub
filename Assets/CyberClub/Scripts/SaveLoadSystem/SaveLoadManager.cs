@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,11 @@ public class SaveLoadManager : MonoBehaviour
     private readonly List<ISaveModule> _modules = new();
     private float _timer;
     private bool _isLoaded;
+    private bool _isLoading;
+    private bool _saveRequestedDuringLoad;
+
+    public bool IsLoaded => _isLoaded;
+    public event Action OnGameLoaded;
 
     private void Awake() => BuildModulesList();
 
@@ -40,10 +46,27 @@ public class SaveLoadManager : MonoBehaviour
     [ContextMenu("Save Game")]
     public void SaveGame()
     {
+        // ИЗМЕНЕНО: миграции могут запросить немедленное сохранение во время Restore.
+        // Фактическая запись выполняется после восстановления всех модулей.
+        if (_isLoading)
+        {
+            _saveRequestedDuringLoad = true;
+            return;
+        }
+
         GameSaveData data = new GameSaveData();
 
         foreach (ISaveModule module in _modules)
-            module?.Capture(data);
+        {
+            try
+            {
+                module?.Capture(data);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, module as UnityEngine.Object);
+            }
+        }
 
         GameSaveRepository.Save(data);
     }
@@ -52,11 +75,37 @@ public class SaveLoadManager : MonoBehaviour
     public void LoadGame()
     {
         GameSaveData data = GameSaveRepository.Load();
+        _isLoading = true;
 
-        foreach (ISaveModule module in _modules)
-            module?.Restore(data);
+        try
+        {
+            foreach (ISaveModule module in _modules)
+            {
+                try
+                {
+                    module?.Restore(data);
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception, module as UnityEngine.Object);
+                }
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
 
         _isLoaded = true;
+        // ИЗМЕНЕНО: зависимые системы запускают callback YG2 и миграции
+        // только после восстановления всех модулей.
+        InvokeGameLoadedSafely();
+
+        if (_saveRequestedDuringLoad)
+        {
+            _saveRequestedDuringLoad = false;
+            SaveGame();
+        }
     }
 
     [ContextMenu("Delete Save")]
@@ -97,6 +146,24 @@ public class SaveLoadManager : MonoBehaviour
                 _modules.Add(module);
             else
                 Debug.LogError($"{behaviour.name} не реализует ISaveModule.");
+        }
+    }
+
+    private void InvokeGameLoadedSafely()
+    {
+        if (OnGameLoaded == null)
+            return;
+
+        foreach (Delegate handler in OnGameLoaded.GetInvocationList())
+        {
+            try
+            {
+                ((Action)handler).Invoke();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
     }
 }

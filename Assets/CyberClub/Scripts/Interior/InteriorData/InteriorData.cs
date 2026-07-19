@@ -45,31 +45,32 @@ public class InteriorData : MonoBehaviour
         return multiplier;
     }
 
-    public void BuyInterior()
+    public bool BuyInterior()
     {
         if (IsMaxPurchased)
-            return;
+            return false;
 
         if (_currentBoughtInteriorObjects >= _interiorObjects.Count)
         {
             Debug.LogError("Не хватает объекта интерьера");
-            return;
+            return false;
         }
 
         if (_currentBoughtInteriorObjects >= _interiorsPrice.Count)
         {
             Debug.LogError("Не хватает цены интерьера");
-            return;
+            return false;
         }
 
         if (_currentBoughtInteriorObjects >= _multipliers.Count)
         {
             Debug.LogError("Не хватает множителя интерьера");
-            return;
+            return false;
         }
 
         _currentBoughtInteriorObjects++;
         RefreshVisuals();
+        return true;
     }
 
     public void RestoreBoughtInteriorObjects(int count)

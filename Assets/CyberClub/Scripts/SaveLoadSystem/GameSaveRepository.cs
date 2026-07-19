@@ -25,8 +25,21 @@ public static class GameSaveRepository
 
         try
         {
-            GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
-            return data ?? new GameSaveData();
+            GameSaveData data = JsonUtility.FromJson<GameSaveData>(json) ?? new GameSaveData();
+
+            // ИЗМЕНЕНО: новые разделы и коллекции создаются для старых JSON,
+            // где этих полей ещё не существовало.
+            data.Resources ??= new ResourceSaveData();
+            data.Rating ??= new RatingSaveData();
+            data.Zones ??= new System.Collections.Generic.List<ZoneSaveData>();
+            data.Admins ??= new System.Collections.Generic.List<AdminSaveData>();
+            data.Settings ??= new SettingsSaveData();
+            data.Quests ??= new QuestSaveData();
+            data.Tutorial ??= new TutorialSaveData();
+            data.PremiumLocation ??= new PremiumLocationSaveData();
+            data.Potions ??= new PotionsSaveData();
+            data.Potions.ActivePotions ??= new System.Collections.Generic.List<ActivePotionSaveData>();
+            return data;
         }
         catch
         {

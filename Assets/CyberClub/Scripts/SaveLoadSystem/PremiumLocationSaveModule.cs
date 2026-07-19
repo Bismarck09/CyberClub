@@ -11,6 +11,8 @@ public class PremiumLocationSaveModule : MonoBehaviour, ISaveModule
 
         saveData.PremiumLocation.HasPremiumLocationSave = true;
         saveData.PremiumLocation.IsUnlocked = _premiumLocationUnlocker.IsUnlocked;
+        saveData.PremiumLocation.HasBonusGrantState = true;
+        saveData.PremiumLocation.BonusGranted = _premiumLocationUnlocker.BonusGranted;
     }
 
     public void Restore(GameSaveData saveData)
@@ -20,7 +22,15 @@ public class PremiumLocationSaveModule : MonoBehaviour, ISaveModule
         if (saveData.PremiumLocation == null || saveData.PremiumLocation.HasPremiumLocationSave == false)
             return;
 
-        _premiumLocationUnlocker.RestoreUnlockedState(saveData.PremiumLocation.IsUnlocked);
+        // ИЗМЕНЕНО: старый сейв с уже открытой премиум-зоной считается
+        // получившим бонус, чтобы обычная загрузка не начисляла гемы повторно.
+        bool bonusGranted = saveData.PremiumLocation.HasBonusGrantState
+            ? saveData.PremiumLocation.BonusGranted
+            : saveData.PremiumLocation.IsUnlocked;
+
+        _premiumLocationUnlocker.RestoreUnlockedState(
+            saveData.PremiumLocation.IsUnlocked,
+            bonusGranted);
     }
 }
 

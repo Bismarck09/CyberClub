@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class AdminUpgradePanelView : MonoBehaviour
 {
@@ -12,9 +11,6 @@ public class AdminUpgradePanelView : MonoBehaviour
     [SerializeField] private GameObject _interiorCard;
     [SerializeField] private GameObject _adminUpgradeCard;
 
-    [Header("Upgrade Button")]
-    [SerializeField] private Button _adminUpgradeButton;
-
     public void ShowAdminShop()
     {
         if (_scrollView != null)
@@ -23,7 +19,8 @@ public class AdminUpgradePanelView : MonoBehaviour
         SetDeviceCard(false);
         SetInteriorCard(false);
         SetAdminHireCard(true);
-        SetAdminUpgradeCard(false);
+        // AdminUpgradeButton is the single owner of the selected-admin card.
+        // Hiding it here made callback order decide whether the card stayed visible.
     }
 
     public void HideAdminShop()
@@ -40,9 +37,6 @@ public class AdminUpgradePanelView : MonoBehaviour
     public void ShowAdminUpgrade()
     {
         SetAdminUpgradeCard(true);
-
-        if (_adminUpgradeButton != null)
-            _adminUpgradeButton.interactable = true;
     }
 
     public void HideAdminUpgrade()
@@ -72,8 +66,5 @@ public class AdminUpgradePanelView : MonoBehaviour
     {
         if (_adminUpgradeCard != null)
             _adminUpgradeCard.SetActive(value);
-
-        if (_adminUpgradeButton != null)
-            _adminUpgradeButton.interactable = value;
     }
 }

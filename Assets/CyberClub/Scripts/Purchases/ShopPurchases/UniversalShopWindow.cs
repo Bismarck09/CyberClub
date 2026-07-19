@@ -75,6 +75,21 @@ public class UniversalShopWindow : MonoBehaviour
         RebuildCurrentCategory();
     }
 
+    public void ShowResourcesAndSelect(ShopProductActionType actionType)
+    {
+        _showPotions = false;
+        RebuildCurrentCategory();
+
+        foreach (ShopProductButton button in _activeButtons)
+        {
+            if (button != null && button.Product != null && button.Product.ActionType == actionType)
+            {
+                SelectProduct(button);
+                return;
+            }
+        }
+    }
+
     public void SelectProduct(ShopProductButton button)
     {
         if (button == null || button.Product == null)

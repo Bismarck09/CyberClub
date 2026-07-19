@@ -66,6 +66,10 @@ public class VisitorRegistration : MonoBehaviour
     {
         IsRegistered = false;
 
+        Debug.LogWarning(
+            $"VisitorRegistration: {name} не смог дойти до очереди и покидает систему.",
+            this);
+
         if (_visitorQueue != null && _visitor != null)
             _visitorQueue.RemoveVisitor(_visitor);
 

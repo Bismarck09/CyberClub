@@ -73,7 +73,7 @@ public class ShopProductInfoPanel : MonoBehaviour
             _priceRoot.SetActive(showPrice);
 
         if (_priceText != null)
-            _priceText.text = showPrice ? product.PriceGems.ToString() : string.Empty;
+            _priceText.text = showPrice ? ResourceValueFormatter.Format(product.PriceGems) : string.Empty;
 
         if (_actionButtonText != null)
             _actionButtonText.text = string.IsNullOrWhiteSpace(product.ButtonText) ? "Купить" : product.ButtonText;

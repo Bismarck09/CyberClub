@@ -5,6 +5,7 @@ public class DevicePriceText : MonoBehaviour
 {
     [SerializeField] private DevicePurchase _devicePurchase;
     [SerializeField] private TMP_Text _priceText;
+    [SerializeField] private string _unavailableText = "MAX";
 
     private void OnEnable()
     {
@@ -22,7 +23,15 @@ public class DevicePriceText : MonoBehaviour
 
     private void UpdateText(int price)
     {
-        if (_priceText != null)
-            _priceText.text = price.ToString();
+        if (_priceText == null)
+            return;
+
+        if (_devicePurchase == null || _devicePurchase.IsDeviceLimitReached)
+        {
+            _priceText.text = _unavailableText;
+            return;
+        }
+
+        _priceText.text = ResourceValueFormatter.Format(price);
     }
 }

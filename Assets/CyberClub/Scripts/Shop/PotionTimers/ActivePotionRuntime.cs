@@ -22,6 +22,14 @@ public class ActivePotionRuntime
         RemainingTime = Duration;
     }
 
+    public void Restore(ShopProductConfig product, float duration, float remainingTime)
+    {
+        Product = product;
+        PotionType = product.PotionType;
+        Duration = Mathf.Max(0.1f, duration);
+        RemainingTime = Mathf.Clamp(remainingTime, 0f, Duration);
+    }
+
     public void Tick(float deltaTime)
     {
         RemainingTime = Mathf.Max(0f, RemainingTime - deltaTime);

@@ -10,7 +10,9 @@ public class CyberClubTutorialManager : MonoBehaviour
         WaitFirstDevicePurchase,
         FirstDeviceMessage,
         InteriorMessage,
-        Completed
+        Completed,
+        WaitFirstIncome,
+        FirstIncomeMessage
     }
 
     [Header("UI")]
@@ -29,6 +31,9 @@ public class CyberClubTutorialManager : MonoBehaviour
     [SerializeField] private string _firstRoomNamePart = "Красная";
     [SerializeField] private DevicePurchase _devicePurchase;
     [SerializeField] private RatingData _ratingData;
+    [SerializeField] private VisitorService _visitorService;
+    [SerializeField] private CoinsData _coinsData;
+    [SerializeField] private SaveLoadManager _saveLoadManager;
 
     [Header("Control")]
     [SerializeField] private InteractionWithUI _interactionWithUI;
@@ -40,15 +45,20 @@ public class CyberClubTutorialManager : MonoBehaviour
     private TutorialStep _step;
     private bool _breakdownTutorialShown;
     private bool _ratingTutorialShown;
+    private bool _hasFirstVisitorIncome;
+    private bool _firstComputerCompensationGranted;
     private bool _wasRestored;
 
     public int StepIndex => (int)_step;
     public bool BreakdownTutorialShown => _breakdownTutorialShown;
     public bool RatingTutorialShown => _ratingTutorialShown;
+    public bool CanHireAdditionalAdmins =>
+        _hasFirstVisitorIncome || _step == TutorialStep.Completed;
+
+    public event System.Action OnTutorialStateChanged;
 
     private void Awake()
     {
-        FindReferences();
         HideAllTutorialUI();
     }
 
@@ -62,6 +72,9 @@ public class CyberClubTutorialManager : MonoBehaviour
 
         if (_ratingData != null)
             _ratingData.OnRatingChanged += OnRatingChanged;
+
+        if (_visitorService != null)
+            _visitorService.OnVisitorServiced += OnFirstVisitorServiced;
     }
 
     private void OnDisable()
@@ -74,12 +87,18 @@ public class CyberClubTutorialManager : MonoBehaviour
 
         if (_ratingData != null)
             _ratingData.OnRatingChanged -= OnRatingChanged;
+
+        if (_visitorService != null)
+            _visitorService.OnVisitorServiced -= OnFirstVisitorServiced;
     }
 
     private void Start()
     {
         if (_wasRestored)
+        {
+            ReconcileFirstDeviceProgress();
             return;
+        }
 
         if (_startOnStart)
             StartTutorial();
@@ -92,7 +111,9 @@ public class CyberClubTutorialManager : MonoBehaviour
             HasTutorialSave = true,
             Step = (int)_step,
             BreakdownTutorialShown = _breakdownTutorialShown,
-            RatingTutorialShown = _ratingTutorialShown
+            RatingTutorialShown = _ratingTutorialShown,
+            HasFirstVisitorIncome = _hasFirstVisitorIncome,
+            FirstComputerCompensationGranted = _firstComputerCompensationGranted
         };
     }
 
@@ -101,10 +122,14 @@ public class CyberClubTutorialManager : MonoBehaviour
         if (data == null || data.HasTutorialSave == false)
             return;
 
-        _step = (TutorialStep)Mathf.Clamp(data.Step, 0, (int)TutorialStep.Completed);
+        _step = (TutorialStep)Mathf.Clamp(data.Step, 0, (int)TutorialStep.FirstIncomeMessage);
         _breakdownTutorialShown = data.BreakdownTutorialShown;
         _ratingTutorialShown = data.RatingTutorialShown;
+        _hasFirstVisitorIncome = data.HasFirstVisitorIncome || _step == TutorialStep.Completed;
+        _firstComputerCompensationGranted = data.FirstComputerCompensationGranted;
         _wasRestored = true;
+
+        TryRepairBrokenFirstComputerSave();
 
         HideAllTutorialUI();
 
@@ -120,13 +145,40 @@ public class CyberClubTutorialManager : MonoBehaviour
                 PointArrowTo(_firstRoomTarget);
                 break;
 
+            case TutorialStep.FirstRoomMessage:
+                _step = TutorialStep.WaitFirstRoom;
+                EnterFirstRoom();
+                break;
+
             case TutorialStep.WaitFirstDevicePurchase:
+                if (HasFirstComputer())
+                {
+                    CompleteFirstDeviceRequirement();
+                    break;
+                }
+
                 HidePanel();
                 ShowObjective("Купи первый компьютер в панели улучшений.");
                 PointArrowTo(_buyDeviceButtonTarget);
                 BlockGameplay();
                 ForceCursor(true);
                 SetSpaceSwitchAllowed(false);
+                break;
+
+            case TutorialStep.FirstDeviceMessage:
+                ShowFirstDevicePurchasedMessage();
+                break;
+
+            case TutorialStep.WaitFirstIncome:
+                BeginWaitFirstIncome();
+                break;
+
+            case TutorialStep.FirstIncomeMessage:
+                ShowFirstIncomeMessage();
+                break;
+
+            case TutorialStep.InteriorMessage:
+                ShowInteriorMessage();
                 break;
 
             default:
@@ -140,14 +192,14 @@ public class CyberClubTutorialManager : MonoBehaviour
         _step = TutorialStep.Welcome;
 
         BlockGameplay();
-        ForceCursor(false);
-        SetSpaceSwitchAllowed(true);
+        ForceCursor(true);
+        SetSpaceSwitchAllowed(false);
 
         if (_panel != null)
         {
             _panel.ShowWindow(
                 "Добро пожаловать в Кибер Клуб",
-                "Ты управляешь компьютерным клубом.\n\nПокупай комнаты и компьютеры, обслуживай клиентов, улучшай интерьер и следи за рейтингом.\n\n<b>Сейчас курсор скрыт.</b> Чтобы нажать кнопку в этом окне, нажми <b>Пробел</b> — курсор появится. Потом нажми кнопку <b>Далее</b>.\n\nВ игре Пробел переключает режимы:\n• курсор виден — можно нажимать на кнопки, но камера не вращается;\n• курсор скрыт — можно ходить и вращать камеру.",
+                "Ты управляешь компьютерным клубом.\n\nПокупай комнаты и компьютеры, обслуживай клиентов, улучшай интерьер и следи за рейтингом.\n\n<b>Чтобы нажимать кнопки:</b> на ПК нажми <b>Пробел</b>, а на телефоне — кнопку <b>Меню</b>. Затем нажми <b>Далее</b>.\n\nВ режиме интерфейса можно нажимать и прокручивать панели; в игровом режиме — ходить и вращать камеру.",
                 "Далее",
                 BeginGoToFirstRoom
             );
@@ -160,6 +212,13 @@ public class CyberClubTutorialManager : MonoBehaviour
             return;
 
         _step = TutorialStep.FirstRoomMessage;
+        SaveProgress();
+
+        if (HasFirstComputer())
+        {
+            CompleteFirstDeviceRequirement();
+            return;
+        }
 
         HideObjective();
         PointArrowTo(_buyDeviceButtonTarget);
@@ -178,10 +237,11 @@ public class CyberClubTutorialManager : MonoBehaviour
             return;
 
         _breakdownTutorialShown = true;
+        SaveProgress();
 
         ShowBlockingWindow(
             "Поломка компьютера",
-            "Иногда компьютеры ломаются. Сломанный компьютер не принимает клиентов.\n\nПодойди к нему, включи курсор через <b>Пробел</b> и зажми иконку поломки. За ремонт ты получишь бонусные монеты.",
+            "Иногда компьютеры ломаются. Сломанный компьютер не принимает клиентов.\n\nПодойди к нему, включи интерфейс через <b>Пробел</b> на ПК или <b>Меню</b> на телефоне и зажми иконку поломки. За ремонт ты получишь бонусные монеты.",
             "Понял",
             ClosePopupTutorialAndReturnToGame
         );
@@ -190,6 +250,7 @@ public class CyberClubTutorialManager : MonoBehaviour
     private void BeginGoToFirstRoom()
     {
         _step = TutorialStep.WaitFirstRoom;
+        SaveProgress();
 
         HidePanel();
         EnableGameplay(false);
@@ -200,7 +261,20 @@ public class CyberClubTutorialManager : MonoBehaviour
 
     private void BeginWaitFirstDevicePurchase()
     {
+        if (_step != TutorialStep.FirstRoomMessage &&
+            _step != TutorialStep.WaitFirstDevicePurchase)
+        {
+            return;
+        }
+
+        if (HasFirstComputer())
+        {
+            CompleteFirstDeviceRequirement();
+            return;
+        }
+
         _step = TutorialStep.WaitFirstDevicePurchase;
+        SaveProgress();
 
         HidePanel();
         ShowObjective("Купи первый компьютер в панели улучшений.");
@@ -213,10 +287,51 @@ public class CyberClubTutorialManager : MonoBehaviour
 
     private void OnDevicePurchased()
     {
-        if (_step != TutorialStep.WaitFirstDevicePurchase)
+        if (_step != TutorialStep.FirstRoomMessage &&
+            _step != TutorialStep.WaitFirstDevicePurchase)
+        {
+            return;
+        }
+
+        CompleteFirstDeviceRequirement();
+    }
+
+    private void CompleteFirstDeviceRequirement()
+    {
+        if (_step == TutorialStep.FirstDeviceMessage ||
+            _step == TutorialStep.WaitFirstIncome ||
+            _step == TutorialStep.FirstIncomeMessage ||
+            _step == TutorialStep.InteriorMessage ||
+            _step == TutorialStep.Completed)
+        {
+            return;
+        }
+
+        if (!HasFirstComputer())
             return;
 
         _step = TutorialStep.FirstDeviceMessage;
+        SaveProgress();
+        ShowFirstDevicePurchasedMessage();
+    }
+
+    private bool HasFirstComputer()
+    {
+        return _firstRoomZone != null && _firstRoomZone.CurrentDevicePurchases > 0;
+    }
+
+    private void ReconcileFirstDeviceProgress()
+    {
+        if ((_step == TutorialStep.FirstRoomMessage ||
+             _step == TutorialStep.WaitFirstDevicePurchase) &&
+            HasFirstComputer())
+        {
+            CompleteFirstDeviceRequirement();
+        }
+    }
+
+    private void ShowFirstDevicePurchasedMessage()
+    {
 
         HideObjective();
         HideArrow();
@@ -225,13 +340,47 @@ public class CyberClubTutorialManager : MonoBehaviour
             "Первый компьютер куплен",
             "Теперь клиенты смогут садиться за компьютер и приносить монеты.\n\nЧем больше компьютеров, тем выше доход, но если клиентов станет слишком много, админы могут не успевать.",
             "Далее",
-            ShowInteriorMessage
+            BeginWaitFirstIncome
         );
+    }
+
+    private void BeginWaitFirstIncome()
+    {
+        _step = TutorialStep.WaitFirstIncome;
+        SaveProgress();
+
+        HidePanel();
+        HideArrow();
+        ShowObjective("Дождись первого посетителя и первого дохода.");
+        EnableGameplay(false);
+    }
+
+    private void OnFirstVisitorServiced(DeviceEntry unusedDevice)
+    {
+        if (_step != TutorialStep.WaitFirstIncome)
+            return;
+
+        _hasFirstVisitorIncome = true;
+        _step = TutorialStep.FirstIncomeMessage;
+        SaveProgress();
+        ShowFirstIncomeMessage();
+    }
+
+    private void ShowFirstIncomeMessage()
+    {
+        HideObjective();
+
+        ShowBlockingWindow(
+            "Первый доход получен",
+            "Первый посетитель обслужен, и клуб начал приносить доход. Теперь можно развивать интерьер и нанимать дополнительных администраторов.",
+            "Далее",
+            ShowInteriorMessage);
     }
 
     private void ShowInteriorMessage()
     {
         _step = TutorialStep.InteriorMessage;
+        SaveProgress();
 
         ShowBlockingWindow(
             "Интерьер",
@@ -244,6 +393,8 @@ public class CyberClubTutorialManager : MonoBehaviour
     private void CompleteBasicTutorial()
     {
         _step = TutorialStep.Completed;
+        _hasFirstVisitorIncome = true;
+        SaveProgress();
         ClosePopupTutorialAndReturnToGame();
     }
 
@@ -287,6 +438,7 @@ public class CyberClubTutorialManager : MonoBehaviour
             return;
 
         _ratingTutorialShown = true;
+        SaveProgress();
 
         PointArrowTo(_ratingTarget);
 
@@ -381,23 +533,64 @@ public class CyberClubTutorialManager : MonoBehaviour
         HideArrow();
     }
 
-    private void FindReferences()
+    private void SaveProgress()
     {
-        if (_panel == null)
-            _panel = FindAnyObjectByType<TutorialPanel>();
-        if (_objectiveHint == null)
-            _objectiveHint = FindAnyObjectByType<TutorialObjectiveHint>();
-        if (_arrow == null)
-            _arrow = FindAnyObjectByType<TutorialArrowPointer>();
-        if (_interactionWithUI == null)
-            _interactionWithUI = FindAnyObjectByType<InteractionWithUI>();
-        if (_inputBlocker == null)
-            _inputBlocker = FindAnyObjectByType<TutorialInputBlocker>();
-        if (_zoneSwitcher == null)
-            _zoneSwitcher = FindAnyObjectByType<ZoneSwitcher>();
-        if (_devicePurchase == null)
-            _devicePurchase = FindAnyObjectByType<DevicePurchase>();
-        if (_ratingData == null)
-            _ratingData = FindAnyObjectByType<RatingData>();
+        // ИЗМЕНЕНО: важные флаги WebGL сохраняются в момент изменения,
+        // а не только по таймеру или при потере фокуса.
+        NotifyTutorialStateChangedSafely();
+        _saveLoadManager?.SaveGame();
+    }
+
+    private void NotifyTutorialStateChangedSafely()
+    {
+        if (OnTutorialStateChanged == null)
+            return;
+
+        foreach (System.Delegate handler in OnTutorialStateChanged.GetInvocationList())
+        {
+            try
+            {
+                ((System.Action)handler).Invoke();
+            }
+            catch (System.Exception exception)
+            {
+                // ИЗМЕНЕНО: ошибка UI-подписчика не должна отменять немедленное сохранение туториала.
+                Debug.LogException(exception, this);
+            }
+        }
+    }
+
+    private void TryRepairBrokenFirstComputerSave()
+    {
+        if (!GameSaveRepository.HasSave ||
+            _firstComputerCompensationGranted ||
+            _firstRoomZone == null ||
+            _coinsData == null ||
+            _firstRoomZone.CurrentDevicePurchases > 0)
+        {
+            return;
+        }
+
+        bool progressRequiresComputer =
+            _step == TutorialStep.FirstRoomMessage ||
+            _step == TutorialStep.WaitFirstDevicePurchase ||
+            _step == TutorialStep.FirstDeviceMessage ||
+            _step == TutorialStep.WaitFirstIncome;
+
+        if (!progressRequiresComputer)
+            return;
+
+        int firstComputerPrice = Mathf.Max(0, _firstRoomZone.CurrentDevicePrice);
+        int missingCoins = Mathf.Max(0, firstComputerPrice - _coinsData.CurrentCoins);
+
+        if (missingCoins <= 0)
+            return;
+
+        _coinsData.AddResource(missingCoins, 1f);
+        _firstComputerCompensationGranted = true;
+
+        // ИЗМЕНЕНО: компенсация выдаёт только недостающую сумму и сразу
+        // фиксирует отдельный одноразовый migration-флаг.
+        SaveProgress();
     }
 }

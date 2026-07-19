@@ -22,12 +22,20 @@ public class AdminUpgradeUIData : MonoBehaviour
 
     private void OnEnable()
     {
-        _zoneSwitcher.OnZoneChanged += OnZoneChanged;
-        _zoneSwitcher.OnZoneExited += OnZoneExited;
+        if (_zoneSwitcher != null)
+        {
+            _zoneSwitcher.OnZoneChanged += OnZoneChanged;
+            _zoneSwitcher.OnZoneExited += OnZoneExited;
+        }
 
-        _adminPurchase.OnAdminPurchased += UpdateHireCard;
-        _adminUpgradePurchase.OnSelectedAdminChanged += UpdateUpgradeCard;
-        _adminUpgradePurchase.OnAdminUpgraded += UpdateUpgradeCard;
+        if (_adminPurchase != null)
+            _adminPurchase.OnAdminStateChanged += UpdateHireCard;
+
+        if (_adminUpgradePurchase != null)
+        {
+            _adminUpgradePurchase.OnSelectedAdminChanged += UpdateUpgradeCard;
+            _adminUpgradePurchase.OnAdminUpgraded += UpdateUpgradeCard;
+        }
 
         UpdateHireCard();
         UpdateUpgradeCard(null);
@@ -35,40 +43,58 @@ public class AdminUpgradeUIData : MonoBehaviour
 
     private void OnDisable()
     {
-        _zoneSwitcher.OnZoneChanged -= OnZoneChanged;
-        _zoneSwitcher.OnZoneExited -= OnZoneExited;
+        if (_zoneSwitcher != null)
+        {
+            _zoneSwitcher.OnZoneChanged -= OnZoneChanged;
+            _zoneSwitcher.OnZoneExited -= OnZoneExited;
+        }
 
-        _adminPurchase.OnAdminPurchased -= UpdateHireCard;
-        _adminUpgradePurchase.OnSelectedAdminChanged -= UpdateUpgradeCard;
-        _adminUpgradePurchase.OnAdminUpgraded -= UpdateUpgradeCard;
+        if (_adminPurchase != null)
+            _adminPurchase.OnAdminStateChanged -= UpdateHireCard;
+
+        if (_adminUpgradePurchase != null)
+        {
+            _adminUpgradePurchase.OnSelectedAdminChanged -= UpdateUpgradeCard;
+            _adminUpgradePurchase.OnAdminUpgraded -= UpdateUpgradeCard;
+        }
     }
 
     private void OnZoneChanged(ZoneInformation zoneInformation)
     {
         UpdateHireCard();
-        UpdateUpgradeCard(_adminUpgradePurchase.SelectedAdmin);
+        UpdateUpgradeCard(_adminUpgradePurchase != null ? _adminUpgradePurchase.SelectedAdmin : null);
     }
 
     private void OnZoneExited()
     {
-        _upgradeButton.interactable = false;
+        if (_upgradeButton != null)
+            _upgradeButton.interactable = false;
     }
 
     private void UpdateHireCard()
     {
+        if (_adminPurchase == null)
+            return;
+
         AdminWorker nextAdmin = _adminPurchase.GetNextNotHiredAdmin();
 
         if (nextAdmin == null)
         {
             _hireTitleText.text = "Все админы куплены";
             _hirePriceText.text = "-";
-            _hireButton.interactable = false;
+            if (_hireButton != null)
+                _hireButton.interactable = false;
             return;
         }
 
         _hireTitleText.text = $"Нанять: {nextAdmin.DisplayName}";
-        _hirePriceText.text = nextAdmin.HirePrice.ToString();
-        _hireButton.interactable = true;
+        _hirePriceText.text = ResourceValueFormatter.Format(nextAdmin.HirePrice);
+
+        if (_adminPurchase.IsHiringLockedByTutorial)
+            _hireTitleText.text = "Доступно после первого дохода";
+
+        if (_hireButton != null)
+            _hireButton.interactable = true;
     }
 
     private void UpdateUpgradeCard(AdminWorker admin)
@@ -78,7 +104,8 @@ public class AdminUpgradeUIData : MonoBehaviour
             _upgradeTitleText.text = "Подойди к админу";
             _upgradePriceText.text = "-";
             _upgradeSpeedText.text = "-";
-            _upgradeButton.interactable = false;
+            if (_upgradeButton != null)
+                _upgradeButton.interactable = false;
             return;
         }
 
@@ -88,11 +115,14 @@ public class AdminUpgradeUIData : MonoBehaviour
         if (admin.CanUpgrade() == false)
         {
             _upgradePriceText.text = "MAX";
-            _upgradeButton.interactable = false;
+            if (_upgradeButton != null)
+                _upgradeButton.interactable = false;
             return;
         }
 
-        _upgradePriceText.text = admin.GetUpgradePrice().ToString();
-        _upgradeButton.interactable = true;
+        _upgradePriceText.text = ResourceValueFormatter.Format(admin.GetUpgradePrice());
+
+        if (_upgradeButton != null)
+            _upgradeButton.interactable = _adminUpgradePurchase != null;
     }
 }

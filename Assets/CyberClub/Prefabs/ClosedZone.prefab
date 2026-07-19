@@ -57,7 +57,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.23056935, g: 0.8962264, b: 0.080322154, a: 1}
@@ -120,31 +120,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4423214895830961704}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &2647649124829245693
 GameObject:
   m_ObjectHideFlags: 0
@@ -157,6 +133,7 @@ GameObject:
   - component: {fileID: 4664635784909756602}
   - component: {fileID: 574666141110187058}
   - component: {fileID: 2711493865297493899}
+  - component: {fileID: 9029355507830175412}
   m_Layer: 3
   m_Name: Canvas
   m_TagString: Untagged
@@ -249,6 +226,19 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &9029355507830175412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2647649124829245693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b9e79cc22ad438cb452313c335c737a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WorldSpaceCanvasScaleCompensator
+  _referenceWorldScale: 0
 --- !u!1 &3276218597293095061
 GameObject:
   m_ObjectHideFlags: 0

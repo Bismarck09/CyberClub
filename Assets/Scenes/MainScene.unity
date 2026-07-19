@@ -6333,6 +6333,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZonePurchase
   _coinsData: {fileID: 89083772}
   _saveLoadManager: {fileID: 1492970798}
+  _purchaseDialog: {fileID: 2200000002}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!1 &236212847
 GameObject:
   m_ObjectHideFlags: 0
@@ -6714,6 +6716,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -7151,6 +7157,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -8600,6 +8610,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteriorPurchase
   _zoneSwitcher: {fileID: 1168961715}
   _coinsData: {fileID: 89083772}
+  _saveLoadManager: {fileID: 1492970798}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!1 &325321194
 GameObject:
   m_ObjectHideFlags: 0
@@ -8848,6 +8860,7 @@ GameObject:
   - component: {fileID: 341522519}
   - component: {fileID: 341522520}
   - component: {fileID: 341522521}
+  - component: {fileID: 341522522}
   m_Layer: 0
   m_Name: Premium
   m_TagString: Untagged
@@ -8973,6 +8986,22 @@ MonoBehaviour:
   _zonePurchaseConfig: {fileID: 1798221704}
   _deviceSpawner: {fileID: 1442244519}
   _isUnlockedByDefault: 0
+--- !u!114 &341522522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 341522515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eafda62bc0824d46ad5abe92cba3ea0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PremiumLocationUnlocker
+  _premiumBarrier: {fileID: 1798221701}
+  _premiumZoneConfig: {fileID: 1798221704}
+  _premiumLockUI: {fileID: 0}
+  _premiumBuyButton: {fileID: 1798221701}
 --- !u!43 &341644331
 Mesh:
   m_ObjectHideFlags: 0
@@ -11026,6 +11055,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialInputBlocker
   _playerInput: {fileID: 1168961709}
+  _inputReader: {fileID: 1168961716}
   _blockedActionNames:
   - Move
   - Look
@@ -11172,6 +11202,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AdminUpgradePurchase
   _coinsData: {fileID: 89083772}
+  _saveLoadManager: {fileID: 1492970798}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!114 &408639998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11210,6 +11242,10 @@ MonoBehaviour:
   _admins:
   - {fileID: 878779722}
   - {fileID: 1940016164}
+  - {fileID: 2925184380328719900}
+  _saveLoadManager: {fileID: 1492970798}
+  _tutorialManager: {fileID: 1906820512}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!1 &412304383 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3276218597293095061, guid: b0855061b337938439f6ab38583de348, type: 3}
@@ -11412,8 +11448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5efd3bdd9ef15f4b9ef4993f379d96d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InteractionWithUI
-  _playerInput: {fileID: 1168961709}
-  _actionName: InteractionWithInterface
+  _inputReader: {fileID: 1168961716}
   _startInInterfaceMode: 0
 --- !u!4 &422191991
 Transform:
@@ -11443,6 +11478,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorActive
   _interactionWithUI: {fileID: 422191990}
+  _inputReader: {fileID: 1168961716}
+  _overlayCanvas: {fileID: 539576229}
 --- !u!1 &423666834
 GameObject:
   m_ObjectHideFlags: 0
@@ -13763,6 +13800,7 @@ MonoBehaviour:
   _arrow: {fileID: 1931643861}
   _screenOffset: {x: 150, y: -20}
   _screenPadding: {x: 70, y: 70}
+  _rotateAtScreenEdge: 1
   _size: {x: 90, y: 90}
   _forceSize: 1
 --- !u!1 &519456741
@@ -14158,6 +14196,9 @@ GameObject:
   - component: {fileID: 539576229}
   - component: {fileID: 539576228}
   - component: {fileID: 539576227}
+  - component: {fileID: 2200000001}
+  - component: {fileID: 2200000002}
+  - component: {fileID: 2200000003}
   m_Layer: 5
   m_Name: MainCanvas
   m_TagString: Untagged
@@ -18540,7 +18581,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1374792487}
-        m_TargetAssemblyTypeName: Purchase, Assembly-CSharp
+        m_TargetAssemblyTypeName: PurchaseProduct, Assembly-CSharp
         m_MethodName: Buy
         m_Mode: 2
         m_Arguments:
@@ -23926,7 +23967,6 @@ GameObject:
   - component: {fileID: 878779719}
   - component: {fileID: 878779721}
   - component: {fileID: 878779722}
-  - component: {fileID: 878779723}
   m_Layer: 0
   m_Name: Admin (1)
   m_TagString: Untagged
@@ -24005,19 +24045,6 @@ MonoBehaviour:
     _serviceInterval: 0.5
   - _upgradePrice: 10000
     _serviceInterval: 0.3
---- !u!114 &878779723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 878779718}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 911bec00c6809104b8a7a7d10af719bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AdminSelection
-  _admin: {fileID: 878779722}
 --- !u!1 &879090906
 GameObject:
   m_ObjectHideFlags: 0
@@ -26203,8 +26230,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CyberClubYG2PaymentsService
   _premiumZoneProductId: premium_zone_100
-  _premiumLocationUnlocker: {fileID: 0}
+  _premiumLocationUnlocker: {fileID: 341522522}
+  _gemsData: {fileID: 89083771}
+  _premiumGemsReward: 100
   _saveLoadManager: {fileID: 1492970798}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!114 &953788643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29314,6 +29344,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DevicePurchase
   _coinsData: {fileID: 89083772}
   _zoneSwitcher: {fileID: 1168961715}
+  _saveLoadManager: {fileID: 1492970798}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!114 &1076341994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31374,6 +31406,8 @@ GameObject:
   - component: {fileID: 1168961710}
   - component: {fileID: 1168961709}
   - component: {fileID: 1168961715}
+  - component: {fileID: 1168961716}
+  - component: {fileID: 1168961717}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -31442,6 +31476,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   _moveSpeed: 5
   _acceleration: 5
+  _sprintMultiplier: 1.5
+  _inputReader: {fileID: 1168961716}
 --- !u!143 &1168961711
 CharacterController:
   m_ObjectHideFlags: 0
@@ -31485,6 +31521,7 @@ MonoBehaviour:
   _sensitivity: 15
   _maxRotationX: 70
   _minRotationX: -90
+  _inputReader: {fileID: 1168961716}
 --- !u!114 &1168961714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31510,6 +31547,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 739d9ebb26ded4bb995177cf3b1b8bb0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZoneSwitcher
+--- !u!114 &1168961716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168961707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17b2c3d4e5f67890123456789abc002, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInputReader
+  _playerInput: {fileID: 1168961709}
+--- !u!114 &1168961717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168961707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17b2c3d4e5f67890123456789abc003, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MobileControlsHUD
+  _inputReader: {fileID: 1168961716}
+  _lookScale: 0.12
 --- !u!1 &1171439904
 GameObject:
   m_ObjectHideFlags: 0
@@ -31895,6 +31959,7 @@ GameObject:
   - component: {fileID: 1178233003}
   - component: {fileID: 1178233005}
   - component: {fileID: 1178233004}
+  - component: {fileID: 1178233006}
   m_Layer: 0
   m_Name: EntryZone
   m_TagString: Untagged
@@ -31931,7 +31996,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EntranceAdminZone
   _panelView: {fileID: 1926309418}
-  _adminUpgradePurchase: {fileID: 408639997}
   _adminUpgradeButtonController: {fileID: 1926309419}
 --- !u!65 &1178233005
 BoxCollider:
@@ -31954,6 +32018,24 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 14.216162, y: 2.5349743, z: 12.437952}
   m_Center: {x: -20.192375, y: 0.76748765, z: -9.867694}
+--- !u!114 &1178233006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178233002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 911bec00c6809104b8a7a7d10af719bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AdminSelection
+  _admins:
+  - {fileID: 878779722}
+  - {fileID: 1940016164}
+  - {fileID: 2925184380328719900}
+  _adminUpgradePurchase: {fileID: 408639997}
+  _selectionHysteresis: 0.35
 --- !u!1 &1182966158
 GameObject:
   m_ObjectHideFlags: 0
@@ -33352,6 +33434,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -35296,8 +35382,8 @@ MonoBehaviour:
   _maxIncomeMultiplier: 2
   _minVisitorCapacityMultiplier: 0.75
   _maxVisitorCapacityMultiplier: 1.35
-  _maxSpawnDelayMultiplier: 0.75
-  _minSpawnDelayMultiplier: 1.25
+  _maxSpawnDelayMultiplier: 1.25
+  _minSpawnDelayMultiplier: 0.75
 --- !u!4 &1395716840
 Transform:
   m_ObjectHideFlags: 0
@@ -36160,7 +36246,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DeviceSpawner
   _deviceRegistry: {fileID: 1114299402}
-  _locationInformation: {fileID: 862471407}
   _devicePurchase: {fileID: 1076341993}
 --- !u!4 &1442244520
 Transform:
@@ -37428,6 +37513,8 @@ GameObject:
   - component: {fileID: 1492970794}
   - component: {fileID: 1492970801}
   - component: {fileID: 1492970800}
+  - component: {fileID: 1492970802}
+  - component: {fileID: 1492970803}
   m_Layer: 0
   m_Name: SaveLoadManager
   m_TagString: Untagged
@@ -37527,7 +37614,9 @@ MonoBehaviour:
   - {fileID: 1492970794}
   - {fileID: 1492970801}
   - {fileID: 1492970800}
-  _loadOnStart: 1
+  - {fileID: 1492970802}
+  - {fileID: 1492970803}
+  _loadOnStart: 0
   _autoSave: 1
   _autoSaveInterval: 15
 --- !u!4 &1492970799
@@ -37571,6 +37660,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QuestsSaveModule
   _questCreator: {fileID: 1684942217}
+--- !u!114 &1492970802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492970793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf114badb33efab4789ad4973ca3eb5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PremiumLocationSaveModule
+  _premiumLocationUnlocker: {fileID: 341522522}
+--- !u!114 &1492970803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492970793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17b2c3d4e5f67890123456789abc001, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PotionSaveModule
+  _potionEffectService: {fileID: 1502559007}
+  _potionProducts:
+  - {fileID: 11400000, guid: b569314fecb2c5c4384c7be2fcc5394c, type: 2}
+  - {fileID: 11400000, guid: a2e7313e4a2f47443a9e5550d0408b50, type: 2}
+  - {fileID: 11400000, guid: 36bfada0cbc61bc4d815ab91362c622a, type: 2}
 --- !u!1 &1494258381
 GameObject:
   m_ObjectHideFlags: 0
@@ -37817,6 +37936,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PotionPurchaseService
   _gemsData: {fileID: 89083771}
   _potionEffectService: {fileID: 1502559007}
+  _saveLoadManager: {fileID: 1492970798}
+  _feedbackPresenter: {fileID: 2200000001}
 --- !u!1001 &1509195187
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38830,6 +38951,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -40323,6 +40448,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -41927,19 +42056,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 235056045}
+      objectReference: {fileID: 2200000002}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: Buy
+      value: OpenPremium
       objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -41947,7 +42080,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: ZonePurchase, Assembly-CSharp
+      value: LocationPurchaseDialog, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -41956,10 +42089,10 @@ PrefabInstance:
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgument
       value: 
-      objectReference: {fileID: 1798221704}
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: ZonePurchaseConfig, Assembly-CSharp
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -43727,6 +43860,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -47060,6 +47197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DevicePriceText
   _devicePurchase: {fileID: 1076341993}
   _priceText: {fileID: 1848173654}
+  _unavailableText: MAX
 --- !u!1 &1848916082
 GameObject:
   m_ObjectHideFlags: 0
@@ -47705,7 +47843,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopActionService
   _gemsData: {fileID: 89083771}
   _coinsData: {fileID: 89083772}
-  _potionEffectService: {fileID: 1502559007}
+  _potionPurchaseService: {fileID: 1502559008}
   _saveLoadManager: {fileID: 1492970798}
   _gemsRewardAdId: reward_gems
   _coinsRewardAdId: reward_coins
@@ -47857,6 +47995,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
@@ -48157,7 +48299,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.45927367, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.06109619, y: -2.6335907}
+  m_AnchoredPosition: {x: 0.06109619, y: -2.6335754}
   m_SizeDelta: {x: 0.6079712, y: 5.3200073}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1878892517
@@ -48581,6 +48723,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 235056045}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy
       objectReference: {fileID: 0}
@@ -48828,6 +48974,9 @@ MonoBehaviour:
   _firstRoomNamePart: "\u041A\u0440\u0430\u0441\u043D\u0430\u044F"
   _devicePurchase: {fileID: 1076341993}
   _ratingData: {fileID: 1395716839}
+  _visitorService: {fileID: 1819034610}
+  _coinsData: {fileID: 89083772}
+  _saveLoadManager: {fileID: 1492970798}
   _interactionWithUI: {fileID: 422191990}
   _inputBlocker: {fileID: 388455132}
   _startOnStart: 1
@@ -49959,7 +50108,6 @@ MonoBehaviour:
   _adminHireCard: {fileID: 2043822867}
   _interiorCard: {fileID: 722884539}
   _adminUpgradeCard: {fileID: 1566504844}
-  _adminUpgradeButton: {fileID: 1566504846}
 --- !u!114 &1926309419
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50372,7 +50520,6 @@ GameObject:
   - component: {fileID: 1940016161}
   - component: {fileID: 1940016163}
   - component: {fileID: 1940016164}
-  - component: {fileID: 1940016166}
   m_Layer: 0
   m_Name: Admin (2)
   m_TagString: Untagged
@@ -50449,21 +50596,8 @@ MonoBehaviour:
     _serviceInterval: 1
   - _upgradePrice: 15000
     _serviceInterval: 0.5
-  - _upgradePrice: 2000
+  - _upgradePrice: 20000
     _serviceInterval: 0.3
---- !u!114 &1940016166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1940016160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 911bec00c6809104b8a7a7d10af719bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AdminSelection
-  _admin: {fileID: 1940016164}
 --- !u!1 &1940096534
 GameObject:
   m_ObjectHideFlags: 0
@@ -52525,7 +52659,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1374792487}
-        m_TargetAssemblyTypeName: Purchase, Assembly-CSharp
+        m_TargetAssemblyTypeName: PurchaseProduct, Assembly-CSharp
         m_MethodName: Buy
         m_Mode: 2
         m_Arguments:
@@ -55592,6 +55726,62 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1278092930985136869, guid: a9edb3b580c4055479cd5da0cde63961, type: 3}
   m_PrefabInstance: {fileID: 2140494666}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2200000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 539576226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c695809a84ef44acaff7d67a1d624806, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PurchaseFeedbackPresenter
+  _coinsWallet: {fileID: 1750537305}
+  _gemsWallet: {fileID: 587537388}
+  _messageText: {fileID: 0}
+  _messageCanvasGroup: {fileID: 0}
+  _audioSource: {fileID: 0}
+  _failureClip: {fileID: 0}
+  _messageDuration: 1.25
+  _soundCooldown: 0.3
+  _walletPunchScale: 1.12
+--- !u!114 &2200000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 539576226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2b58cb93ec24accbc27a9aa9e46e90f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LocationPurchaseDialog
+  _zonePurchase: {fileID: 235056045}
+  _paymentsService: {fileID: 953788642}
+  _premiumUnlocker: {fileID: 341522522}
+  _feedbackPresenter: {fileID: 2200000001}
+  _premiumZoneConfig: {fileID: 1798221704}
+  _premiumZoneInformation: {fileID: 341522519}
+  _interactionWithUI: {fileID: 422191990}
+--- !u!114 &2200000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 539576226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f04edb379274ee5992cbc9cbc9247a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceShopShortcuts
+  _coinsWallet: {fileID: 1750537305}
+  _gemsWallet: {fileID: 587537388}
+  _shopRoot: {fileID: 1861126614}
+  _shopWindow: {fileID: 1861126620}
 --- !u!137 &84955422329844018
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0
@@ -55889,7 +56079,6 @@ GameObject:
   - component: {fileID: 2925184380328719899}
   - component: {fileID: 2911837258332839395}
   - component: {fileID: 2925184380328719900}
-  - component: {fileID: 2925184380328719902}
   m_Layer: 0
   m_Name: Admin
   m_TagString: Untagged
@@ -57673,19 +57862,6 @@ MonoBehaviour:
     _serviceInterval: 0.5
   - _upgradePrice: 1000
     _serviceInterval: 0.3
---- !u!114 &2925184380328719902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 645531126525767913}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 911bec00c6809104b8a7a7d10af719bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AdminSelection
-  _admin: {fileID: 2925184380328719900}
 --- !u!1 &2943284038736086645
 GameObject:
   m_ObjectHideFlags: 0
@@ -59729,6 +59905,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 235056045}
+    - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1268758669404166762, guid: b0855061b337938439f6ab38583de348, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: Buy

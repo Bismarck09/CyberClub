@@ -3,10 +3,17 @@ using UnityEngine;
 
 public class DevicePurchase : MonoBehaviour, IPurchasable
 {
+    private const float PurchaseDebounceSeconds = 0.25f;
+
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private ZoneSwitcher _zoneSwitcher;
+    [SerializeField] private SaveLoadManager _saveLoadManager;
+    [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
 
     private ZoneInformation _zoneInformation;
+    private DeviceSpawner _deviceSpawner;
+    private bool _isPurchasing;
+    private float _nextPurchaseAllowedTime = float.NegativeInfinity;
 
     public event Action OnDevicePurchased;
     public event Action OnDeviceStateChanged;
@@ -18,13 +25,12 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     {
         get
         {
-            if (_zoneInformation == null)
+            ZoneInformation zoneInformation = _zoneInformation;
+
+            if (zoneInformation == null || _deviceSpawner == null)
                 return true;
 
-            if (_zoneInformation.SpawnPoints == null)
-                return true;
-
-            return !_zoneInformation.SpawnPoints.HasSpawnPoints;
+            return !_deviceSpawner.CanSpawnDevice(zoneInformation);
         }
     }
 
@@ -42,39 +48,115 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
 
     public bool CanBuy()
     {
-        if (_zoneInformation == null || _coinsData == null)
+        ZoneInformation zoneInformation = _zoneInformation;
+
+        if (_isPurchasing || !CanCreateDevice(zoneInformation) || _coinsData == null)
             return false;
 
-        if (IsDeviceLimitReached)
-            return false;
-
-        return _coinsData.CurrentCoins >= CurrentDevicePrice;
+        int price = zoneInformation.CurrentDevicePrice;
+        return price >= 0 && _coinsData.CurrentCoins >= price;
     }
 
     public void Buy()
     {
-        if (_zoneInformation == null || _coinsData == null)
+        if (_isPurchasing || Time.unscaledTime < _nextPurchaseAllowedTime)
+            return;
+
+        ZoneInformation zoneInformation = _zoneInformation;
+        int price = zoneInformation != null ? zoneInformation.CurrentDevicePrice : 0;
+
+        if (zoneInformation == null || _deviceSpawner == null)
         {
-            NotifyDeviceStateChanged();
+            Fail(PurchaseFailureReason.ProductUnavailable);
             return;
         }
 
-        if (IsDeviceLimitReached)
+        if (!_deviceSpawner.CanSpawnDevice(zoneInformation))
         {
-            NotifyDeviceStateChanged();
+            Fail(PurchaseFailureReason.MaximumReached);
             return;
         }
 
-        int price = CurrentDevicePrice;
-
-        if (!_coinsData.TryBuy(price))
+        if (_coinsData == null || price < 0)
         {
-            NotifyDeviceStateChanged();
+            Fail(PurchaseFailureReason.TransactionFailed);
             return;
         }
 
-        _zoneInformation.RegisterDevicePurchase();
-        OnDevicePurchased?.Invoke();
+        if (_coinsData.CurrentCoins < price)
+        {
+            Fail(PurchaseFailureReason.NotEnoughCoins);
+            return;
+        }
+
+        int coinsBeforePurchase = _coinsData.CurrentCoins;
+        _isPurchasing = true;
+        bool deviceCreated = false;
+
+        try
+        {
+            if (!_coinsData.TryBuy(price))
+            {
+                Fail(PurchaseFailureReason.NotEnoughCoins);
+                return;
+            }
+
+            deviceCreated = _deviceSpawner.TrySpawnDevice(zoneInformation, out _);
+
+            if (!deviceCreated)
+            {
+                Fail(PurchaseFailureReason.TransactionFailed);
+                return;
+            }
+
+            zoneInformation.RegisterDevicePurchase();
+            // ИЗМЕНЕНО: повторный UI-click после синхронной транзакции не создаёт второе устройство.
+            _nextPurchaseAllowedTime = Time.unscaledTime + PurchaseDebounceSeconds;
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+            Fail(PurchaseFailureReason.TransactionFailed);
+            return;
+        }
+        finally
+        {
+            if (!deviceCreated)
+            {
+                int missingCoins = Mathf.Max(0, coinsBeforePurchase - _coinsData.CurrentCoins);
+                RefundCoins(missingCoins);
+            }
+
+            _isPurchasing = false;
+        }
+
+        InvokeSafely(OnDevicePurchased);
+        NotifyDeviceStateChanged();
+        // ИЗМЕНЕНО: покупка устройства сохраняется сразу, включая закрытие игры после первого ПК.
+        _saveLoadManager?.SaveGame();
+    }
+
+    public void RegisterDeviceSpawner(DeviceSpawner deviceSpawner)
+    {
+        if (deviceSpawner == null)
+            return;
+
+        if (_deviceSpawner != null && _deviceSpawner != deviceSpawner)
+        {
+            Debug.LogError("DevicePurchase: зарегистрировано несколько DeviceSpawner.", this);
+            return;
+        }
+
+        _deviceSpawner = deviceSpawner;
+        NotifyDeviceStateChanged();
+    }
+
+    public void UnregisterDeviceSpawner(DeviceSpawner deviceSpawner)
+    {
+        if (_deviceSpawner != deviceSpawner)
+            return;
+
+        _deviceSpawner = null;
         NotifyDeviceStateChanged();
     }
 
@@ -86,7 +168,71 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
 
     private void NotifyDeviceStateChanged()
     {
-        OnDevicePriceChanged?.Invoke(CurrentDevicePrice);
-        OnDeviceStateChanged?.Invoke();
+        InvokeSafely(OnDevicePriceChanged, CurrentDevicePrice);
+        InvokeSafely(OnDeviceStateChanged);
+    }
+
+    private bool CanCreateDevice(ZoneInformation zoneInformation)
+    {
+        if (zoneInformation == null || _deviceSpawner == null)
+            return false;
+
+        return _deviceSpawner.CanSpawnDevice(zoneInformation);
+    }
+
+    private void RefundCoins(int amount)
+    {
+        if (amount <= 0 || _coinsData == null)
+            return;
+
+        try
+        {
+            _coinsData.AddResource(amount, 1f);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
+    }
+
+    private void InvokeSafely(Action callback)
+    {
+        if (callback == null)
+            return;
+
+        foreach (Delegate handler in callback.GetInvocationList())
+        {
+            try
+            {
+                ((Action)handler).Invoke();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+    }
+
+    private void InvokeSafely(Action<int> callback, int value)
+    {
+        if (callback == null)
+            return;
+
+        foreach (Delegate handler in callback.GetInvocationList())
+        {
+            try
+            {
+                ((Action<int>)handler).Invoke(value);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+    }
+
+    private void Fail(PurchaseFailureReason reason)
+    {
+        _feedbackPresenter?.Show(reason);
     }
 }

@@ -22,18 +22,18 @@ public class ZoneSaveSlot : MonoBehaviour
             if (_isUnlockedByDefault)
                 return true;
 
-            if (_zonePurchaseConfig == null || _zonePurchaseConfig.BarrierObject == null)
+            if (_zonePurchaseConfig == null)
                 return true;
 
-            return !_zonePurchaseConfig.BarrierObject.activeSelf;
+            return _zonePurchaseConfig.IsUnlocked;
         }
     }
 
     public void ApplyUnlockedState(bool isUnlocked)
     {
-        if (_zonePurchaseConfig == null || _zonePurchaseConfig.BarrierObject == null)
+        if (_zonePurchaseConfig == null)
             return;
 
-        _zonePurchaseConfig.BarrierObject.SetActive(!isUnlocked);
+        _zonePurchaseConfig.RestoreUnlockedState(isUnlocked);
     }
 }

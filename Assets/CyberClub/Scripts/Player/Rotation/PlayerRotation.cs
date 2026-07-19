@@ -1,6 +1,5 @@
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerRotation : MonoBehaviour
 {
@@ -10,23 +9,30 @@ public class PlayerRotation : MonoBehaviour
     [SerializeField] private float _sensitivity;
     [SerializeField] private float _maxRotationX;
     [SerializeField] private float _minRotationX;
+    [SerializeField] private PlayerInputReader _inputReader;
 
     private float _rotationX;
     private float _rotationY;
 
     private bool _isRotateActive;
 
-    private PlayerInput _playerInput;
-    private InputAction _inputAction;
-
-    private void Start()
+    private void Awake()
     {
-        _playerInput = GetComponent<PlayerInput>();
-        _inputAction = _playerInput.actions["Look"];
+        if (_inputReader == null)
+            _inputReader = GetComponent<PlayerInputReader>();
     }
 
-    private void OnEnable() => _interactionWithUI.IsInteractsChanged += SwitchRotateActive;
-    private void OnDisable() => _interactionWithUI.IsInteractsChanged -= SwitchRotateActive;
+    private void OnEnable()
+    {
+        if (_interactionWithUI != null)
+            _interactionWithUI.IsInteractsChanged += SwitchRotateActive;
+    }
+
+    private void OnDisable()
+    {
+        if (_interactionWithUI != null)
+            _interactionWithUI.IsInteractsChanged -= SwitchRotateActive;
+    }
 
     private void Update()
     {
@@ -36,7 +42,10 @@ public class PlayerRotation : MonoBehaviour
 
     private void Rotate()
     {
-        Vector2 rotateDirection = _inputAction.ReadValue<Vector2>();
+        if (_inputReader == null)
+            return;
+
+        Vector2 rotateDirection = _inputReader.Look;
 
         _rotationX -= rotateDirection.y * _sensitivity * Time.deltaTime;
         _rotationY += rotateDirection.x * _sensitivity * Time.deltaTime;
@@ -50,7 +59,8 @@ public class PlayerRotation : MonoBehaviour
     private void SwitchRotateActive(bool isActive)
     {
         _isRotateActive = !isActive;
-        _cinemachineInputAxisController.enabled = _isRotateActive;
+        if (_cinemachineInputAxisController != null)
+            _cinemachineInputAxisController.enabled = _isRotateActive;
         Debug.Log($"Rotate active: {_isRotateActive}");
     }
 }

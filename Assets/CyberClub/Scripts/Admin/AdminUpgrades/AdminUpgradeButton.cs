@@ -10,14 +10,14 @@ public class AdminUpgradeButton : MonoBehaviour
 
     private void OnEnable()
     {
-        AdminSelection.OnAdminSelected += OnAdminSelected;
-        AdminSelection.OnAdminDeselected += OnAdminDeselected;
+        if (_adminUpgradePurchase != null)
+            _adminUpgradePurchase.OnSelectedAdminChanged += OnAdminSelected;
     }
 
     private void OnDisable()
     {
-        AdminSelection.OnAdminSelected -= OnAdminSelected;
-        AdminSelection.OnAdminDeselected -= OnAdminDeselected;
+        if (_adminUpgradePurchase != null)
+            _adminUpgradePurchase.OnSelectedAdminChanged -= OnAdminSelected;
     }
 
     public void SetAdminShopOpened(bool value)
@@ -39,17 +39,6 @@ public class AdminUpgradeButton : MonoBehaviour
     private void OnAdminSelected(AdminWorker admin)
     {
         _currentAdmin = admin;
-        RefreshPanel();
-    }
-
-    private void OnAdminDeselected(AdminWorker admin)
-    {
-        // ИЗМЕНЕНО: выход из зоны другого администратора
-        // не должен скрывать текущую карточку.
-        if (_currentAdmin != admin)
-            return;
-
-        _currentAdmin = null;
         RefreshPanel();
     }
 

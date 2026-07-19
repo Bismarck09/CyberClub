@@ -17,10 +17,38 @@ public class GameDeviceFactory
 
     public void SpawnDevice(ZoneInformation zoneInformation)
     {
+        TrySpawnDevice(zoneInformation, out _);
+    }
+
+    public bool CanCreateDevice(ZoneInformation zoneInformation)
+    {
+        if (zoneInformation == null || _deviceRegistry == null)
+            return false;
+
+        ZoneDeviceConfig config = zoneInformation.ZoneConfig;
+        SpawnPointsHolder spawnPointsHolder = zoneInformation.SpawnPoints;
+
+        if (config == null || config.DevicePrefab == null || spawnPointsHolder == null)
+            return false;
+
+        return spawnPointsHolder.HasSpawnPoints &&
+               _deviceCreators.Exists(creator => creator != null && creator.Type == config.DeviceType);
+    }
+
+    public bool TrySpawnDevice(ZoneInformation zoneInformation, out GameDevice device)
+    {
+        device = null;
+
         if (zoneInformation == null)
         {
             Debug.LogError("GameDeviceFactory: не передана ZoneInformation.");
-            return;
+            return false;
+        }
+
+        if (_deviceRegistry == null)
+        {
+            Debug.LogError("GameDeviceFactory: не назначен DeviceRegistry.");
+            return false;
         }
 
         ZoneDeviceConfig config = zoneInformation.ZoneConfig;
@@ -29,21 +57,27 @@ public class GameDeviceFactory
         if (config == null)
         {
             Debug.LogError($"GameDeviceFactory: у зоны {zoneInformation.ZoneName} не назначен ZoneDeviceConfig.");
-            return;
+            return false;
+        }
+
+        if (config.DevicePrefab == null)
+        {
+            Debug.LogError($"GameDeviceFactory: у конфигурации {config.name} не назначен prefab устройства.");
+            return false;
         }
 
         if (spawnPointsHolder == null)
         {
             Debug.LogError($"GameDeviceFactory: у зоны {zoneInformation.ZoneName} не назначен SpawnPointsHolder.");
-            return;
+            return false;
         }
 
-        IDeviceCreator creator = _deviceCreators.Find(c => c.Type == config.DeviceType);
+        IDeviceCreator creator = _deviceCreators.Find(c => c != null && c.Type == config.DeviceType);
 
         if (creator == null)
         {
             Debug.LogError($"GameDeviceFactory: не найден creator для типа {config.DeviceType}.");
-            return;
+            return false;
         }
 
         Transform spawnPoint = spawnPointsHolder.GetSpawnPoint();
@@ -51,16 +85,52 @@ public class GameDeviceFactory
         if (spawnPoint == null)
         {
             IsDeviceOver?.Invoke();
-            return;
+            return false;
         }
 
-        GameDevice device = creator.Create(config, spawnPoint);
+        GameDevice createdDevice = null;
 
-        _deviceRegistry.Add(
-            device,
-            zoneInformation,
-            config.PriceOfHourCoins,
-            config.PriceOfHourGems
-        );
+        try
+        {
+            createdDevice = creator.Create(config, spawnPoint);
+
+            if (createdDevice == null)
+                return false;
+
+            if (createdDevice.TargetPoint == null)
+            {
+                Debug.LogError(
+                    $"GameDeviceFactory: у устройства {createdDevice.name} не назначен TargetPoint.",
+                    createdDevice);
+
+                return false;
+            }
+
+            if (!_deviceRegistry.TryAdd(
+                    createdDevice,
+                    zoneInformation,
+                    config.PriceOfHourCoins,
+                    config.PriceOfHourGems,
+                    out _))
+            {
+                return false;
+            }
+
+            device = createdDevice;
+            return true;
+        }
+        finally
+        {
+            if (device == null)
+            {
+                spawnPointsHolder.ReleaseSpawnPoint(spawnPoint);
+
+                if (createdDevice != null)
+                {
+                    createdDevice.gameObject.SetActive(false);
+                    UnityEngine.Object.Destroy(createdDevice.gameObject);
+                }
+            }
+        }
     }
 }

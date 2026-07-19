@@ -1286,6 +1286,7 @@ GameObject:
   - component: {fileID: 5192345496968460319}
   - component: {fileID: 4972955973064746517}
   - component: {fileID: 3263444803881777140}
+  - component: {fileID: 700000000000000008}
   m_Layer: 0
   m_Name: VisitorMan1
   m_TagString: Untagged
@@ -2400,3 +2401,15 @@ SkinnedMeshRenderer:
     m_Center: {x: 0, y: 0.60639846, z: 0.2964799}
     m_Extent: {x: 0.1855562, y: 0.028556049, z: 0.0320518}
   m_DirtyAABB: 0
+--- !u!114 &700000000000000008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3920359375468111553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b02b020eeeed9094693deeaf6b055a5f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::VisitorSpeedBoostAdapter

@@ -1,21 +1,19 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _acceleration;
+    [SerializeField, Min(1f)] private float _sprintMultiplier = 1.5f;
+    [SerializeField] private PlayerInputReader _inputReader;
 
     private Vector3 _currentVelocity;
     private CharacterController _characterController;
-    private PlayerInput _playerInput;
-    private InputAction inputAction;
 
-    private void Start()
+    private void Awake()
     {
-        _playerInput = GetComponent<PlayerInput>();
-        inputAction = _playerInput.actions["Move"];
-
+        if (_inputReader == null)
+            _inputReader = GetComponent<PlayerInputReader>();
         _characterController = GetComponent<CharacterController>();
     }
 
@@ -26,12 +24,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move()
     {
-        Vector2 input = inputAction.ReadValue<Vector2>();
+        if (_inputReader == null || _characterController == null)
+            return;
+
+        Vector2 input = _inputReader.Movement;
         Vector3 direction = new Vector3(input.x, 0, input.y);
 
         Vector3 worldDirection = transform.TransformDirection(direction);
 
-        _currentVelocity = Vector3.Lerp(_currentVelocity, worldDirection * _moveSpeed, _acceleration * Time.deltaTime);
+        float speed = _moveSpeed * (_inputReader.Sprint ? _sprintMultiplier : 1f);
+        _currentVelocity = Vector3.Lerp(_currentVelocity, worldDirection * speed, _acceleration * Time.deltaTime);
 
         _characterController.Move(_currentVelocity * Time.deltaTime);
 

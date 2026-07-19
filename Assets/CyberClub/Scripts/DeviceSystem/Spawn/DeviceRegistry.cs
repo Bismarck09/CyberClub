@@ -13,22 +13,53 @@ public class DeviceRegistry : MonoBehaviour
 
     public void Add(GameDevice device, ZoneInformation zoneInformation, int priceOfHourCoins, int priceOfHourGems)
     {
+        TryAdd(device, zoneInformation, priceOfHourCoins, priceOfHourGems, out _);
+    }
+
+    public bool TryAdd(
+        GameDevice device,
+        ZoneInformation zoneInformation,
+        int priceOfHourCoins,
+        int priceOfHourGems,
+        out DeviceEntry entry)
+    {
+        entry = null;
+
         if (device == null)
         {
             Debug.LogError("DeviceRegistry: попытка добавить null-устройство.");
-            return;
+            return false;
         }
 
         if (zoneInformation == null)
         {
             Debug.LogError("DeviceRegistry: устройство добавляется без ZoneInformation.");
-            return;
+            return false;
         }
 
-        DeviceEntry entry = new DeviceEntry(device, zoneInformation, priceOfHourCoins, priceOfHourGems);
+        if (_devices.Exists(existingEntry =>
+                existingEntry != null && existingEntry.Device == device))
+        {
+            Debug.LogError(
+                $"DeviceRegistry: устройство {device.name} уже зарегистрировано.",
+                device);
+
+            return false;
+        }
+
+        entry = new DeviceEntry(device, zoneInformation, priceOfHourCoins, priceOfHourGems);
         _devices.Add(entry);
 
-        OnDeviceAdded?.Invoke(entry);
+        try
+        {
+            OnDeviceAdded?.Invoke(entry);
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
+
+        return true;
     }
 
     public DeviceEntry GetRandomFreeDevice()

@@ -28,7 +28,7 @@ public class PotionEffectService : MonoBehaviour
         {
             ActivePotionRuntime potion = pair.Value;
             potion.Tick(Time.deltaTime);
-            OnPotionUpdated?.Invoke(potion);
+            InvokeSafely(OnPotionUpdated, potion);
 
             if (potion.RemainingTime <= 0f)
                 _expiredPotions.Add(pair.Key);
@@ -38,32 +38,71 @@ public class PotionEffectService : MonoBehaviour
             EndPotion(potionType);
     }
 
-    public void Activate(ShopProductConfig product)
+    public bool TryActivate(ShopProductConfig product)
     {
-        if (product == null)
-            return;
-
-        if (product.ActionType != ShopProductActionType.Potion)
-        {
-            Debug.LogWarning($"PotionEffectService: товар {product.name} не является зельем.");
-            return;
-        }
+        if (!CanApply(product))
+            return false;
 
         ApplyEffect(product);
 
         if (_activePotions.TryGetValue(product.PotionType, out ActivePotionRuntime activePotion))
         {
             activePotion.Restart(product);
-            OnPotionStarted?.Invoke(activePotion);
+            InvokeSafely(OnPotionStarted, activePotion);
             Debug.Log($"Зелье обновлено: {product.name}. Таймер сброшен до {activePotion.Duration} сек.");
-            return;
+            return true;
         }
 
         ActivePotionRuntime newPotion = new ActivePotionRuntime(product);
         _activePotions.Add(product.PotionType, newPotion);
-        OnPotionStarted?.Invoke(newPotion);
+        InvokeSafely(OnPotionStarted, newPotion);
 
         Debug.Log($"Зелье активировано: {product.name}. Длительность: {newPotion.Duration} сек.");
+        return true;
+    }
+
+    public bool TryRestore(
+        ShopProductConfig product,
+        float duration,
+        float remainingTime)
+    {
+        if (!CanApply(product) || remainingTime <= 0f)
+            return false;
+
+        ApplyEffect(product);
+
+        ActivePotionRuntime runtime = new ActivePotionRuntime(product);
+        runtime.Restore(product, duration, remainingTime);
+        _activePotions[product.PotionType] = runtime;
+        InvokeSafely(OnPotionStarted, runtime);
+        return true;
+    }
+
+    public bool IsActive(PotionType potionType)
+    {
+        return _activePotions.ContainsKey(potionType);
+    }
+
+    private bool CanApply(ShopProductConfig product)
+    {
+        if (product == null ||
+            product.ActionType != ShopProductActionType.Potion ||
+            product.DurationSeconds <= 0f)
+        {
+            return false;
+        }
+
+        switch (product.PotionType)
+        {
+            case PotionType.Coins:
+                return _resourcesMultiplier != null;
+            case PotionType.Speed:
+                return _speedPotionEffectService != null;
+            case PotionType.Rating:
+                return _ratingPotionEffectService != null;
+            default:
+                return false;
+        }
     }
 
     private void ApplyEffect(ShopProductConfig product)
@@ -71,32 +110,14 @@ public class PotionEffectService : MonoBehaviour
         switch (product.PotionType)
         {
             case PotionType.Coins:
-                if (_resourcesMultiplier == null)
-                {
-                    Debug.LogError("PotionEffectService: не назначен ResourcesMultiplier.");
-                    return;
-                }
-
                 _resourcesMultiplier.SetMultiplier(ResourceType.Coins, Mathf.Max(1, product.EffectMultiplier));
                 break;
 
             case PotionType.Speed:
-                if (_speedPotionEffectService == null)
-                {
-                    Debug.LogError("PotionEffectService: не назначен SpeedPotionEffectService.");
-                    return;
-                }
-
                 _speedPotionEffectService.Apply(product.EffectMultiplier);
                 break;
 
             case PotionType.Rating:
-                if (_ratingPotionEffectService == null)
-                {
-                    Debug.LogError("PotionEffectService: не назначен RatingPotionEffectService.");
-                    return;
-                }
-
                 _ratingPotionEffectService.Apply(product.EffectMultiplier);
                 break;
         }
@@ -109,7 +130,7 @@ public class PotionEffectService : MonoBehaviour
 
         ResetEffect(potionType);
         _activePotions.Remove(potionType);
-        OnPotionEnded?.Invoke(potion);
+        InvokeSafely(OnPotionEnded, potion);
 
         Debug.Log($"Зелье закончилось: {potion.Product.name}.");
     }
@@ -141,5 +162,25 @@ public class PotionEffectService : MonoBehaviour
             ResetEffect(potionType);
 
         _activePotions.Clear();
+    }
+
+    private void InvokeSafely(
+        Action<ActivePotionRuntime> callback,
+        ActivePotionRuntime potion)
+    {
+        if (callback == null)
+            return;
+
+        foreach (Delegate handler in callback.GetInvocationList())
+        {
+            try
+            {
+                ((Action<ActivePotionRuntime>)handler).Invoke(potion);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
     }
 }

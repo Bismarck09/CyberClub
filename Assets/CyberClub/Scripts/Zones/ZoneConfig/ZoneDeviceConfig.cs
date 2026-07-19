@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Game/Zone Device Config")]
@@ -19,6 +20,7 @@ public class ZoneDeviceConfig : ScriptableObject
     public int PriceOfHourCoins => _priceOfHourCoins;
     public int PriceOfHourGems => _priceOfHourGems;
     public int DevicePrice => _devicePrice;
+    public float PriceGrowthPercent => _priceGrowthPercent;
 
     public int CalculateDevicePrice(int purchasedDeviceCount)
     {
@@ -32,8 +34,12 @@ public class ZoneDeviceConfig : ScriptableObject
         return price;
     }
 
+    [Obsolete("Runtime-цена рассчитывается через CalculateDevicePrice и количество покупок зоны.")]
     public void IncreaseDevicePrice()
     {
-        _devicePrice += Mathf.RoundToInt(_devicePrice * (_priceGrowthPercent / 100f));
+        Debug.LogWarning(
+            $"{name}: IncreaseDevicePrice больше не изменяет ScriptableObject. " +
+            "Используйте CalculateDevicePrice с фактическим количеством покупок.",
+            this);
     }
 }

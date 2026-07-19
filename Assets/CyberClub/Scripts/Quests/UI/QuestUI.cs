@@ -162,7 +162,7 @@ public class QuestUI : MonoBehaviour
             _description.text = data.Description;
 
         if (_reward != null)
-            _reward.text = data.RewardValue.ToString();
+            _reward.text = ResourceValueFormatter.Format(data.RewardValue);
     }
 
     private void SetProgress(float value)
