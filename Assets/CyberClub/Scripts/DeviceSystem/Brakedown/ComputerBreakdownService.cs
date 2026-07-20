@@ -147,7 +147,12 @@ public class ComputerBreakdownService : MonoBehaviour
     private void SetupWorldSpaceCanvas(GameObject repairButtonObject)
     {
         if (_uiEventCamera == null)
-            _uiEventCamera = Camera.main;
+        {
+            Debug.LogError(
+                $"ComputerBreakdownService: поле {nameof(_uiEventCamera)} не назначено на GameObject '{name}'.",
+                this);
+            return;
+        }
 
         Canvas[] canvases = repairButtonObject.GetComponentsInChildren<Canvas>(true);
 
@@ -157,7 +162,12 @@ public class ComputerBreakdownService : MonoBehaviour
                 canvas.worldCamera = _uiEventCamera;
 
             if (canvas.GetComponent<GraphicRaycaster>() == null)
-                canvas.gameObject.AddComponent<GraphicRaycaster>();
+            {
+                Debug.LogError(
+                    $"ComputerBreakdownService: Canvas '{canvas.name}' в prefab '{_repairButtonPrefab.name}' " +
+                    "должен заранее содержать GraphicRaycaster.",
+                    canvas);
+            }
         }
     }
 

@@ -54,6 +54,16 @@ public class CyberClubTutorialManager : MonoBehaviour
     public bool RatingTutorialShown => _ratingTutorialShown;
     public bool CanHireAdditionalAdmins =>
         _hasFirstVisitorIncome || _step == TutorialStep.Completed;
+    public bool HasFirstComputerPurchased => HasFirstComputer();
+    public bool IsBasicTutorialCompleted => _step == TutorialStep.Completed;
+    public bool IsInteriorPurchaseAvailable =>
+        _step == TutorialStep.InteriorMessage || _step == TutorialStep.Completed;
+    public bool AreAdminPurchasesAvailable =>
+        HasFirstComputer() &&
+        (_hasFirstVisitorIncome ||
+         _step == TutorialStep.FirstIncomeMessage ||
+         _step == TutorialStep.InteriorMessage ||
+         _step == TutorialStep.Completed);
 
     public event System.Action OnTutorialStateChanged;
 
@@ -185,6 +195,8 @@ public class CyberClubTutorialManager : MonoBehaviour
                 StartTutorial();
                 break;
         }
+
+        NotifyTutorialStateChangedSafely();
     }
 
     public void StartTutorial()
@@ -213,6 +225,10 @@ public class CyberClubTutorialManager : MonoBehaviour
 
         _step = TutorialStep.FirstRoomMessage;
         SaveProgress();
+
+        // Old saves without tutorial flags receive only the missing amount once,
+        // at the moment the first computer actually becomes required.
+        TryRepairBrokenFirstComputerSave();
 
         if (HasFirstComputer())
         {
@@ -322,9 +338,13 @@ public class CyberClubTutorialManager : MonoBehaviour
 
     private void ReconcileFirstDeviceProgress()
     {
-        if ((_step == TutorialStep.FirstRoomMessage ||
-             _step == TutorialStep.WaitFirstDevicePurchase) &&
-            HasFirstComputer())
+        bool stalePreComputerStep =
+            _step == TutorialStep.Welcome ||
+            _step == TutorialStep.WaitFirstRoom ||
+            _step == TutorialStep.FirstRoomMessage ||
+            _step == TutorialStep.WaitFirstDevicePurchase;
+
+        if (stalePreComputerStep && HasFirstComputer())
         {
             CompleteFirstDeviceRequirement();
         }
@@ -412,7 +432,7 @@ public class CyberClubTutorialManager : MonoBehaviour
         EnterFirstRoom();
     }
 
-    private bool IsFirstRoom(ZoneInformation zone)
+    public bool IsFirstRoom(ZoneInformation zone)
     {
         if (zone == null)
             return false;

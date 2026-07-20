@@ -1,15 +1,23 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class ZonePurchaseConfig : MonoBehaviour
 {
     [SerializeField] private GameObject _barrierObject;
     [SerializeField] private int _zonePrice;
 
-    [Header("Purchase window (optional authored content)")]
+    [Header("Authored purchase content")]
     [SerializeField] private ZoneInformation _zoneInformation;
-    [SerializeField, TextArea(2, 4)] private string _description;
-    [SerializeField, TextArea(2, 4)] private string _advantages;
-    [SerializeField] private Sprite _icon;
+    [SerializeField, TextArea(2, 5)] private string _description;
+    [FormerlySerializedAs("_advantages")]
+    [SerializeField, TextArea(2, 5)] private string _gameplayBenefit;
+    [SerializeField, TextArea(2, 4)] private string _progressionHint;
+    [FormerlySerializedAs("_icon")]
+    [SerializeField] private Sprite _previewSprite;
+
+    private bool _isInitialized;
+    private bool _isUnlocked;
+    private bool _isPurchaseInProgress;
 
     public GameObject BarrierObject => _barrierObject;
     public int ZonePrice => _zonePrice;
@@ -24,23 +32,17 @@ public class ZonePurchaseConfig : MonoBehaviour
             return barrierData != null ? barrierData.ZoneInformation : null;
         }
     }
+
     public string DisplayName => ZoneInformation != null && !string.IsNullOrWhiteSpace(ZoneInformation.ZoneName)
         ? ZoneInformation.ZoneName
         : name;
-    public string Description => string.IsNullOrWhiteSpace(_description)
-        ? "Новая зона клуба с дополнительными игровыми местами."
-        : _description;
-    public string Advantages => string.IsNullOrWhiteSpace(_advantages)
-        ? "Больше мест для посетителей и новый этап развития клуба."
-        : _advantages;
-    public Sprite Icon => _icon;
+    public string Description => _description;
+    public string GameplayBenefit => _gameplayBenefit;
+    public string ProgressionHint => _progressionHint;
+    public Sprite PreviewSprite => _previewSprite;
     public int ComputerCapacity => ZoneInformation != null && ZoneInformation.SpawnPoints != null
         ? ZoneInformation.SpawnPoints.AvailableSpawnPointCount
         : 0;
-
-    private bool _isInitialized;
-    private bool _isUnlocked;
-    private bool _isPurchaseInProgress;
 
     public bool IsUnlocked
     {

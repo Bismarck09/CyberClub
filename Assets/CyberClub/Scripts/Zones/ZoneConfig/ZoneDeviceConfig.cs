@@ -6,6 +6,7 @@ public class ZoneDeviceConfig : ScriptableObject
 {
     [SerializeField] private DeviceType _deviceType;
     [SerializeField] private GameObject _devicePrefab;
+    [SerializeField] private bool _isPremiumZone;
 
     [Header("Income")]
     [SerializeField] private int _priceOfHourCoins;
@@ -17,6 +18,7 @@ public class ZoneDeviceConfig : ScriptableObject
 
     public DeviceType DeviceType => _deviceType;
     public GameObject DevicePrefab => _devicePrefab;
+    public bool IsPremiumZone => _isPremiumZone;
     public int PriceOfHourCoins => _priceOfHourCoins;
     public int PriceOfHourGems => _priceOfHourGems;
     public int DevicePrice => _devicePrice;

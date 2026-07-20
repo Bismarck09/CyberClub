@@ -53,7 +53,7 @@ public class GameDevice : MonoBehaviour
         _isOccupied = false;
     }
 
-    public void Reserve(float time, VisitorExit visitorExit)
+    public void Reserve(float time, VisitorExit visitorExit, Action onCompleted = null)
     {
         if (_isBroken)
             return;
@@ -61,10 +61,14 @@ public class GameDevice : MonoBehaviour
         if (!_isOccupied)
             _isOccupied = true;
 
-        StartReleaseCoroutine(time, visitorExit, null);
+        StartReleaseCoroutine(time, visitorExit, null, onCompleted);
     }
 
-    public void StartSession(float time, VisitorExit visitorExit, VisitorSeat seatController)
+    public void StartSession(
+        float time,
+        VisitorExit visitorExit,
+        VisitorSeat seatController,
+        Action onCompleted = null)
     {
         if (_isBroken)
             return;
@@ -72,7 +76,7 @@ public class GameDevice : MonoBehaviour
         if (!_isOccupied)
             _isOccupied = true;
 
-        StartReleaseCoroutine(time, visitorExit, seatController);
+        StartReleaseCoroutine(time, visitorExit, seatController, onCompleted);
     }
 
     public bool BreakDown()
@@ -110,12 +114,17 @@ public class GameDevice : MonoBehaviour
         return Mathf.Max(1f, _repairIncomeMultiplier);
     }
 
-    private void StartReleaseCoroutine(float time, VisitorExit visitorExit, VisitorSeat seatController)
+    private void StartReleaseCoroutine(
+        float time,
+        VisitorExit visitorExit,
+        VisitorSeat seatController,
+        Action onCompleted)
     {
         if (_sessionCoroutine != null)
             StopCoroutine(_sessionCoroutine);
 
-        _sessionCoroutine = StartCoroutine(ReleaseAfterTime(time, visitorExit, seatController));
+        _sessionCoroutine = StartCoroutine(
+            ReleaseAfterTime(time, visitorExit, seatController, onCompleted));
     }
 
     private void OnApplicationQuit()
@@ -124,7 +133,11 @@ public class GameDevice : MonoBehaviour
         _sessionCoroutine = null;
     }
 
-    private IEnumerator ReleaseAfterTime(float time, VisitorExit visitorExit, VisitorSeat seatController)
+    private IEnumerator ReleaseAfterTime(
+        float time,
+        VisitorExit visitorExit,
+        VisitorSeat seatController,
+        Action onCompleted)
     {
         yield return new WaitForSeconds(time);
 
@@ -133,6 +146,15 @@ public class GameDevice : MonoBehaviour
 
         _isOccupied = false;
         _sessionCoroutine = null;
+
+        try
+        {
+            onCompleted?.Invoke();
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception, this);
+        }
 
         if (visitorExit != null)
         {

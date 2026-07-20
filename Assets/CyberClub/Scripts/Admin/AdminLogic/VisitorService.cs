@@ -138,13 +138,15 @@ public class VisitorService : MonoBehaviour
                     device.StartSession(
                         actualSessionTime,
                         visitorExit,
-                        seatController);
+                        seatController,
+                        () => NotifyVisitorServicedSafely(freeDevice));
                 }
                 else
                 {
                     device.Reserve(
                         actualSessionTime,
-                        visitorExit);
+                        visitorExit,
+                        () => NotifyVisitorServicedSafely(freeDevice));
                 }
             },
             () =>
@@ -164,11 +166,6 @@ public class VisitorService : MonoBehaviour
             Debug.LogWarning($"VisitorService: путь к устройству не запущен для {visitor.name}.", visitor);
             visitorExit.MoveToExit();
         }
-        else
-        {
-            NotifyVisitorServicedSafely(freeDevice);
-        }
-
         admin.SetBusy(false);
     }
 

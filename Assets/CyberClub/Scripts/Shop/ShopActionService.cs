@@ -9,6 +9,8 @@ public class ShopActionService : MonoBehaviour
 
     [Header("Potion purchase")]
     [SerializeField] private PotionPurchaseService _potionPurchaseService;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
+    [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
 
     [Header("Save")]
     [SerializeField] private SaveLoadManager _saveLoadManager;
@@ -105,6 +107,36 @@ public class ShopActionService : MonoBehaviour
             return;
         }
 
+        if (!CanExecute(product, out PurchaseFailureReason blockedReason))
+        {
+            _feedbackPresenter?.Show(blockedReason);
+            return;
+        }
+
         _potionPurchaseService.TryBuy(product);
+    }
+
+    public bool CanExecute(ShopProductConfig product, out PurchaseFailureReason blockedReason)
+    {
+        blockedReason = PurchaseFailureReason.None;
+
+        if (product == null)
+        {
+            blockedReason = PurchaseFailureReason.ProductUnavailable;
+            return false;
+        }
+
+        if (product.ActionType != ShopProductActionType.Potion)
+            return true;
+
+        if (_tutorialPurchaseGate == null)
+        {
+            blockedReason = PurchaseFailureReason.TransactionFailed;
+            return false;
+        }
+
+        return _tutorialPurchaseGate.CanPurchase(
+            TutorialPurchaseCategory.Potion,
+            out blockedReason);
     }
 }

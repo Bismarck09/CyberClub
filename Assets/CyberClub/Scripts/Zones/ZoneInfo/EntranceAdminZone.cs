@@ -5,9 +5,11 @@ public class EntranceAdminZone : MonoBehaviour
 {
     [SerializeField] private AdminUpgradePanelView _panelView;
     [SerializeField] private AdminUpgradeButton _adminUpgradeButtonController;
+    [SerializeField] private AdminSelection _adminSelection;
 
-    // ИЗМЕНЕНО: учитываем все коллайдеры игрока.
     private readonly HashSet<Collider> _playerColliders = new();
+
+    public bool IsPlayerInside { get; private set; }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -17,11 +19,11 @@ public class EntranceAdminZone : MonoBehaviour
         bool wasOutside = _playerColliders.Count == 0;
         _playerColliders.Add(other);
 
-        if (!wasOutside)
-            return;
-
-        _panelView?.ShowAdminShop();
-        _adminUpgradeButtonController?.SetAdminShopOpened(true);
+        if (wasOutside)
+        {
+            SetPlayerInside(true);
+            OpenAdminShop();
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -34,24 +36,41 @@ public class EntranceAdminZone : MonoBehaviour
         if (_playerColliders.Count > 0)
             return;
 
+        SetPlayerInside(false);
         CloseAdminShop();
     }
 
     private void OnDisable()
     {
         _playerColliders.Clear();
+        SetPlayerInside(false);
         CloseAdminShop();
     }
 
-    private void CloseAdminShop()
+    public void SetPlayerInside(bool value)
     {
+        IsPlayerInside = value;
+    }
+
+    public void OpenAdminShop()
+    {
+        if (!IsPlayerInside)
+            return;
+
+        _adminSelection?.RefreshSelectedAdmin();
+        _panelView?.ShowAdminShop();
+        _adminUpgradeButtonController?.SetAdminShopOpened(true);
+    }
+
+    public void CloseAdminShop()
+    {
+        // Closing the UI does not change physical presence or clear selection.
         _adminUpgradeButtonController?.SetAdminShopOpened(false);
         _panelView?.HideAdminShop();
     }
 
-    private bool IsPlayer(Collider other)
+    private static bool IsPlayer(Collider other)
     {
-        return other != null &&
-               other.GetComponentInParent<PlayerMovement>() != null;
+        return other != null && other.GetComponentInParent<PlayerMovement>() != null;
     }
 }

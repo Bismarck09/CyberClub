@@ -12,6 +12,13 @@ public class UpgradeUIData : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _interiorPrice;
     [SerializeField] private TextMeshProUGUI _interiorMultiplier;
 
+    [Header("Tutorial blocked states")]
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
+    [SerializeField] private GameObject _deviceTutorialBlockedState;
+    [SerializeField] private TextMeshProUGUI _deviceTutorialBlockedText;
+    [SerializeField] private GameObject _interiorTutorialBlockedState;
+    [SerializeField] private TextMeshProUGUI _interiorTutorialBlockedText;
+
     private ZoneInformation _zoneInformation;
     private int _lastDevicePrice = -1;
     private bool _lastDeviceLimitState;
@@ -31,7 +38,11 @@ public class UpgradeUIData : MonoBehaviour
             _devicePurchase.OnDevicePriceChanged += ForceRefreshDeviceData;
         }
 
+        if (_tutorialPurchaseGate != null)
+            _tutorialPurchaseGate.OnGateStateChanged += RefreshTutorialBlockedStates;
+
         ForceRefreshDeviceData();
+        RefreshTutorialBlockedStates();
     }
 
     private void OnDisable()
@@ -48,6 +59,9 @@ public class UpgradeUIData : MonoBehaviour
             _devicePurchase.OnDeviceStateChanged -= ForceRefreshDeviceData;
             _devicePurchase.OnDevicePriceChanged -= ForceRefreshDeviceData;
         }
+
+        if (_tutorialPurchaseGate != null)
+            _tutorialPurchaseGate.OnGateStateChanged -= RefreshTutorialBlockedStates;
     }
 
     private void Update()
@@ -74,6 +88,8 @@ public class UpgradeUIData : MonoBehaviour
 
         if (_zoneInformation != null && _zoneInformation.Interior != null)
             ChangeInteriorData(_zoneInformation.Interior);
+
+        RefreshTutorialBlockedStates();
     }
 
     private void ChangeInteriorData(InteriorData interiorData)
@@ -121,5 +137,36 @@ public class UpgradeUIData : MonoBehaviour
         _devicePriceText.text = _lastDeviceLimitState
             ? MaxText
             : ResourceValueFormatter.Format(_devicePurchase.CurrentDevicePrice);
+    }
+
+    private void RefreshTutorialBlockedStates()
+    {
+        SetBlockedState(
+            _deviceTutorialBlockedState,
+            _deviceTutorialBlockedText,
+            TutorialPurchaseCategory.Device,
+            _zoneInformation);
+        SetBlockedState(
+            _interiorTutorialBlockedState,
+            _interiorTutorialBlockedText,
+            TutorialPurchaseCategory.Interior,
+            _zoneInformation);
+    }
+
+    private void SetBlockedState(
+        GameObject root,
+        TextMeshProUGUI text,
+        TutorialPurchaseCategory category,
+        ZoneInformation zone)
+    {
+        PurchaseFailureReason reason = PurchaseFailureReason.TransactionFailed;
+        bool blocked = _tutorialPurchaseGate == null ||
+            !_tutorialPurchaseGate.CanPurchase(category, zone, out reason);
+
+        if (root != null)
+            root.SetActive(blocked);
+
+        if (text != null)
+            text.text = blocked ? PurchaseFailureMessage.Get(reason) : string.Empty;
     }
 }

@@ -1,15 +1,16 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using TMPro;
 
 public class CursorActive : MonoBehaviour
 {
     [SerializeField] private InteractionWithUI _interactionWithUI;
     [SerializeField] private PlayerInputReader _inputReader;
-    [SerializeField] private Canvas _overlayCanvas;
 
-    private GameObject _startOverlay;
+    [Header("Authored pointer-lock UI")]
+    [SerializeField] private GameObject _startOverlay;
+    [SerializeField] private Button _startOverlayButton;
+
     private bool _lastInterfaceState;
     private bool _hasStartGesture;
     private float _pointerLockCheckTime;
@@ -18,6 +19,8 @@ public class CursorActive : MonoBehaviour
     {
         if (_inputReader == null)
             _inputReader = GetComponentInParent<PlayerInputReader>();
+
+        ValidateReferences();
     }
 
     private void OnEnable()
@@ -27,6 +30,9 @@ public class CursorActive : MonoBehaviour
 
         if (_inputReader != null)
             _inputReader.OnControlModeChanged += HandleControlModeChanged;
+
+        if (_startOverlayButton != null)
+            _startOverlayButton.onClick.AddListener(AcceptStartGesture);
 
         if (_interactionWithUI != null)
         {
@@ -42,6 +48,9 @@ public class CursorActive : MonoBehaviour
 
         if (_inputReader != null)
             _inputReader.OnControlModeChanged -= HandleControlModeChanged;
+
+        if (_startOverlayButton != null)
+            _startOverlayButton.onClick.RemoveListener(AcceptStartGesture);
     }
 
     private void Update()
@@ -55,6 +64,24 @@ public class CursorActive : MonoBehaviour
 
         if (pressed)
             AcceptStartGesture();
+    }
+
+    private void LateUpdate()
+    {
+        if (!RequiresBrowserGesture() ||
+            _lastInterfaceState ||
+            (_inputReader != null && _inputReader.IsTouchMode) ||
+            Time.unscaledTime < _pointerLockCheckTime ||
+            (_startOverlay != null && _startOverlay.activeSelf))
+        {
+            return;
+        }
+
+        if (Cursor.lockState != CursorLockMode.Locked)
+        {
+            _hasStartGesture = false;
+            ShowStartOverlay();
+        }
     }
 
     private void SwitchCursorActive(bool isActive)
@@ -120,36 +147,20 @@ public class CursorActive : MonoBehaviour
         _pointerLockCheckTime = Time.unscaledTime + 0.5f;
     }
 
-    private void LateUpdate()
-    {
-        if (!RequiresBrowserGesture() ||
-            _lastInterfaceState ||
-            (_inputReader != null && _inputReader.IsTouchMode) ||
-            Time.unscaledTime < _pointerLockCheckTime ||
-            (_startOverlay != null && _startOverlay.activeSelf))
-        {
-            return;
-        }
-
-        if (Cursor.lockState != CursorLockMode.Locked)
-        {
-            _hasStartGesture = false;
-            ShowStartOverlay();
-        }
-    }
-
-    private bool RequiresBrowserGesture()
+    private static bool RequiresBrowserGesture()
     {
         return Application.platform == RuntimePlatform.WebGLPlayer;
     }
 
     private void ShowStartOverlay()
     {
-        EnsureStartOverlay();
+        if (_startOverlay == null)
+        {
+            ReportMissing(nameof(_startOverlay));
+            return;
+        }
 
-        if (_startOverlay != null)
-            _startOverlay.SetActive(true);
-
+        _startOverlay.SetActive(true);
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         _inputReader?.SetInterfaceMode(true);
@@ -161,46 +172,20 @@ public class CursorActive : MonoBehaviour
             _startOverlay.SetActive(false);
     }
 
-    private void EnsureStartOverlay()
+    private void ValidateReferences()
     {
-        if (_startOverlay != null || _overlayCanvas == null)
-            return;
+        if (_interactionWithUI == null)
+            ReportMissing(nameof(_interactionWithUI));
+        if (_inputReader == null)
+            ReportMissing(nameof(_inputReader));
+        if (_startOverlay == null)
+            ReportMissing(nameof(_startOverlay));
+        if (_startOverlayButton == null)
+            ReportMissing(nameof(_startOverlayButton));
+    }
 
-        _startOverlay = new GameObject("PointerLockStartOverlay", typeof(RectTransform));
-        _startOverlay.layer = _overlayCanvas.gameObject.layer;
-        _startOverlay.transform.SetParent(_overlayCanvas.transform, false);
-
-        RectTransform rect = (RectTransform)_startOverlay.transform;
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-
-        Image image = _startOverlay.AddComponent<Image>();
-        image.color = new Color(0.015f, 0.02f, 0.035f, 0.9f);
-        Button button = _startOverlay.AddComponent<Button>();
-        button.targetGraphic = image;
-        button.onClick.AddListener(AcceptStartGesture);
-
-        GameObject labelObject = new GameObject("Label", typeof(RectTransform));
-        labelObject.layer = _startOverlay.layer;
-        labelObject.transform.SetParent(_startOverlay.transform, false);
-
-        RectTransform labelRect = (RectTransform)labelObject.transform;
-        labelRect.anchorMin = new Vector2(0.15f, 0.4f);
-        labelRect.anchorMax = new Vector2(0.85f, 0.6f);
-        labelRect.offsetMin = Vector2.zero;
-        labelRect.offsetMax = Vector2.zero;
-
-        TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
-        label.text = "Нажмите, чтобы начать";
-        label.fontSize = 44f;
-        label.enableAutoSizing = true;
-        label.fontSizeMin = 22f;
-        label.fontSizeMax = 44f;
-        label.fontStyle = FontStyles.Bold;
-        label.alignment = TextAlignmentOptions.Center;
-        label.color = Color.white;
-        label.raycastTarget = false;
+    private void ReportMissing(string fieldName)
+    {
+        Debug.LogError($"CursorActive: поле {fieldName} не назначено на GameObject '{name}'.", this);
     }
 }

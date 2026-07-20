@@ -1,21 +1,17 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ResourceShopShortcuts : MonoBehaviour
 {
-    [SerializeField] private RectTransform _coinsWallet;
-    [SerializeField] private RectTransform _gemsWallet;
+    [Header("Authored shortcut buttons")]
+    [SerializeField] private Button _coinsButton;
+    [SerializeField] private Button _gemsButton;
     [SerializeField] private GameObject _shopRoot;
     [SerializeField] private UniversalShopWindow _shopWindow;
 
-    private Button _coinsButton;
-    private Button _gemsButton;
-
-    private void Awake()
+    private void OnEnable()
     {
-        _coinsButton = CreateShortcut(_coinsWallet, "CoinsShopShortcut");
-        _gemsButton = CreateShortcut(_gemsWallet, "GemsShopShortcut");
+        ValidateReferences();
 
         if (_coinsButton != null)
             _coinsButton.onClick.AddListener(OpenCoins);
@@ -24,7 +20,7 @@ public class ResourceShopShortcuts : MonoBehaviour
             _gemsButton.onClick.AddListener(OpenGems);
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (_coinsButton != null)
             _coinsButton.onClick.RemoveListener(OpenCoins);
@@ -47,7 +43,7 @@ public class ResourceShopShortcuts : MonoBehaviour
     {
         if (_shopRoot == null || _shopWindow == null)
         {
-            Debug.LogError("ResourceShopShortcuts: не назначен существующий магазин.", this);
+            Debug.LogError($"ResourceShopShortcuts: магазин не настроен на GameObject '{name}'.", this);
             return;
         }
 
@@ -57,51 +53,20 @@ public class ResourceShopShortcuts : MonoBehaviour
         _shopWindow.ShowResourcesAndSelect(actionType);
     }
 
-    private Button CreateShortcut(RectTransform wallet, string objectName)
+    private void ValidateReferences()
     {
-        if (wallet == null)
-            return null;
+        if (_coinsButton == null)
+            ReportMissing(nameof(_coinsButton));
+        if (_gemsButton == null)
+            ReportMissing(nameof(_gemsButton));
+        if (_shopRoot == null)
+            ReportMissing(nameof(_shopRoot));
+        if (_shopWindow == null)
+            ReportMissing(nameof(_shopWindow));
+    }
 
-        Transform existing = wallet.Find(objectName);
-
-        if (existing != null)
-            return existing.GetComponent<Button>();
-
-        GameObject gameObject = new GameObject(objectName, typeof(RectTransform));
-        gameObject.layer = wallet.gameObject.layer;
-        gameObject.transform.SetParent(wallet, false);
-
-        RectTransform rect = (RectTransform)gameObject.transform;
-        rect.anchorMin = new Vector2(1f, 0.5f);
-        rect.anchorMax = new Vector2(1f, 0.5f);
-        rect.pivot = new Vector2(1f, 0.5f);
-        rect.anchoredPosition = new Vector2(-12f, 0f);
-        rect.sizeDelta = new Vector2(58f, 58f);
-
-        Image image = gameObject.AddComponent<Image>();
-        image.color = new Color(0.05f, 0.62f, 0.86f, 0.96f);
-
-        Button button = gameObject.AddComponent<Button>();
-        button.targetGraphic = image;
-
-        GameObject labelObject = new GameObject("Plus", typeof(RectTransform));
-        labelObject.layer = gameObject.layer;
-        labelObject.transform.SetParent(gameObject.transform, false);
-
-        RectTransform labelRect = (RectTransform)labelObject.transform;
-        labelRect.anchorMin = Vector2.zero;
-        labelRect.anchorMax = Vector2.one;
-        labelRect.offsetMin = Vector2.zero;
-        labelRect.offsetMax = Vector2.zero;
-
-        TextMeshProUGUI label = labelObject.AddComponent<TextMeshProUGUI>();
-        label.text = "+";
-        label.fontSize = 42f;
-        label.fontStyle = FontStyles.Bold;
-        label.alignment = TextAlignmentOptions.Center;
-        label.color = Color.white;
-        label.raycastTarget = false;
-
-        return button;
+    private void ReportMissing(string fieldName)
+    {
+        Debug.LogError($"ResourceShopShortcuts: поле {fieldName} не назначено на GameObject '{name}'.", this);
     }
 }

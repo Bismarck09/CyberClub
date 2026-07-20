@@ -9,6 +9,7 @@ public class PotionPurchaseService : MonoBehaviour
     [SerializeField] private PotionEffectService _potionEffectService;
     [SerializeField] private SaveLoadManager _saveLoadManager;
     [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
 
     private bool _isPurchasing;
     private float _nextPurchaseAllowedTime = float.NegativeInfinity;
@@ -29,6 +30,12 @@ public class PotionPurchaseService : MonoBehaviour
         {
             Debug.LogWarning($"PotionPurchaseService: товар {product.name} не является зельем.");
             Fail(PurchaseFailureReason.ProductUnavailable);
+            return false;
+        }
+
+        if (!CanPassTutorialGate(out PurchaseFailureReason tutorialReason))
+        {
+            Fail(tutorialReason);
             return false;
         }
 
@@ -119,5 +126,18 @@ public class PotionPurchaseService : MonoBehaviour
     private void Fail(PurchaseFailureReason reason)
     {
         _feedbackPresenter?.Show(reason);
+    }
+
+    private bool CanPassTutorialGate(out PurchaseFailureReason failureReason)
+    {
+        if (_tutorialPurchaseGate == null)
+        {
+            failureReason = PurchaseFailureReason.TransactionFailed;
+            return false;
+        }
+
+        return _tutorialPurchaseGate.CanPurchase(
+            TutorialPurchaseCategory.Potion,
+            out failureReason);
     }
 }

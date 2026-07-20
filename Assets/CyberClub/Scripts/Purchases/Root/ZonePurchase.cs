@@ -9,6 +9,7 @@ public class ZonePurchase : MonoBehaviour
     [SerializeField] private SaveLoadManager _saveLoadManager;
     [SerializeField] private LocationPurchaseDialog _purchaseDialog;
     [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
     private bool _isPurchasing;
     private float _nextPurchaseAllowedTime = float.NegativeInfinity;
 
@@ -131,6 +132,17 @@ public class ZonePurchase : MonoBehaviour
         if (config == null || _coinsData == null)
             return PurchaseFailureReason.TransactionFailed;
 
+        if (_tutorialPurchaseGate == null)
+            return PurchaseFailureReason.TransactionFailed;
+
+        if (!_tutorialPurchaseGate.CanPurchase(
+                TutorialPurchaseCategory.Zone,
+                config.ZoneInformation,
+                out PurchaseFailureReason tutorialReason))
+        {
+            return tutorialReason;
+        }
+
         if (config.IsUnlocked ||
             config.BarrierObject == null ||
             !config.BarrierObject.activeSelf)
@@ -144,7 +156,7 @@ public class ZonePurchase : MonoBehaviour
         if (barrier == null || !barrier.CanUnlock)
             return PurchaseFailureReason.ProductUnavailable;
 
-        if (config.ZonePrice < 0)
+        if (config.ZonePrice < 0 || config.ComputerCapacity <= 0)
             return PurchaseFailureReason.TransactionFailed;
 
         if (_coinsData.CurrentCoins < config.ZonePrice)

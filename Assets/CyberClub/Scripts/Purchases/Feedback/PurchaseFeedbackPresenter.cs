@@ -1,20 +1,16 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PurchaseFeedbackPresenter : MonoBehaviour
 {
+    [Header("Authored view")]
+    [SerializeField] private PurchaseFeedbackView _view;
+
     [Header("Wallets")]
     [SerializeField] private RectTransform _coinsWallet;
     [SerializeField] private RectTransform _gemsWallet;
 
-    [Header("Optional authored feedback UI")]
-    [SerializeField] private TMP_Text _messageText;
-    [SerializeField] private CanvasGroup _messageCanvasGroup;
-
-    [Header("Optional authored audio")]
-    [SerializeField] private AudioSource _audioSource;
+    [Header("Audio")]
     [SerializeField] private AudioClip _failureClip;
 
     [Header("Timing")]
@@ -30,9 +26,8 @@ public class PurchaseFeedbackPresenter : MonoBehaviour
 
     private void Awake()
     {
-        EnsureFeedbackView();
-        EnsureAudioSource();
-        SetMessageVisible(false);
+        ValidateReferences();
+        _view?.Hide();
     }
 
     private void OnDisable()
@@ -43,19 +38,15 @@ public class PurchaseFeedbackPresenter : MonoBehaviour
         _animatedWallet = null;
         _messageRoutine = null;
         _walletRoutine = null;
-        SetMessageVisible(false);
+        _view?.Hide();
     }
 
     public void Show(PurchaseFailureReason reason)
     {
-        if (reason == PurchaseFailureReason.None)
+        if (reason == PurchaseFailureReason.None || _view == null)
             return;
 
-        EnsureFeedbackView();
-        EnsureAudioSource();
-
-        if (_messageText != null)
-            _messageText.text = GetMessage(reason);
+        _view.SetMessage(PurchaseFailureMessage.Get(reason));
 
         if (_messageRoutine != null)
             StopCoroutine(_messageRoutine);
@@ -77,32 +68,29 @@ public class PurchaseFeedbackPresenter : MonoBehaviour
             _walletRoutine = StartCoroutine(PunchWalletRoutine(wallet));
         }
 
-        if (Time.unscaledTime >= _nextSoundTime && _audioSource != null && _failureClip != null)
+        if (Time.unscaledTime >= _nextSoundTime && _failureClip != null)
         {
             _nextSoundTime = Time.unscaledTime + _soundCooldown;
-            _audioSource.PlayOneShot(_failureClip);
+            _view.PlayFailureSound(_failureClip);
         }
     }
 
     private IEnumerator ShowMessageRoutine()
     {
-        SetMessageVisible(true);
+        _view.Show();
         yield return new WaitForSecondsRealtime(_messageDuration);
 
-        float duration = 0.18f;
+        const float duration = 0.18f;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-
-            if (_messageCanvasGroup != null)
-                _messageCanvasGroup.alpha = 1f - Mathf.Clamp01(elapsed / duration);
-
+            _view.SetAlpha(1f - Mathf.Clamp01(elapsed / duration));
             yield return null;
         }
 
-        SetMessageVisible(false);
+        _view.Hide();
         _messageRoutine = null;
     }
 
@@ -134,117 +122,27 @@ public class PurchaseFeedbackPresenter : MonoBehaviour
         _walletRoutine = null;
     }
 
-    private void EnsureFeedbackView()
-    {
-        if (_messageText != null && _messageCanvasGroup != null)
-            return;
-
-        GameObject root = new GameObject(
-            "PurchaseFeedbackMessage",
-            typeof(RectTransform),
-            typeof(CanvasRenderer),
-            typeof(Image),
-            typeof(CanvasGroup));
-        root.layer = gameObject.layer;
-        root.transform.SetParent(transform, false);
-
-        RectTransform rect = (RectTransform)root.transform;
-        rect.anchorMin = new Vector2(0.5f, 1f);
-        rect.anchorMax = new Vector2(0.5f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, -90f);
-        rect.sizeDelta = new Vector2(540f, 64f);
-
-        Image background = root.GetComponent<Image>();
-        background.color = new Color(0.08f, 0.09f, 0.13f, 0.94f);
-        background.raycastTarget = false;
-
-        _messageCanvasGroup = root.GetComponent<CanvasGroup>();
-        _messageCanvasGroup.interactable = false;
-        _messageCanvasGroup.blocksRaycasts = false;
-
-        GameObject textObject = new GameObject("Message", typeof(RectTransform), typeof(CanvasRenderer));
-        textObject.layer = gameObject.layer;
-        textObject.transform.SetParent(root.transform, false);
-
-        RectTransform textRect = (RectTransform)textObject.transform;
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(20f, 8f);
-        textRect.offsetMax = new Vector2(-20f, -8f);
-
-        TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
-        text.alignment = TextAlignmentOptions.Center;
-        text.fontSize = 30f;
-        text.enableAutoSizing = true;
-        text.fontSizeMin = 18f;
-        text.fontSizeMax = 30f;
-        text.color = Color.white;
-        text.raycastTarget = false;
-        _messageText = text;
-    }
-
-    private void EnsureAudioSource()
-    {
-        if (_audioSource == null)
-        {
-            _audioSource = GetComponent<AudioSource>();
-
-            if (_audioSource == null)
-                _audioSource = gameObject.AddComponent<AudioSource>();
-
-            _audioSource.playOnAwake = false;
-        }
-
-        if (_failureClip == null)
-            _failureClip = CreatePlaceholderFailureClip();
-    }
-
-    private static AudioClip CreatePlaceholderFailureClip()
-    {
-        const int frequency = 44100;
-        const float duration = 0.1f;
-        int sampleCount = Mathf.CeilToInt(frequency * duration);
-        float[] samples = new float[sampleCount];
-
-        for (int i = 0; i < sampleCount; i++)
-        {
-            float progress = i / (float)sampleCount;
-            float envelope = 1f - progress;
-            samples[i] = Mathf.Sin(2f * Mathf.PI * 180f * i / frequency) * envelope * 0.16f;
-        }
-
-        AudioClip clip = AudioClip.Create("PurchaseFailurePlaceholder", sampleCount, 1, frequency, false);
-        clip.SetData(samples, 0);
-        return clip;
-    }
-
     private RectTransform GetWallet(PurchaseFailureReason reason)
     {
         return reason == PurchaseFailureReason.NotEnoughGems ? _gemsWallet :
             reason == PurchaseFailureReason.NotEnoughCoins ? _coinsWallet : null;
     }
 
-    private void SetMessageVisible(bool visible)
+    private void ValidateReferences()
     {
-        if (_messageCanvasGroup == null)
-            return;
-
-        _messageCanvasGroup.alpha = visible ? 1f : 0f;
-        _messageCanvasGroup.gameObject.SetActive(visible);
+        if (_view == null)
+            ReportMissing(nameof(_view));
+        if (_coinsWallet == null)
+            ReportMissing(nameof(_coinsWallet));
+        if (_gemsWallet == null)
+            ReportMissing(nameof(_gemsWallet));
+        if (_failureClip == null)
+            ReportMissing(nameof(_failureClip));
     }
 
-    private static string GetMessage(PurchaseFailureReason reason)
+    private void ReportMissing(string fieldName)
     {
-        return reason switch
-        {
-            PurchaseFailureReason.NotEnoughCoins => "Недостаточно монет",
-            PurchaseFailureReason.NotEnoughGems => "Недостаточно кристаллов",
-            PurchaseFailureReason.MaximumReached => "Достигнут максимум",
-            PurchaseFailureReason.LockedByTutorial => "Сначала завершите этап обучения",
-            PurchaseFailureReason.ProductUnavailable => "Покупка сейчас недоступна",
-            PurchaseFailureReason.TransactionFailed => "Не удалось завершить покупку",
-            _ => "Покупка недоступна"
-        };
+        Debug.LogError($"PurchaseFeedbackPresenter: поле {fieldName} не назначено на GameObject '{name}'.", this);
     }
+
 }

@@ -11,26 +11,19 @@ public class PremiumLocationSaveModule : MonoBehaviour, ISaveModule
 
         saveData.PremiumLocation.HasPremiumLocationSave = true;
         saveData.PremiumLocation.IsUnlocked = _premiumLocationUnlocker.IsUnlocked;
+
+        // Retain legacy fields so the JSON shape remains backward-compatible.
         saveData.PremiumLocation.HasBonusGrantState = true;
-        saveData.PremiumLocation.BonusGranted = _premiumLocationUnlocker.BonusGranted;
+        saveData.PremiumLocation.BonusGranted = true;
     }
 
     public void Restore(GameSaveData saveData)
     {
         if (_premiumLocationUnlocker == null)
             return;
-        if (saveData.PremiumLocation == null || saveData.PremiumLocation.HasPremiumLocationSave == false)
+        if (saveData.PremiumLocation == null || !saveData.PremiumLocation.HasPremiumLocationSave)
             return;
 
-        // ИЗМЕНЕНО: старый сейв с уже открытой премиум-зоной считается
-        // получившим бонус, чтобы обычная загрузка не начисляла гемы повторно.
-        bool bonusGranted = saveData.PremiumLocation.HasBonusGrantState
-            ? saveData.PremiumLocation.BonusGranted
-            : saveData.PremiumLocation.IsUnlocked;
-
-        _premiumLocationUnlocker.RestoreUnlockedState(
-            saveData.PremiumLocation.IsUnlocked,
-            bonusGranted);
+        _premiumLocationUnlocker.RestoreUnlockedState(saveData.PremiumLocation.IsUnlocked);
     }
 }
-

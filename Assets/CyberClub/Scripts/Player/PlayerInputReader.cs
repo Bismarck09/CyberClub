@@ -18,7 +18,6 @@ public class PlayerInputReader : MonoBehaviour
 
     private Vector2 _mobileMovement;
     private Vector2 _mobileLookDelta;
-    private bool _mobileSprint;
     private bool _isBlocked;
     private bool _isInterfaceMode;
 
@@ -28,21 +27,33 @@ public class PlayerInputReader : MonoBehaviour
             ? _mobileMovement
             : _moveAction?.ReadValue<Vector2>() ?? Vector2.zero;
 
-    public Vector2 Look => _isBlocked || _isInterfaceMode
-        ? Vector2.zero
-        : IsTouchMode
-            ? _mobileLookDelta
-            : _lookAction?.ReadValue<Vector2>() ?? Vector2.zero;
+    public Vector2 Look
+    {
+        get
+        {
+            if (_isBlocked || _isInterfaceMode)
+                return Vector2.zero;
 
-    public bool Sprint => !_isBlocked && !_isInterfaceMode &&
-        (IsTouchMode ? _mobileSprint : _sprintAction?.IsPressed() == true);
+            if (!IsTouchMode)
+                return _lookAction?.ReadValue<Vector2>() ?? Vector2.zero;
+
+            Vector2 value = _mobileLookDelta;
+            _mobileLookDelta = Vector2.zero;
+            return value;
+        }
+    }
+
+    public bool Sprint => !_isBlocked && !_isInterfaceMode && !IsTouchMode &&
+        _sprintAction?.IsPressed() == true;
 
     public bool Interact => !_isBlocked &&
         (_interactAction?.IsPressed() == true);
 
     public bool IsTouchMode { get; private set; }
+    public bool IsGameplayInputAvailable => !_isBlocked && !_isInterfaceMode;
 
     public event Action<bool> OnControlModeChanged;
+    public event Action OnMobileControlsResetRequested;
     public event Action OnInteractRequested;
     public event Action OnToggleCursorRequested;
     public event Action OnPauseRequested;
@@ -86,7 +97,9 @@ public class PlayerInputReader : MonoBehaviour
         {
             foreach (TouchControl touch in Touchscreen.current.touches)
             {
-                if (touch.press.isPressed || touch.press.wasPressedThisFrame)
+                if (touch.press.isPressed ||
+                    touch.press.wasPressedThisFrame ||
+                    touch.press.wasReleasedThisFrame)
                 {
                     hasTouchInput = true;
                     break;
@@ -110,32 +123,39 @@ public class PlayerInputReader : MonoBehaviour
             SetTouchMode(false);
     }
 
-    private void LateUpdate()
-    {
-        _mobileLookDelta = Vector2.zero;
-    }
-
     public void SetBlocked(bool value)
     {
+        if (_isBlocked == value)
+            return;
+
         _isBlocked = value;
 
         if (value)
+        {
             ResetMobileState();
+            OnMobileControlsResetRequested?.Invoke();
+        }
     }
 
     public void SetInterfaceMode(bool value)
     {
+        if (_isInterfaceMode == value)
+            return;
+
         _isInterfaceMode = value;
 
         if (value)
+        {
             ResetMobileState();
+            OnMobileControlsResetRequested?.Invoke();
+        }
     }
 
     public void SetMobileMovement(Vector2 value)
     {
-        // ИЗМЕНЕНО: запись значения не считается новым вводом. Это позволяет
-        // дочерним контролам безопасно обнуляться из OnDisable без смены режима.
-        _mobileMovement = Vector2.ClampMagnitude(value, 1f);
+        _mobileMovement = IsGameplayInputAvailable
+            ? Vector2.ClampMagnitude(value, 1f)
+            : Vector2.zero;
     }
 
     public void ResetMobileMovement()
@@ -145,45 +165,19 @@ public class PlayerInputReader : MonoBehaviour
 
     public void AddMobileLookDelta(Vector2 value)
     {
-        _mobileLookDelta += value;
+        if (IsGameplayInputAvailable)
+            _mobileLookDelta += value;
     }
 
-    public void SetMobileSprint(bool value)
+    public void ResetMobileLook()
     {
-        _mobileSprint = value;
-    }
-
-    public void RegisterTouchActivity()
-    {
-        SetTouchMode(true);
-    }
-
-    public void SubmitMobileInteract()
-    {
-        RegisterTouchActivity();
-
-        if (!_isBlocked)
-            OnInteractRequested?.Invoke();
-    }
-
-    public void SubmitMobileToggleCursor()
-    {
-        RegisterTouchActivity();
-
-        OnToggleCursorRequested?.Invoke();
-    }
-
-    public void SubmitMobilePause()
-    {
-        RegisterTouchActivity();
-        OnPauseRequested?.Invoke();
+        _mobileLookDelta = Vector2.zero;
     }
 
     public void ResetMobileState()
     {
         ResetMobileMovement();
-        _mobileLookDelta = Vector2.zero;
-        _mobileSprint = false;
+        ResetMobileLook();
     }
 
     private void SetTouchMode(bool value)

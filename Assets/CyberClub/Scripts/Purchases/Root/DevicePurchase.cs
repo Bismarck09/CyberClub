@@ -9,6 +9,7 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     [SerializeField] private ZoneSwitcher _zoneSwitcher;
     [SerializeField] private SaveLoadManager _saveLoadManager;
     [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
 
     private ZoneInformation _zoneInformation;
     private DeviceSpawner _deviceSpawner;
@@ -50,7 +51,10 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
     {
         ZoneInformation zoneInformation = _zoneInformation;
 
-        if (_isPurchasing || !CanCreateDevice(zoneInformation) || _coinsData == null)
+        if (_isPurchasing ||
+            !CanCreateDevice(zoneInformation) ||
+            _coinsData == null ||
+            !CanPassTutorialGate(zoneInformation, out _))
             return false;
 
         int price = zoneInformation.CurrentDevicePrice;
@@ -68,6 +72,12 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
         if (zoneInformation == null || _deviceSpawner == null)
         {
             Fail(PurchaseFailureReason.ProductUnavailable);
+            return;
+        }
+
+        if (!CanPassTutorialGate(zoneInformation, out PurchaseFailureReason tutorialReason))
+        {
+            Fail(tutorialReason);
             return;
         }
 
@@ -178,6 +188,22 @@ public class DevicePurchase : MonoBehaviour, IPurchasable
             return false;
 
         return _deviceSpawner.CanSpawnDevice(zoneInformation);
+    }
+
+    private bool CanPassTutorialGate(
+        ZoneInformation zoneInformation,
+        out PurchaseFailureReason failureReason)
+    {
+        if (_tutorialPurchaseGate == null)
+        {
+            failureReason = PurchaseFailureReason.TransactionFailed;
+            return false;
+        }
+
+        return _tutorialPurchaseGate.CanPurchase(
+            TutorialPurchaseCategory.Device,
+            zoneInformation,
+            out failureReason);
     }
 
     private void RefundCoins(int amount)

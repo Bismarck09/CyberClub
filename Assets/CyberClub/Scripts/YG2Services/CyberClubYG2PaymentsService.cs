@@ -9,8 +9,6 @@ public class CyberClubYG2PaymentsService : MonoBehaviour
 
     [Header("Premium")]
     [SerializeField] private PremiumLocationUnlocker _premiumLocationUnlocker;
-    [SerializeField] private GemsData _gemsData;
-    [SerializeField, Min(0)] private int _premiumGemsReward = 100;
 
     [Header("Save")]
     [SerializeField] private SaveLoadManager _saveLoadManager;
@@ -23,7 +21,6 @@ public class CyberClubYG2PaymentsService : MonoBehaviour
     private bool _isHandlingSuccess;
 
     public string PremiumProductId => _premiumZoneProductId;
-    public int PremiumGemsReward => _premiumGemsReward;
     public bool IsPurchasePending => _purchaseRequestPending;
 
     private void OnEnable()
@@ -36,7 +33,7 @@ public class CyberClubYG2PaymentsService : MonoBehaviour
     {
         if (_saveLoadManager == null)
         {
-            Debug.LogError("CyberClubYG2PaymentsService: не назначен SaveLoadManager.", this);
+            Debug.LogError($"CyberClubYG2PaymentsService: поле {nameof(_saveLoadManager)} не назначено на GameObject '{name}'.", this);
             return;
         }
 
@@ -94,7 +91,6 @@ public class CyberClubYG2PaymentsService : MonoBehaviour
 
         if (_isHandlingSuccess ||
             _premiumLocationUnlocker == null ||
-            _gemsData == null ||
             _saveLoadManager == null ||
             !_saveLoadManager.IsLoaded)
         {
@@ -105,27 +101,8 @@ public class CyberClubYG2PaymentsService : MonoBehaviour
 
         try
         {
-            if (!_premiumLocationUnlocker.BonusGranted)
-            {
-                int gemsBefore = _gemsData.CurrentGems;
-
-                try
-                {
-                    _gemsData.AddResource(_premiumGemsReward, 1f);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception, this);
-
-                    // ИЗМЕНЕНО: событие UI могло выбросить исключение уже после
-                    // фактического начисления; состояние всё равно помечаем завершённым.
-                    if (_gemsData.CurrentGems < gemsBefore + _premiumGemsReward)
-                        return;
-                }
-
-                _premiumLocationUnlocker.TryMarkBonusGranted();
-            }
-
+            // This transaction unlocks the zone only. Its income is awarded
+            // after a completed session by ResourcesWallet.
             _premiumLocationUnlocker.UnlockPremiumLocation();
             _saveLoadManager.SaveGame();
             OnPurchaseSuccess?.Invoke(purchaseId);
@@ -144,15 +121,12 @@ public class CyberClubYG2PaymentsService : MonoBehaviour
         _purchaseRequestPending = false;
         OnPurchaseFailed?.Invoke(purchaseId);
         _feedbackPresenter?.Show(PurchaseFailureReason.TransactionFailed);
-        Debug.LogWarning($"Покупка не завершена: {purchaseId}");
+        Debug.LogWarning($"Покупка не завершена: {purchaseId}", this);
     }
 
     private void ConsumePurchasesAfterLoad()
     {
         _saveLoadManager.OnGameLoaded -= ConsumePurchasesAfterLoad;
-
-        // ИЗМЕНЕНО: consume запускается только после Restore всех save-модулей,
-        // поэтому повторный callback видит сохранённый флаг одноразовой награды.
         YG2.ConsumePurchases();
     }
 }

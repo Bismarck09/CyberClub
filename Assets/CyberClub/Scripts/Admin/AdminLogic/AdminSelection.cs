@@ -54,6 +54,12 @@ public class AdminSelection : MonoBehaviour
             SelectClosestAdmin();
     }
 
+    public void RefreshSelectedAdmin()
+    {
+        if (_player != null && _playerColliders.Count > 0)
+            SelectClosestAdmin();
+    }
+
     private void OnDisable()
     {
         _playerColliders.Clear();

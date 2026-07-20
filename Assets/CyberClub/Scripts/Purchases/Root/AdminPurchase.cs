@@ -9,7 +9,7 @@ public class AdminPurchase : MonoBehaviour, IPurchasable
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private List<AdminWorker> _admins;
     [SerializeField] private SaveLoadManager _saveLoadManager;
-    [SerializeField] private CyberClubTutorialManager _tutorialManager;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
     [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
 
     private bool _isPurchasing;
@@ -19,15 +19,15 @@ public class AdminPurchase : MonoBehaviour, IPurchasable
     public event Action OnAdminStateChanged;
 
     public bool IsHiringLockedByTutorial =>
-        _tutorialManager != null && !_tutorialManager.CanHireAdditionalAdmins;
+        !CanPassTutorialGate(out _);
 
     private void OnEnable()
     {
         if (_coinsData != null)
             _coinsData.OnCoinsChanged += HandleCoinsChanged;
 
-        if (_tutorialManager != null)
-            _tutorialManager.OnTutorialStateChanged += HandleTutorialStateChanged;
+        if (_tutorialPurchaseGate != null)
+            _tutorialPurchaseGate.OnGateStateChanged += HandleTutorialStateChanged;
 
         if (_admins == null)
             return;
@@ -44,8 +44,8 @@ public class AdminPurchase : MonoBehaviour, IPurchasable
         if (_coinsData != null)
             _coinsData.OnCoinsChanged -= HandleCoinsChanged;
 
-        if (_tutorialManager != null)
-            _tutorialManager.OnTutorialStateChanged -= HandleTutorialStateChanged;
+        if (_tutorialPurchaseGate != null)
+            _tutorialPurchaseGate.OnGateStateChanged -= HandleTutorialStateChanged;
 
         if (_admins == null)
             return;
@@ -77,9 +77,9 @@ public class AdminPurchase : MonoBehaviour, IPurchasable
         if (_isPurchasing || Time.unscaledTime < _nextPurchaseAllowedTime)
             return;
 
-        if (IsHiringLockedByTutorial)
+        if (!CanPassTutorialGate(out PurchaseFailureReason tutorialReason))
         {
-            Fail(PurchaseFailureReason.LockedByTutorial);
+            Fail(tutorialReason);
             return;
         }
 
@@ -185,6 +185,19 @@ public class AdminPurchase : MonoBehaviour, IPurchasable
     private void HandleTutorialStateChanged()
     {
         NotifyStateChanged();
+    }
+
+    private bool CanPassTutorialGate(out PurchaseFailureReason failureReason)
+    {
+        if (_tutorialPurchaseGate == null)
+        {
+            failureReason = PurchaseFailureReason.TransactionFailed;
+            return false;
+        }
+
+        return _tutorialPurchaseGate.CanPurchase(
+            TutorialPurchaseCategory.AdminHire,
+            out failureReason);
     }
 
     private void NotifyStateChanged()

@@ -8,6 +8,7 @@ public class AdminUpgradePurchase : MonoBehaviour, IPurchasable
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private SaveLoadManager _saveLoadManager;
     [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
 
     private AdminWorker _selectedAdmin;
     private bool _isPurchasing;
@@ -20,7 +21,10 @@ public class AdminUpgradePurchase : MonoBehaviour, IPurchasable
 
     public bool CanBuy()
     {
-        if (_isPurchasing || _selectedAdmin == null || _coinsData == null)
+        if (_isPurchasing ||
+            _selectedAdmin == null ||
+            _coinsData == null ||
+            !CanPassTutorialGate(out _))
             return false;
 
         if (_selectedAdmin.IsHired == false)
@@ -41,6 +45,12 @@ public class AdminUpgradePurchase : MonoBehaviour, IPurchasable
         if (_selectedAdmin == null || !_selectedAdmin.IsHired)
         {
             Fail(PurchaseFailureReason.ProductUnavailable);
+            return;
+        }
+
+        if (!CanPassTutorialGate(out PurchaseFailureReason tutorialReason))
+        {
+            Fail(tutorialReason);
             return;
         }
 
@@ -135,6 +145,19 @@ public class AdminUpgradePurchase : MonoBehaviour, IPurchasable
 
         _selectedAdmin = admin;
         InvokeSafely(OnSelectedAdminChanged, _selectedAdmin);
+    }
+
+    private bool CanPassTutorialGate(out PurchaseFailureReason failureReason)
+    {
+        if (_tutorialPurchaseGate == null)
+        {
+            failureReason = PurchaseFailureReason.TransactionFailed;
+            return false;
+        }
+
+        return _tutorialPurchaseGate.CanPurchase(
+            TutorialPurchaseCategory.AdminUpgrade,
+            out failureReason);
     }
 
     private void InvokeSafely(Action<AdminWorker> callback, AdminWorker admin)

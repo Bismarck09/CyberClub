@@ -20,6 +20,10 @@ public class ShopProductInfoPanel : MonoBehaviour
     [Header("Optional button label")]
     [SerializeField] private TMP_Text _actionButtonText;
 
+    [Header("Optional tutorial blocked state")]
+    [SerializeField] private GameObject _tutorialBlockedState;
+    [SerializeField] private TMP_Text _tutorialBlockedReasonText;
+
     private ShopProductConfig _currentProduct;
     private ShopActionService _actionService;
 
@@ -38,6 +42,11 @@ public class ShopProductInfoPanel : MonoBehaviour
     {
         if (_actionButton != null)
             _actionButton.onClick.RemoveListener(ExecuteCurrentProduct);
+    }
+
+    private void Update()
+    {
+        RefreshTutorialBlockedState();
     }
 
     public void Show(ShopProductConfig product)
@@ -80,6 +89,8 @@ public class ShopProductInfoPanel : MonoBehaviour
 
         if (_actionButton != null)
             _actionButton.interactable = true;
+
+        RefreshTutorialBlockedState();
     }
 
     private void ExecuteCurrentProduct()
@@ -124,5 +135,24 @@ public class ShopProductInfoPanel : MonoBehaviour
 
         if (_actionButton != null)
             _actionButton.interactable = false;
+
+        if (_tutorialBlockedState != null)
+            _tutorialBlockedState.SetActive(false);
+    }
+
+    private void RefreshTutorialBlockedState()
+    {
+        PurchaseFailureReason reason = PurchaseFailureReason.None;
+        bool blocked = _currentProduct != null &&
+            _actionService != null &&
+            !_actionService.CanExecute(_currentProduct, out reason);
+
+        if (_tutorialBlockedState != null)
+            _tutorialBlockedState.SetActive(blocked);
+
+        if (_tutorialBlockedReasonText != null)
+            _tutorialBlockedReasonText.text = blocked
+                ? PurchaseFailureMessage.Get(reason)
+                : string.Empty;
     }
 }

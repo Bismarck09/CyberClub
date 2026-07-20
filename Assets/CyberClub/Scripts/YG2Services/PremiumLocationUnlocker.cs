@@ -9,9 +9,8 @@ public class PremiumLocationUnlocker : MonoBehaviour
     [SerializeField] private GameObject _premiumBuyButton;
 
     private bool _isUnlocked;
-    private bool _bonusGranted;
+
     public bool IsUnlocked => _isUnlocked;
-    public bool BonusGranted => _bonusGranted;
     public event Action OnPremiumUnlocked;
 
     public bool UnlockPremiumLocation()
@@ -26,19 +25,9 @@ public class PremiumLocationUnlocker : MonoBehaviour
         return true;
     }
 
-    public bool TryMarkBonusGranted()
-    {
-        if (_bonusGranted)
-            return false;
-
-        _bonusGranted = true;
-        return true;
-    }
-
-    public void RestoreUnlockedState(bool isUnlocked, bool bonusGranted)
+    public void RestoreUnlockedState(bool isUnlocked)
     {
         _isUnlocked = isUnlocked;
-        _bonusGranted = bonusGranted;
         _premiumZoneConfig?.RestoreUnlockedState(isUnlocked);
         ApplyVisualState();
     }
@@ -58,7 +47,6 @@ public class PremiumLocationUnlocker : MonoBehaviour
         if (OnPremiumUnlocked == null)
             return;
 
-        // ИЗМЕНЕНО: ошибка внешнего UI/звукового подписчика не прерывает сохранение покупки YG2.
         foreach (Delegate handler in OnPremiumUnlocked.GetInvocationList())
         {
             try

@@ -19,6 +19,13 @@ public class AdminUpgradeUIData : MonoBehaviour
     [SerializeField] private AdminPurchase _adminPurchase;
     [SerializeField] private AdminUpgradePurchase _adminUpgradePurchase;
     [SerializeField] private ZoneSwitcher _zoneSwitcher;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
+
+    [Header("Tutorial blocked states")]
+    [SerializeField] private GameObject _hireTutorialBlockedState;
+    [SerializeField] private TextMeshProUGUI _hireTutorialBlockedText;
+    [SerializeField] private GameObject _upgradeTutorialBlockedState;
+    [SerializeField] private TextMeshProUGUI _upgradeTutorialBlockedText;
 
     private void OnEnable()
     {
@@ -37,8 +44,12 @@ public class AdminUpgradeUIData : MonoBehaviour
             _adminUpgradePurchase.OnAdminUpgraded += UpdateUpgradeCard;
         }
 
+        if (_tutorialPurchaseGate != null)
+            _tutorialPurchaseGate.OnGateStateChanged += UpdateTutorialBlockedStates;
+
         UpdateHireCard();
         UpdateUpgradeCard(null);
+        UpdateTutorialBlockedStates();
     }
 
     private void OnDisable()
@@ -57,6 +68,9 @@ public class AdminUpgradeUIData : MonoBehaviour
             _adminUpgradePurchase.OnSelectedAdminChanged -= UpdateUpgradeCard;
             _adminUpgradePurchase.OnAdminUpgraded -= UpdateUpgradeCard;
         }
+
+        if (_tutorialPurchaseGate != null)
+            _tutorialPurchaseGate.OnGateStateChanged -= UpdateTutorialBlockedStates;
     }
 
     private void OnZoneChanged(ZoneInformation zoneInformation)
@@ -124,5 +138,33 @@ public class AdminUpgradeUIData : MonoBehaviour
 
         if (_upgradeButton != null)
             _upgradeButton.interactable = _adminUpgradePurchase != null;
+    }
+
+    private void UpdateTutorialBlockedStates()
+    {
+        SetTutorialBlockedState(
+            TutorialPurchaseCategory.AdminHire,
+            _hireTutorialBlockedState,
+            _hireTutorialBlockedText);
+        SetTutorialBlockedState(
+            TutorialPurchaseCategory.AdminUpgrade,
+            _upgradeTutorialBlockedState,
+            _upgradeTutorialBlockedText);
+    }
+
+    private void SetTutorialBlockedState(
+        TutorialPurchaseCategory category,
+        GameObject root,
+        TextMeshProUGUI text)
+    {
+        PurchaseFailureReason reason = PurchaseFailureReason.TransactionFailed;
+        bool blocked = _tutorialPurchaseGate == null ||
+            !_tutorialPurchaseGate.CanPurchase(category, out reason);
+
+        if (root != null)
+            root.SetActive(blocked);
+
+        if (text != null)
+            text.text = blocked ? PurchaseFailureMessage.Get(reason) : string.Empty;
     }
 }

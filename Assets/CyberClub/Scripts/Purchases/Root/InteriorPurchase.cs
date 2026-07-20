@@ -9,6 +9,7 @@ public class InteriorPurchase : MonoBehaviour, IPurchasable
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private SaveLoadManager _saveLoadManager;
     [SerializeField] private PurchaseFeedbackPresenter _feedbackPresenter;
+    [SerializeField] private TutorialPurchaseGate _tutorialPurchaseGate;
 
     private InteriorData _interiorData;
     private bool _isPurchasing;
@@ -30,7 +31,10 @@ public class InteriorPurchase : MonoBehaviour, IPurchasable
 
     public bool CanBuy()
     {
-        if (_isPurchasing || _interiorData == null || _coinsData == null)
+        if (_isPurchasing ||
+            _interiorData == null ||
+            _coinsData == null ||
+            !CanPassTutorialGate(out _))
             return false;
 
         if (_interiorData.IsMaxPurchased)
@@ -49,6 +53,12 @@ public class InteriorPurchase : MonoBehaviour, IPurchasable
         if (interior == null)
         {
             Fail(PurchaseFailureReason.ProductUnavailable);
+            return;
+        }
+
+        if (!CanPassTutorialGate(out PurchaseFailureReason tutorialReason))
+        {
+            Fail(tutorialReason);
             return;
         }
 
@@ -131,6 +141,19 @@ public class InteriorPurchase : MonoBehaviour, IPurchasable
     private void ChangeInteriorData(ZoneInformation zoneInformation)
     {
         _interiorData = zoneInformation != null ? zoneInformation.Interior : null;
+    }
+
+    private bool CanPassTutorialGate(out PurchaseFailureReason failureReason)
+    {
+        if (_tutorialPurchaseGate == null)
+        {
+            failureReason = PurchaseFailureReason.TransactionFailed;
+            return false;
+        }
+
+        return _tutorialPurchaseGate.CanPurchase(
+            TutorialPurchaseCategory.Interior,
+            out failureReason);
     }
 
     private void Fail(PurchaseFailureReason reason)

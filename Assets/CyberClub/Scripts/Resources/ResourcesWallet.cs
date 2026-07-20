@@ -8,6 +8,7 @@ public class ResourcesWallet : MonoBehaviour
     [SerializeField] private CoinsData _coinsData;
     [SerializeField] private GemsData _gemsData;
     [SerializeField] private RatingData _ratingData;
+    [SerializeField] private SaveLoadManager _saveLoadManager;
 
     private readonly List<IResource> _resources = new();
 
@@ -31,23 +32,43 @@ public class ResourcesWallet : MonoBehaviour
 
     private void AddResources(DeviceEntry device)
     {
-        if (device == null)
+        if (device == null || _coinsData == null || _gemsData == null)
             return;
 
-        float globalCoinsMultiplier = _resourceMultiplier != null ? _resourceMultiplier.GetMultiplier(_coinsData.Type) : 1f;
+        ZoneDeviceConfig zoneConfig = device.ZoneInformation != null
+            ? device.ZoneInformation.ZoneConfig
+            : null;
+
+        if (zoneConfig != null && zoneConfig.IsPremiumZone)
+        {
+            // Premium income is exact and ignores every multiplier.
+            _coinsData.AddResource(zoneConfig.PriceOfHourCoins, 1f);
+
+            if (zoneConfig.PriceOfHourGems > 0)
+                _gemsData.AddResource(zoneConfig.PriceOfHourGems, 1f);
+
+            _saveLoadManager?.SaveGame();
+            return;
+        }
+
+        float globalCoinsMultiplier = _resourceMultiplier != null
+            ? _resourceMultiplier.GetMultiplier(_coinsData.Type)
+            : 1f;
         float roomCoinsMultiplier = device.RoomCoinsMultiplier;
         float ratingMultiplier = _ratingData != null ? _ratingData.IncomeMultiplier : 1f;
-        float repairBonusMultiplier = device.Device != null ? device.Device.ConsumeRepairIncomeMultiplier() : 1f;
+        float repairBonusMultiplier = device.Device != null
+            ? device.Device.ConsumeRepairIncomeMultiplier()
+            : 1f;
 
-        float coinsMultiplier = (globalCoinsMultiplier + roomCoinsMultiplier) * ratingMultiplier * repairBonusMultiplier;
+        float coinsMultiplier = (globalCoinsMultiplier + roomCoinsMultiplier) *
+            ratingMultiplier * repairBonusMultiplier;
         _coinsData.AddResource(device.PriceOfHourCoins, coinsMultiplier);
 
         int gemsReward = device.RollGemsReward();
 
-        if (gemsReward <= 0)
-            return;
+        if (gemsReward > 0)
+            _gemsData.AddResource(gemsReward, 1f);
 
-        float gemsMultiplier = _resourceMultiplier != null ? _resourceMultiplier.GetMultiplier(_gemsData.Type) : 1f;
-        _gemsData.AddResource(gemsReward, gemsMultiplier);
+        _saveLoadManager?.SaveGame();
     }
 }

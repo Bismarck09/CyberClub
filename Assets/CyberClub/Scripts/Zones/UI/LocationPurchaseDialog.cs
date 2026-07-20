@@ -1,6 +1,4 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using YG;
 using YG.Utils.Pay;
 
@@ -12,6 +10,9 @@ public class LocationPurchaseDialog : MonoBehaviour
         Ordinary,
         Premium
     }
+
+    [Header("Authored view")]
+    [SerializeField] private ZonePurchasePopupView _view;
 
     [Header("Transactions")]
     [SerializeField] private ZonePurchase _zonePurchase;
@@ -26,34 +27,26 @@ public class LocationPurchaseDialog : MonoBehaviour
     [Header("Input mode")]
     [SerializeField] private InteractionWithUI _interactionWithUI;
 
-    private GameObject _root;
-    private RectTransform _safeAreaRoot;
-    private TMP_Text _titleText;
-    private TMP_Text _bodyText;
-    private TMP_Text _advantagesText;
-    private TMP_Text _capacityText;
-    private TMP_Text _priceText;
-    private TMP_Text _statusText;
-    private Button _buyButton;
-    private TMP_Text _buyButtonText;
-    private Button _cancelButton;
-
     private DialogMode _mode;
     private ZonePurchaseConfig _ordinaryConfig;
-    private Rect _lastSafeArea;
     private bool _catalogReceived;
     private bool _interfaceWasActive;
 
     private void Awake()
     {
-        BuildRuntimeView();
-        ApplySafeArea();
+        ValidateReferences();
         HideImmediate();
     }
 
     private void OnEnable()
     {
         YG2.onGetPayments += HandleCatalogReceived;
+
+        if (_view != null)
+        {
+            _view.BuyRequested += ConfirmPurchase;
+            _view.CancelRequested += Close;
+        }
 
         if (_paymentsService != null)
         {
@@ -69,6 +62,12 @@ public class LocationPurchaseDialog : MonoBehaviour
     {
         YG2.onGetPayments -= HandleCatalogReceived;
 
+        if (_view != null)
+        {
+            _view.BuyRequested -= ConfirmPurchase;
+            _view.CancelRequested -= Close;
+        }
+
         if (_paymentsService != null)
         {
             _paymentsService.OnPurchaseSuccess -= HandlePremiumPurchaseSuccess;
@@ -78,10 +77,7 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private void Update()
     {
-        if (_lastSafeArea != Screen.safeArea)
-            ApplySafeArea();
-
-        if (_mode == DialogMode.Premium && _root != null && _root.activeSelf)
+        if (_mode == DialogMode.Premium)
             RefreshPremiumControls();
     }
 
@@ -95,27 +91,35 @@ public class LocationPurchaseDialog : MonoBehaviour
         _ordinaryConfig = config;
 
         int capacity = config.ComputerCapacity;
-
-        _titleText.text = config.DisplayName;
-        _bodyText.text = config.Description;
-        _advantagesText.text = $"Преимущества: {config.Advantages}";
-        _capacityText.text = capacity > 0
+        string capacityText = capacity > 0
             ? $"Игровых мест: {capacity}"
-            : "Игровые места откроются вместе с зоной";
-        _priceText.text = $"Цена: {ResourceValueFormatter.Format(config.ZonePrice)} монет";
-        _buyButtonText.text = "Купить";
-        _cancelButton.interactable = true;
+            : "Вместимость зоны не настроена";
+
+        if (capacity <= 0)
+            Debug.LogError($"LocationPurchaseDialog: у ZonePurchaseConfig '{config.name}' не настроена положительная вместимость.", config);
+
+        _view?.SetContent(
+            config.DisplayName,
+            config.Description,
+            $"Польза: {config.GameplayBenefit}",
+            config.ProgressionHint,
+            capacityText,
+            config.ZonePrice == 0
+                ? "Цена: Бесплатно"
+                : $"Цена: {ResourceValueFormatter.Format(config.ZonePrice)} монет",
+            config.PreviewSprite);
 
         PurchaseFailureReason reason = _zonePurchase != null
             ? _zonePurchase.GetFailureReason(config)
             : PurchaseFailureReason.TransactionFailed;
 
-        _buyButton.interactable = reason == PurchaseFailureReason.None ||
-            reason == PurchaseFailureReason.NotEnoughCoins;
-        SetStatus(reason == PurchaseFailureReason.NotEnoughCoins
-            ? "Недостаточно монет — пополните баланс или вернитесь позже."
-            : string.Empty,
-            reason == PurchaseFailureReason.NotEnoughCoins);
+        bool canExplainByClick = reason == PurchaseFailureReason.None ||
+            reason == PurchaseFailureReason.NotEnoughCoins ||
+            reason == PurchaseFailureReason.FirstComputerRequired ||
+            reason == PurchaseFailureReason.TutorialStageIncomplete;
+
+        _view?.SetControls(canExplainByClick, true, "Купить");
+        SetOrdinaryStatus(reason);
     }
 
     public void OpenPremium()
@@ -137,13 +141,23 @@ public class LocationPurchaseDialog : MonoBehaviour
         int capacity = _premiumZoneInformation != null && _premiumZoneInformation.SpawnPoints != null
             ? _premiumZoneInformation.SpawnPoints.AvailableSpawnPointCount
             : (_premiumZoneConfig != null ? _premiumZoneConfig.ComputerCapacity : 0);
-        int gems = _paymentsService != null ? _paymentsService.PremiumGemsReward : 0;
 
-        _titleText.text = zoneName;
-        _bodyText.text = "Покупка навсегда открывает премиум-зону клуба и её игровые места.";
-        _advantagesText.text = $"Преимущества: отдельная зона, премиум-посетители и бонус {gems} кристаллов.";
-        _capacityText.text = capacity > 0 ? $"Игровых мест: {capacity}" : "Игровые места: данные зоны";
-        _buyButtonText.text = "Купить";
+        if (capacity <= 0)
+            Debug.LogError("LocationPurchaseDialog: у премиум-зоны не настроена положительная вместимость.", this);
+
+        _view?.SetContent(
+            zoneName,
+            _premiumZoneConfig != null
+                ? _premiumZoneConfig.Description
+                : "Покупка навсегда открывает премиум-зону клуба и её игровые места.",
+            _premiumZoneConfig != null
+                ? $"Польза: {_premiumZoneConfig.GameplayBenefit}"
+                : "Польза: отдельная зона с премиум-посетителями.",
+            _premiumZoneConfig != null ? _premiumZoneConfig.ProgressionHint : string.Empty,
+            capacity > 0 ? $"Игровых мест: {capacity}" : "Вместимость зоны не настроена",
+            "Загрузка цены…",
+            _premiumZoneConfig != null ? _premiumZoneConfig.PreviewSprite : null);
+
         RefreshPremiumControls();
     }
 
@@ -151,14 +165,12 @@ public class LocationPurchaseDialog : MonoBehaviour
     {
         if (_paymentsService != null && _paymentsService.IsPurchasePending)
         {
-            SetStatus("Покупка обрабатывается. Дождитесь ответа платёжного окна.", true);
+            _view?.SetStatus("Покупка обрабатывается. Дождитесь ответа платёжного окна.", true);
             return;
         }
 
         HideImmediate();
-
-        if (_interactionWithUI != null)
-            _interactionWithUI.SetInteracts(_interfaceWasActive);
+        _interactionWithUI?.SetInteracts(_interfaceWasActive);
     }
 
     private void ConfirmPurchase()
@@ -178,9 +190,10 @@ public class LocationPurchaseDialog : MonoBehaviour
 
         if (!TryGetPremiumProduct(out _))
         {
-            SetStatus(_catalogReceived
-                ? "Цена недоступна. Повторите попытку позже."
-                : "Загрузка цены…",
+            _view?.SetStatus(
+                _catalogReceived
+                    ? "Цена недоступна. Повторите попытку позже."
+                    : "Загрузка цены…",
                 _catalogReceived);
             return;
         }
@@ -191,40 +204,39 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private void RefreshPremiumControls()
     {
-        if (_mode != DialogMode.Premium || _buyButton == null)
+        if (_mode != DialogMode.Premium || _view == null)
             return;
 
         bool pending = _paymentsService != null && _paymentsService.IsPurchasePending;
-        _cancelButton.interactable = !pending;
 
         if (pending)
         {
-            _buyButton.interactable = false;
-            _priceText.text = "Покупка обрабатывается…";
-            SetStatus("Не закрывайте окно до завершения операции.", false);
+            _view.SetControls(false, false, "Покупка…");
+            _view.SetStatus("Не закрывайте окно до завершения операции.", false);
             return;
         }
 
         if (TryGetPremiumProduct(out Purchase product))
         {
-            _priceText.text = $"Цена: {product.price}";
-            _buyButton.interactable = _premiumUnlocker == null || !_premiumUnlocker.IsUnlocked;
-            SetStatus(string.Empty, false);
+            _view.SetContent(
+                GetPremiumName(),
+                GetPremiumDescription(),
+                GetPremiumBenefit(),
+                GetPremiumHint(),
+                GetPremiumCapacityText(),
+                $"Цена: {product.price}",
+                _premiumZoneConfig != null ? _premiumZoneConfig.PreviewSprite : null);
+            _view.SetControls(_premiumUnlocker == null || !_premiumUnlocker.IsUnlocked, true, "Купить");
+            _view.SetStatus(string.Empty, false);
             return;
         }
 
-        _buyButton.interactable = false;
-
-        if (_catalogReceived)
-        {
-            _priceText.text = "Цена недоступна";
-            SetStatus("Не удалось получить товар из каталога Яндекс Игр.", true);
-        }
-        else
-        {
-            _priceText.text = "Загрузка цены…";
-            SetStatus("Ожидаем данные каталога Яндекс Игр.", false);
-        }
+        _view.SetControls(false, true, "Купить");
+        _view.SetStatus(
+            _catalogReceived
+                ? "Не удалось получить товар из каталога Яндекс Игр."
+                : "Ожидаем данные каталога Яндекс Игр.",
+            _catalogReceived);
     }
 
     private bool TryGetPremiumProduct(out Purchase product)
@@ -258,157 +270,99 @@ public class LocationPurchaseDialog : MonoBehaviour
             return;
 
         RefreshPremiumControls();
-        SetStatus("Покупка не завершена. Средства не списаны.", true);
+        _view?.SetStatus("Покупка не завершена. Средства не списаны.", true);
     }
 
     private void ShowRoot()
     {
-        if (_root == null)
-            BuildRuntimeView();
-
-        if (!_root.activeSelf)
+        if (_view == null)
         {
-            _interfaceWasActive = _interactionWithUI != null && _interactionWithUI.IsInteracts;
-            _interactionWithUI?.SetInteracts(true);
+            ReportMissing(nameof(_view));
+            return;
         }
 
-        _root.SetActive(true);
+        _interfaceWasActive = _interactionWithUI != null && _interactionWithUI.IsInteracts;
+        _interactionWithUI?.SetInteracts(true);
+        _view.Show();
     }
 
     private void HideImmediate()
     {
         _mode = DialogMode.None;
         _ordinaryConfig = null;
-
-        if (_root != null)
-            _root.SetActive(false);
+        _view?.Hide();
     }
 
-    private void SetStatus(string message, bool isError)
+    private void SetOrdinaryStatus(PurchaseFailureReason reason)
     {
-        if (_statusText == null)
-            return;
+        string message = reason switch
+        {
+            PurchaseFailureReason.NotEnoughCoins => "Недостаточно монет — пополните баланс или вернитесь позже.",
+            PurchaseFailureReason.FirstComputerRequired => "Сначала купи первый компьютер",
+            PurchaseFailureReason.TutorialStageIncomplete => "Заверши текущий этап обучения",
+            PurchaseFailureReason.TransactionFailed => "Параметры зоны настроены неверно.",
+            _ => string.Empty
+        };
 
-        _statusText.text = message;
-        _statusText.color = isError ? new Color(1f, 0.43f, 0.4f) : new Color(0.78f, 0.86f, 1f);
+        _view?.SetStatus(message, reason != PurchaseFailureReason.None);
     }
 
-    private void BuildRuntimeView()
+    private string GetPremiumName()
     {
-        if (_root != null)
-            return;
-
-        _root = CreateUiObject("LocationPurchaseDialog", transform);
-        RectTransform rootRect = (RectTransform)_root.transform;
-        Stretch(rootRect);
-        Image overlay = _root.AddComponent<Image>();
-        overlay.color = new Color(0.015f, 0.02f, 0.035f, 0.82f);
-        overlay.raycastTarget = true;
-
-        GameObject safeObject = CreateUiObject("SafeArea", rootRect);
-        _safeAreaRoot = (RectTransform)safeObject.transform;
-
-        GameObject panelObject = CreateUiObject("Card", _safeAreaRoot);
-        RectTransform panel = (RectTransform)panelObject.transform;
-        panel.anchorMin = new Vector2(0.14f, 0.08f);
-        panel.anchorMax = new Vector2(0.86f, 0.92f);
-        panel.offsetMin = Vector2.zero;
-        panel.offsetMax = Vector2.zero;
-        Image card = panelObject.AddComponent<Image>();
-        card.color = new Color(0.065f, 0.085f, 0.14f, 0.98f);
-
-        _titleText = CreateText("Title", panel, new Vector2(0.07f, 0.82f), new Vector2(0.93f, 0.96f), 42f, FontStyles.Bold);
-        _bodyText = CreateText("Description", panel, new Vector2(0.07f, 0.59f), new Vector2(0.93f, 0.81f), 28f, FontStyles.Normal);
-        _advantagesText = CreateText("Advantages", panel, new Vector2(0.07f, 0.42f), new Vector2(0.93f, 0.59f), 26f, FontStyles.Normal);
-        _capacityText = CreateText("Capacity", panel, new Vector2(0.07f, 0.33f), new Vector2(0.93f, 0.43f), 26f, FontStyles.Bold);
-        _priceText = CreateText("Price", panel, new Vector2(0.07f, 0.23f), new Vector2(0.93f, 0.34f), 30f, FontStyles.Bold);
-        _statusText = CreateText("Status", panel, new Vector2(0.07f, 0.14f), new Vector2(0.93f, 0.24f), 23f, FontStyles.Normal);
-
-        _buyButton = CreateButton("BuyButton", panel, new Vector2(0.52f, 0.035f), new Vector2(0.93f, 0.14f), new Color(0.08f, 0.58f, 0.82f), out _buyButtonText);
-        _cancelButton = CreateButton("CancelButton", panel, new Vector2(0.07f, 0.035f), new Vector2(0.48f, 0.14f), new Color(0.23f, 0.27f, 0.36f), out TMP_Text cancelText);
-        cancelText.text = "Отмена";
-        _buyButton.onClick.AddListener(ConfirmPurchase);
-        _cancelButton.onClick.AddListener(Close);
+        return _premiumZoneInformation != null && !string.IsNullOrWhiteSpace(_premiumZoneInformation.ZoneName)
+            ? _premiumZoneInformation.ZoneName
+            : "Премиум-зона";
     }
 
-    private void ApplySafeArea()
+    private string GetPremiumDescription()
     {
-        if (_safeAreaRoot == null || Screen.width <= 0 || Screen.height <= 0)
-            return;
-
-        Rect safeArea = Screen.safeArea;
-        _lastSafeArea = safeArea;
-        _safeAreaRoot.anchorMin = new Vector2(safeArea.xMin / Screen.width, safeArea.yMin / Screen.height);
-        _safeAreaRoot.anchorMax = new Vector2(safeArea.xMax / Screen.width, safeArea.yMax / Screen.height);
-        _safeAreaRoot.offsetMin = Vector2.zero;
-        _safeAreaRoot.offsetMax = Vector2.zero;
+        return _premiumZoneConfig != null
+            ? _premiumZoneConfig.Description
+            : "Покупка навсегда открывает премиум-зону клуба и её игровые места.";
     }
 
-    private static GameObject CreateUiObject(string name, Transform parent)
+    private string GetPremiumBenefit()
     {
-        GameObject gameObject = new GameObject(name, typeof(RectTransform));
-        gameObject.layer = parent.gameObject.layer;
-        gameObject.transform.SetParent(parent, false);
-        return gameObject;
+        return _premiumZoneConfig != null
+            ? $"Польза: {_premiumZoneConfig.GameplayBenefit}"
+            : "Польза: отдельная зона с премиум-посетителями.";
     }
 
-    private static TMP_Text CreateText(
-        string name,
-        RectTransform parent,
-        Vector2 anchorMin,
-        Vector2 anchorMax,
-        float fontSize,
-        FontStyles style)
+    private string GetPremiumHint()
     {
-        GameObject gameObject = CreateUiObject(name, parent);
-        RectTransform rect = (RectTransform)gameObject.transform;
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-
-        TextMeshProUGUI text = gameObject.AddComponent<TextMeshProUGUI>();
-        text.fontSize = fontSize;
-        text.enableAutoSizing = true;
-        text.fontSizeMin = 15f;
-        text.fontSizeMax = fontSize;
-        text.fontStyle = style;
-        text.color = Color.white;
-        text.alignment = TextAlignmentOptions.MidlineLeft;
-        text.textWrappingMode = TextWrappingModes.Normal;
-        text.raycastTarget = false;
-        return text;
+        return _premiumZoneConfig != null ? _premiumZoneConfig.ProgressionHint : string.Empty;
     }
 
-    private static Button CreateButton(
-        string name,
-        RectTransform parent,
-        Vector2 anchorMin,
-        Vector2 anchorMax,
-        Color color,
-        out TMP_Text label)
+    private string GetPremiumCapacityText()
     {
-        GameObject gameObject = CreateUiObject(name, parent);
-        RectTransform rect = (RectTransform)gameObject.transform;
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-
-        Image image = gameObject.AddComponent<Image>();
-        image.color = color;
-        Button button = gameObject.AddComponent<Button>();
-        button.targetGraphic = image;
-        label = CreateText("Label", rect, Vector2.zero, Vector2.one, 28f, FontStyles.Bold);
-        label.alignment = TextAlignmentOptions.Center;
-        return button;
+        int capacity = _premiumZoneInformation != null && _premiumZoneInformation.SpawnPoints != null
+            ? _premiumZoneInformation.SpawnPoints.AvailableSpawnPointCount
+            : (_premiumZoneConfig != null ? _premiumZoneConfig.ComputerCapacity : 0);
+        return capacity > 0 ? $"Игровых мест: {capacity}" : "Вместимость зоны не настроена";
     }
 
-    private static void Stretch(RectTransform rect)
+    private void ValidateReferences()
     {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
+        if (_view == null)
+            ReportMissing(nameof(_view));
+        if (_zonePurchase == null)
+            ReportMissing(nameof(_zonePurchase));
+        if (_paymentsService == null)
+            ReportMissing(nameof(_paymentsService));
+        if (_premiumUnlocker == null)
+            ReportMissing(nameof(_premiumUnlocker));
+        if (_feedbackPresenter == null)
+            ReportMissing(nameof(_feedbackPresenter));
+        if (_premiumZoneConfig == null)
+            ReportMissing(nameof(_premiumZoneConfig));
+        if (_premiumZoneInformation == null)
+            ReportMissing(nameof(_premiumZoneInformation));
+        if (_interactionWithUI == null)
+            ReportMissing(nameof(_interactionWithUI));
+    }
+
+    private void ReportMissing(string fieldName)
+    {
+        Debug.LogError($"LocationPurchaseDialog: поле {fieldName} не назначено на GameObject '{name}'.", this);
     }
 }

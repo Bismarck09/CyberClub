@@ -5,6 +5,9 @@ public enum PurchaseFailureReason
     NotEnoughGems,
     MaximumReached,
     LockedByTutorial,
+    FirstComputerRequired,
+    InteriorTutorialRequired,
+    TutorialStageIncomplete,
     ProductUnavailable,
     TransactionFailed
 }
