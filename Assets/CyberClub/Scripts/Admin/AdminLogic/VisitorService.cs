@@ -43,11 +43,13 @@ public class VisitorService : MonoBehaviour
             Visitor visitor =
                 _visitorQueue.GetNextVisitor(admin);
 
+            if (visitor == null)
+                continue;
+
             DeviceEntry freeDevice =
                 _deviceRegistry.GetRandomFreeDevice();
 
-            if (visitor == null ||
-                freeDevice == null ||
+            if (freeDevice == null ||
                 freeDevice.Device == null)
             {
                 continue;

@@ -1,83 +1,56 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public sealed class MobileLookArea : MonoBehaviour,
-    IPointerDownHandler,
-    IDragHandler,
-    IPointerUpHandler,
-    IEndDragHandler,
-    ICancelHandler
+public sealed class MobileLookArea : MonoBehaviour
 {
-    [SerializeField, Min(0.01f)] private float _sensitivity = 0.12f;
+    [SerializeField] private Rect _activationArea = new(0.4f, 0f, 0.6f, 1f);
 
     private const int NoPointer = int.MinValue;
 
     private PlayerInputReader _inputReader;
-    private Canvas _canvas;
+    private MobileVirtualJoystick _movementJoystick;
+    private TouchControl _activeTouch;
     private int _pointerId = NoPointer;
 
     private void Awake()
     {
-        _canvas = GetComponentInParent<Canvas>();
+        Graphic[] graphics = GetComponentsInChildren<Graphic>(true);
+        for (int i = 0; i < graphics.Length; i++)
+            graphics[i].raycastTarget = false;
     }
 
-    public void Bind(PlayerInputReader inputReader)
+    private void Update()
     {
-        _inputReader = inputReader;
-    }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        if (_pointerId != NoPointer ||
-            _inputReader == null ||
-            !_inputReader.IsGameplayInputAvailable ||
-            IsCoveredByOtherUI(eventData))
+        if (_activeTouch != null)
         {
+            UpdateCapturedTouch();
             return;
         }
-
-        _pointerId = eventData.pointerId;
-    }
-
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (eventData.pointerId != _pointerId)
-            return;
 
         if (_inputReader == null ||
-            !_inputReader.IsGameplayInputAvailable ||
-            IsCoveredByOtherUI(eventData))
+            !_inputReader.IsTouchMode ||
+            !_inputReader.IsGameplayInputAvailable)
         {
-            ResetControl();
             return;
         }
 
-        float canvasScale = _canvas != null
-            ? Mathf.Max(0.01f, _canvas.scaleFactor)
-            : GetFallbackScreenScale();
-
-        _inputReader.AddMobileLookDelta(
-            eventData.delta * (_sensitivity / canvasScale));
+        TryCaptureNewTouch();
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public void Bind(
+        PlayerInputReader inputReader,
+        MobileVirtualJoystick movementJoystick)
     {
-        Release(eventData.pointerId);
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        Release(eventData.pointerId);
-    }
-
-    public void OnCancel(BaseEventData unusedEventData)
-    {
-        ResetControl();
+        _inputReader = inputReader;
+        _movementJoystick = movementJoystick;
     }
 
     public void ResetControl()
     {
+        _activeTouch = null;
         _pointerId = NoPointer;
         _inputReader?.ResetMobileLook();
     }
@@ -87,28 +60,75 @@ public sealed class MobileLookArea : MonoBehaviour,
         ResetControl();
     }
 
-    private void Release(int pointerId)
+    private void TryCaptureNewTouch()
     {
-        if (pointerId == _pointerId)
+        Touchscreen touchscreen = Touchscreen.current;
+        if (touchscreen == null)
+            return;
+
+        foreach (TouchControl touch in touchscreen.touches)
+        {
+            if (!touch.press.wasPressedThisFrame)
+                continue;
+
+            int pointerId = touch.touchId.ReadValue();
+            Vector2 screenPosition = touch.position.ReadValue();
+
+            if (!GetActivationScreenRect().Contains(screenPosition) ||
+                (_movementJoystick != null &&
+                 _movementJoystick.IsPointerCaptured(pointerId)) ||
+                MobilePointerUiGuard.IsPointerOverInteractiveUi(
+                    screenPosition,
+                    pointerId,
+                    transform))
+            {
+                continue;
+            }
+
+            _activeTouch = touch;
+            _pointerId = pointerId;
+            return;
+        }
+    }
+
+    private void UpdateCapturedTouch()
+    {
+        if (_inputReader == null ||
+            !_inputReader.IsGameplayInputAvailable ||
+            !_activeTouch.press.isPressed ||
+            (_movementJoystick != null &&
+             _movementJoystick.IsPointerCaptured(_pointerId)))
+        {
             ResetControl();
+            return;
+        }
+
+        Vector2 delta = _activeTouch.delta.ReadValue();
+        if (delta.sqrMagnitude > 0f)
+            _inputReader.AddMobileLookDelta(delta);
     }
 
-    private bool IsCoveredByOtherUI(PointerEventData eventData)
+    private Rect GetActivationScreenRect()
     {
-        GameObject raycastTarget = eventData.pointerCurrentRaycast.gameObject;
+        float xMin = Mathf.Clamp01(_activationArea.xMin) * Screen.width;
+        float yMin = Mathf.Clamp01(_activationArea.yMin) * Screen.height;
+        float xMax = Mathf.Clamp01(_activationArea.xMax) * Screen.width;
+        float yMax = Mathf.Clamp01(_activationArea.yMax) * Screen.height;
 
-        return raycastTarget != null &&
-            raycastTarget != gameObject &&
-            !raycastTarget.transform.IsChildOf(transform);
-    }
+        Rect configured = Rect.MinMaxRect(
+            Mathf.Min(xMin, xMax),
+            Mathf.Min(yMin, yMax),
+            Mathf.Max(xMin, xMax),
+            Mathf.Max(yMin, yMax));
+        Rect safeArea = Screen.safeArea;
 
-    private static float GetFallbackScreenScale()
-    {
-        if (Screen.width <= 0 || Screen.height <= 0)
-            return 1f;
+        float safeXMin = Mathf.Max(configured.xMin, safeArea.xMin);
+        float safeYMin = Mathf.Max(configured.yMin, safeArea.yMin);
+        float safeXMax = Mathf.Min(configured.xMax, safeArea.xMax);
+        float safeYMax = Mathf.Min(configured.yMax, safeArea.yMax);
 
-        return Mathf.Max(
-            0.01f,
-            Mathf.Min(Screen.width / 1920f, Screen.height / 1080f));
+        return safeXMax > safeXMin && safeYMax > safeYMin
+            ? Rect.MinMaxRect(safeXMin, safeYMin, safeXMax, safeYMax)
+            : configured;
     }
 }

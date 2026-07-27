@@ -64,13 +64,33 @@ public class DeviceRegistry : MonoBehaviour
 
     public DeviceEntry GetRandomFreeDevice()
     {
-        List<DeviceEntry> freeDevices = _devices.FindAll(d => d.Device != null && d.Device.IsAvailable);
+        int freeDeviceCount = 0;
 
-        if (freeDevices.Count <= 0)
+        for (int i = 0; i < _devices.Count; i++)
+        {
+            DeviceEntry entry = _devices[i];
+            if (entry?.Device != null && entry.Device.IsAvailable)
+                freeDeviceCount++;
+        }
+
+        if (freeDeviceCount == 0)
             return null;
 
-        int randomIndex = UnityEngine.Random.Range(0, freeDevices.Count);
-        return freeDevices[randomIndex];
+        int selectedFreeIndex = UnityEngine.Random.Range(0, freeDeviceCount);
+
+        for (int i = 0; i < _devices.Count; i++)
+        {
+            DeviceEntry entry = _devices[i];
+            if (entry?.Device == null || !entry.Device.IsAvailable)
+                continue;
+
+            if (selectedFreeIndex == 0)
+                return entry;
+
+            selectedFreeIndex--;
+        }
+
+        return null;
     }
 
     public List<DeviceEntry> GetBreakableDevices()

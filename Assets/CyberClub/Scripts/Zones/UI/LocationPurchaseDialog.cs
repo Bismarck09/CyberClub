@@ -1,5 +1,4 @@
 using UnityEngine;
-using YG;
 using YG.Utils.Pay;
 
 public class LocationPurchaseDialog : MonoBehaviour
@@ -29,7 +28,6 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private DialogMode _mode;
     private ZonePurchaseConfig _ordinaryConfig;
-    private bool _catalogReceived;
     private bool _interfaceWasActive;
 
     private void Awake()
@@ -40,8 +38,6 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private void OnEnable()
     {
-        YG2.onGetPayments += HandleCatalogReceived;
-
         if (_view != null)
         {
             _view.BuyRequested += ConfirmPurchase;
@@ -50,18 +46,14 @@ public class LocationPurchaseDialog : MonoBehaviour
 
         if (_paymentsService != null)
         {
+            _paymentsService.OnProductLoadStateChanged += HandleProductLoadStateChanged;
             _paymentsService.OnPurchaseSuccess += HandlePremiumPurchaseSuccess;
             _paymentsService.OnPurchaseFailed += HandlePremiumPurchaseFailed;
         }
-
-        if (YG2.purchases != null && YG2.purchases.Length > 0)
-            _catalogReceived = true;
     }
 
     private void OnDisable()
     {
-        YG2.onGetPayments -= HandleCatalogReceived;
-
         if (_view != null)
         {
             _view.BuyRequested -= ConfirmPurchase;
@@ -70,15 +62,10 @@ public class LocationPurchaseDialog : MonoBehaviour
 
         if (_paymentsService != null)
         {
+            _paymentsService.OnProductLoadStateChanged -= HandleProductLoadStateChanged;
             _paymentsService.OnPurchaseSuccess -= HandlePremiumPurchaseSuccess;
             _paymentsService.OnPurchaseFailed -= HandlePremiumPurchaseFailed;
         }
-    }
-
-    private void Update()
-    {
-        if (_mode == DialogMode.Premium)
-            RefreshPremiumControls();
     }
 
     public void OpenOrdinary(ZonePurchaseConfig config)
@@ -96,7 +83,12 @@ public class LocationPurchaseDialog : MonoBehaviour
             : "Вместимость зоны не настроена";
 
         if (capacity <= 0)
-            Debug.LogError($"LocationPurchaseDialog: у ZonePurchaseConfig '{config.name}' не настроена положительная вместимость.", config);
+        {
+            Debug.LogError(
+                $"LocationPurchaseDialog: у ZonePurchaseConfig '{config.name}' " +
+                "не настроена положительная вместимость.",
+                config);
+        }
 
         _view?.SetContent(
             config.DisplayName,
@@ -134,30 +126,7 @@ public class LocationPurchaseDialog : MonoBehaviour
         _mode = DialogMode.Premium;
         _ordinaryConfig = null;
 
-        string zoneName = _premiumZoneInformation != null &&
-            !string.IsNullOrWhiteSpace(_premiumZoneInformation.ZoneName)
-            ? _premiumZoneInformation.ZoneName
-            : "Премиум-зона";
-        int capacity = _premiumZoneInformation != null && _premiumZoneInformation.SpawnPoints != null
-            ? _premiumZoneInformation.SpawnPoints.AvailableSpawnPointCount
-            : (_premiumZoneConfig != null ? _premiumZoneConfig.ComputerCapacity : 0);
-
-        if (capacity <= 0)
-            Debug.LogError("LocationPurchaseDialog: у премиум-зоны не настроена положительная вместимость.", this);
-
-        _view?.SetContent(
-            zoneName,
-            _premiumZoneConfig != null
-                ? _premiumZoneConfig.Description
-                : "Покупка навсегда открывает премиум-зону клуба и её игровые места.",
-            _premiumZoneConfig != null
-                ? $"Польза: {_premiumZoneConfig.GameplayBenefit}"
-                : "Польза: отдельная зона с премиум-посетителями.",
-            _premiumZoneConfig != null ? _premiumZoneConfig.ProgressionHint : string.Empty,
-            capacity > 0 ? $"Игровых мест: {capacity}" : "Вместимость зоны не настроена",
-            "Загрузка цены…",
-            _premiumZoneConfig != null ? _premiumZoneConfig.PreviewSprite : null);
-
+        SetPremiumContent("Загрузка цены…");
         RefreshPremiumControls();
     }
 
@@ -165,7 +134,9 @@ public class LocationPurchaseDialog : MonoBehaviour
     {
         if (_paymentsService != null && _paymentsService.IsPurchasePending)
         {
-            _view?.SetStatus("Покупка обрабатывается. Дождитесь ответа платёжного окна.", true);
+            _view?.SetStatus(
+                "Покупка обрабатывается. Дождитесь ответа платёжного окна.",
+                true);
             return;
         }
 
@@ -188,13 +159,24 @@ public class LocationPurchaseDialog : MonoBehaviour
         if (_mode != DialogMode.Premium || _paymentsService == null)
             return;
 
-        if (!TryGetPremiumProduct(out _))
+        if (_paymentsService.IsRetryAvailable)
+        {
+            _paymentsService.RetryCatalogLoad();
+            RefreshPremiumControls();
+            return;
+        }
+
+        if (_paymentsService.ProductLoadState == PremiumProductLoadState.EditorFallback)
         {
             _view?.SetStatus(
-                _catalogReceived
-                    ? "Цена недоступна. Повторите попытку позже."
-                    : "Загрузка цены…",
-                _catalogReceived);
+                "Тестовый режим: настоящая покупка доступна только в WebGL-версии Яндекс Игр.",
+                false);
+            return;
+        }
+
+        if (!_paymentsService.TryGetPremiumProduct(out _))
+        {
+            RefreshPremiumControls();
             return;
         }
 
@@ -207,52 +189,94 @@ public class LocationPurchaseDialog : MonoBehaviour
         if (_mode != DialogMode.Premium || _view == null)
             return;
 
-        bool pending = _paymentsService != null && _paymentsService.IsPurchasePending;
+        if (_paymentsService == null)
+        {
+            _view.SetControls(false, true, "Недоступно");
+            _view.SetStatus("Сервис платежей не назначен.", true);
+            return;
+        }
 
-        if (pending)
+        if (_paymentsService.IsPurchasePending)
         {
             _view.SetControls(false, false, "Покупка…");
-            _view.SetStatus("Не закрывайте окно до завершения операции.", false);
+            _view.SetStatus(
+                "Не закрывайте окно до завершения операции.",
+                false);
             return;
         }
 
-        if (TryGetPremiumProduct(out Purchase product))
+        switch (_paymentsService.ProductLoadState)
         {
-            _view.SetContent(
-                GetPremiumName(),
-                GetPremiumDescription(),
-                GetPremiumBenefit(),
-                GetPremiumHint(),
-                GetPremiumCapacityText(),
-                $"Цена: {product.price}",
-                _premiumZoneConfig != null ? _premiumZoneConfig.PreviewSprite : null);
-            _view.SetControls(_premiumUnlocker == null || !_premiumUnlocker.IsUnlocked, true, "Купить");
-            _view.SetStatus(string.Empty, false);
+            case PremiumProductLoadState.Loaded:
+                ShowLoadedProduct(false);
+                break;
+
+            case PremiumProductLoadState.EditorFallback:
+                ShowLoadedProduct(true);
+                break;
+
+            case PremiumProductLoadState.ProductNotFound:
+                _view.SetControls(true, true, "Повторить");
+                _view.SetStatus(
+                    $"Товар '{_paymentsService.PremiumProductId}' не найден в каталоге Яндекс Игр.",
+                    true);
+                break;
+
+            case PremiumProductLoadState.SdkUnavailable:
+                _view.SetControls(true, true, "Повторить");
+                _view.SetStatus(
+                    "Магазин Яндекс Игр пока недоступен. Проверьте окружение запуска.",
+                    true);
+                break;
+
+            case PremiumProductLoadState.Failed:
+                _view.SetControls(true, true, "Повторить");
+                _view.SetStatus(
+                    string.IsNullOrWhiteSpace(_paymentsService.LastCatalogError)
+                        ? "Не удалось загрузить цену."
+                        : _paymentsService.LastCatalogError,
+                    true);
+                break;
+
+            default:
+                _view.SetControls(false, true, "Загрузка…");
+                _view.SetStatus(
+                    "Ожидаем каталог Яндекс Игр…",
+                    false);
+                break;
+        }
+    }
+
+    private void ShowLoadedProduct(bool editorFallback)
+    {
+        if (!_paymentsService.TryGetPremiumProduct(out Purchase product))
+        {
+            _view.SetControls(false, true, "Недоступно");
+            _view.SetStatus("Товар найден, но цена недоступна.", true);
             return;
         }
 
-        _view.SetControls(false, true, "Купить");
-        _view.SetStatus(
-            _catalogReceived
-                ? "Не удалось получить товар из каталога Яндекс Игр."
-                : "Ожидаем данные каталога Яндекс Игр.",
-            _catalogReceived);
+        SetPremiumContent(
+            editorFallback
+                ? $"{product.price} (UI preview)"
+                : product.price);
+
+        if (editorFallback)
+        {
+            _view.SetControls(false, true, "Тестовый режим");
+            _view.SetStatus(
+                "Editor fallback: цена служит только для проверки UI, покупка отключена.",
+                false);
+            return;
+        }
+
+        bool canBuy = _paymentsService.CanBuyPremium;
+        _view.SetControls(canBuy, true, canBuy ? "Купить" : "Недоступно");
+        _view.SetStatus(string.Empty, false);
     }
 
-    private bool TryGetPremiumProduct(out Purchase product)
+    private void HandleProductLoadStateChanged(PremiumProductLoadState unusedState)
     {
-        product = null;
-
-        if (_paymentsService == null || string.IsNullOrWhiteSpace(_paymentsService.PremiumProductId))
-            return false;
-
-        product = YG2.PurchaseByID(_paymentsService.PremiumProductId);
-        return product != null && !string.IsNullOrWhiteSpace(product.price);
-    }
-
-    private void HandleCatalogReceived()
-    {
-        _catalogReceived = true;
         RefreshPremiumControls();
     }
 
@@ -261,7 +285,10 @@ public class LocationPurchaseDialog : MonoBehaviour
         if (_paymentsService == null || purchaseId != _paymentsService.PremiumProductId)
             return;
 
-        Close();
+        // Restoring a permanent purchase can happen while this dialog is hidden.
+        // Do not change the current interface mode unless this dialog opened it.
+        if (_mode == DialogMode.Premium)
+            Close();
     }
 
     private void HandlePremiumPurchaseFailed(string purchaseId)
@@ -270,7 +297,9 @@ public class LocationPurchaseDialog : MonoBehaviour
             return;
 
         RefreshPremiumControls();
-        _view?.SetStatus("Покупка не завершена. Средства не списаны.", true);
+        _view?.SetStatus(
+            "Покупка не завершена. Средства не списаны.",
+            true);
     }
 
     private void ShowRoot()
@@ -293,14 +322,41 @@ public class LocationPurchaseDialog : MonoBehaviour
         _view?.Hide();
     }
 
+    private void SetPremiumContent(string price)
+    {
+        int capacity = GetPremiumCapacity();
+
+        if (capacity <= 0)
+        {
+            Debug.LogError(
+                "LocationPurchaseDialog: у премиум-зоны не настроена положительная вместимость.",
+                this);
+        }
+
+        _view?.SetContent(
+            GetPremiumName(),
+            GetPremiumDescription(),
+            GetPremiumBenefit(),
+            GetPremiumHint(),
+            capacity > 0
+                ? $"Игровых мест: {capacity}"
+                : "Вместимость зоны не настроена",
+            $"Цена: {price}",
+            _premiumZoneConfig != null ? _premiumZoneConfig.PreviewSprite : null);
+    }
+
     private void SetOrdinaryStatus(PurchaseFailureReason reason)
     {
         string message = reason switch
         {
-            PurchaseFailureReason.NotEnoughCoins => "Недостаточно монет — пополните баланс или вернитесь позже.",
-            PurchaseFailureReason.FirstComputerRequired => "Сначала купи первый компьютер",
-            PurchaseFailureReason.TutorialStageIncomplete => "Заверши текущий этап обучения",
-            PurchaseFailureReason.TransactionFailed => "Параметры зоны настроены неверно.",
+            PurchaseFailureReason.NotEnoughCoins =>
+                "Недостаточно монет — пополните баланс или вернитесь позже.",
+            PurchaseFailureReason.FirstComputerRequired =>
+                "Сначала купи первый компьютер",
+            PurchaseFailureReason.TutorialStageIncomplete =>
+                "Заверши текущий этап обучения",
+            PurchaseFailureReason.TransactionFailed =>
+                "Параметры зоны настроены неверно.",
             _ => string.Empty
         };
 
@@ -309,7 +365,8 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private string GetPremiumName()
     {
-        return _premiumZoneInformation != null && !string.IsNullOrWhiteSpace(_premiumZoneInformation.ZoneName)
+        return _premiumZoneInformation != null &&
+            !string.IsNullOrWhiteSpace(_premiumZoneInformation.ZoneName)
             ? _premiumZoneInformation.ZoneName
             : "Премиум-зона";
     }
@@ -330,15 +387,19 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private string GetPremiumHint()
     {
-        return _premiumZoneConfig != null ? _premiumZoneConfig.ProgressionHint : string.Empty;
+        return _premiumZoneConfig != null
+            ? _premiumZoneConfig.ProgressionHint
+            : string.Empty;
     }
 
-    private string GetPremiumCapacityText()
+    private int GetPremiumCapacity()
     {
-        int capacity = _premiumZoneInformation != null && _premiumZoneInformation.SpawnPoints != null
-            ? _premiumZoneInformation.SpawnPoints.AvailableSpawnPointCount
-            : (_premiumZoneConfig != null ? _premiumZoneConfig.ComputerCapacity : 0);
-        return capacity > 0 ? $"Игровых мест: {capacity}" : "Вместимость зоны не настроена";
+        if (_premiumZoneInformation != null && _premiumZoneInformation.SpawnPoints != null)
+            return _premiumZoneInformation.SpawnPoints.AvailableSpawnPointCount;
+
+        return _premiumZoneConfig != null
+            ? _premiumZoneConfig.ComputerCapacity
+            : 0;
     }
 
     private void ValidateReferences()
@@ -363,6 +424,8 @@ public class LocationPurchaseDialog : MonoBehaviour
 
     private void ReportMissing(string fieldName)
     {
-        Debug.LogError($"LocationPurchaseDialog: поле {fieldName} не назначено на GameObject '{name}'.", this);
+        Debug.LogError(
+            $"LocationPurchaseDialog: поле {fieldName} не назначено на GameObject '{name}'.",
+            this);
     }
 }

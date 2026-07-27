@@ -18,7 +18,7 @@ public sealed class MobileControlsHUD : MonoBehaviour
 
         ValidateReferences();
         _movementJoystick?.Bind(_inputReader);
-        _lookArea?.Bind(_inputReader);
+        _lookArea?.Bind(_inputReader, _movementJoystick);
         ApplySafeArea();
         SetHudVisible(_inputReader != null && _inputReader.IsTouchMode);
     }

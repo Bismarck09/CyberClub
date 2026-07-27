@@ -77,9 +77,7 @@ public class BarrierDissolve : MonoBehaviour
             return false;
         }
 
-        Material[] materials = _renderer.materials;
-
-        if (materials == null || materials.Length == 0)
+        if (_renderer.sharedMaterial == null)
         {
             Debug.LogError(
                 $"BarrierDissolve: на {name} отсутствуют материалы.");
@@ -87,7 +85,9 @@ public class BarrierDissolve : MonoBehaviour
             return false;
         }
 
-        _dissolveMaterial = materials[0];
+        // Only the first material is animated. Renderer.material creates one
+        // private instance; Renderer.materials duplicated every material slot.
+        _dissolveMaterial = _renderer.material;
         return _dissolveMaterial != null;
     }
 
@@ -108,5 +108,11 @@ public class BarrierDissolve : MonoBehaviour
     {
         _dissolveTween?.Kill();
         _dissolveTween = null;
+
+        if (_dissolveMaterial != null)
+        {
+            Destroy(_dissolveMaterial);
+            _dissolveMaterial = null;
+        }
     }
 }

@@ -51,6 +51,8 @@ public class PlayerInputReader : MonoBehaviour
 
     public bool IsTouchMode { get; private set; }
     public bool IsGameplayInputAvailable => !_isBlocked && !_isInterfaceMode;
+    public bool IsLookFromGamepad =>
+        !IsTouchMode && _lookAction?.activeControl?.device is Gamepad;
 
     public event Action<bool> OnControlModeChanged;
     public event Action OnMobileControlsResetRequested;

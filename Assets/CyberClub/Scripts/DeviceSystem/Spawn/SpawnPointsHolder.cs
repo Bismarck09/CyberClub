@@ -8,7 +8,21 @@ public class SpawnPointsHolder : MonoBehaviour
     private readonly List<Transform> _runtimeSpawnPoints = new();
 
     public bool HasSpawnPoints => _runtimeSpawnPoints.Exists(point => point != null);
-    public int AvailableSpawnPointCount => _runtimeSpawnPoints.FindAll(point => point != null).Count;
+    public int AvailableSpawnPointCount
+    {
+        get
+        {
+            int count = 0;
+
+            for (int i = 0; i < _runtimeSpawnPoints.Count; i++)
+            {
+                if (_runtimeSpawnPoints[i] != null)
+                    count++;
+            }
+
+            return count;
+        }
+    }
 
     private void Awake()
     {

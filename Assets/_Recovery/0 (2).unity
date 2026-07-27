@@ -2817,7 +2817,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2ba8a84f1348644c83e1b38c96cf6c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinsData
-  _startCoins: 1000
+  _startCoins: 2147483647
 --- !u!114 &89083773
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18341,7 +18341,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.7185188}
   m_AnchorMax: {x: 0.3945387, y: 1}
-  m_AnchoredPosition: {x: 0.2000122, y: 1.1000061}
+  m_AnchoredPosition: {x: 0.19995117, y: 1.1000061}
   m_SizeDelta: {x: 1.1339722, y: -2.1539993}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &648658860
@@ -24727,7 +24727,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.36251882}
   m_AnchorMax: {x: 0.3945387, y: 0.63526964}
-  m_AnchoredPosition: {x: 0.5700073, y: 0.47000122}
+  m_AnchoredPosition: {x: 0.5699463, y: 0.47000122}
   m_SizeDelta: {x: 1.1339722, y: 1.8460007}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &822380724
@@ -40627,7 +40627,7 @@ MonoBehaviour:
   - {fileID: 1492970800}
   - {fileID: 1492970802}
   - {fileID: 1492970803}
-  _loadOnStart: 1
+  _loadOnStart: 0
   _autoSave: 1
   _autoSaveInterval: 15
 --- !u!4 &1492970799
